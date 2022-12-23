@@ -1,0 +1,43 @@
+name: Deploy to yandex-cloud serverless function
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.8", "3.9", "3.10"]
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v3
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install pylint
+    - name: Analysing the code with pylint
+      run: |
+        pylint $(git ls-files '*.py')
+    - name: Deploy Function
+      id: sls-func
+      uses: yc-actions/yc-sls-function@v2
+      with:
+        yc-sa-json-credentials: ${{ secrets.YC_SA_JSON_CREDENTIALS }}
+        bucket: ${{ secrets.BUCKET }}
+        folder-id: ${{ secrets.FOLDER_ID }}
+        function-name: ${{ secrets.FUNCTION_NAME }}
+        runtime: 'python310'
+        memory: '256Mb'
+        entrypoint: 'src/entrypoint.handler'
+        environment: |
+          BOT_TOKEN = ${{ secrets.BOT_TOKEN }}
+          SERVICE_API_KEY = ${{ secrets.SERVICE_API_KEY }}
+          SERVICE_STATIC_KEY = ${{ secrets.SERVICE_STATIC_KEY }}
+          YDB_DATABASE = ${{ secrets.YDB_DATABASE }}
+          YDB_ENDPOINT = ${{ secrets.YDB_ENDPOINT }}
+        include: | 
+          ./src
+          package.json
