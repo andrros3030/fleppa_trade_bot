@@ -28,7 +28,7 @@ jobs:
         yc-sa-json-credentials: ${{ secrets.YC_SA_JSON_CREDENTIALS }}
         folder-id: ${{ secrets.FOLDER_ID }}
         function-name: ${{ secrets.FUNCTION_NAME }}
-        runtime: 'python310'
+        runtime: 'python39'
         memory: '256Mb'
         entrypoint: 'src/entrypoint.handler'
         environment: |
