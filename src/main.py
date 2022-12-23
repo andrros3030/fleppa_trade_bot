@@ -1,14 +1,21 @@
-from constants import BOT_TOKEN, IS_PRODUCTION
+from constants import BOT_TOKEN, IS_PRODUCTION, SUDO_USERS  # ,SERVICE_API_KEY,YDB_DATABASE, YDB_ENDPOINT
 import telebot
 from telebot import types
 from logger import Logger
-
+# from data_source import DataSource
 
 bot = telebot.TeleBot(BOT_TOKEN)
 if __name__ == '__main__':
     IS_PRODUCTION = False
     bot.remove_webhook()
 logger = Logger(log_level=0 if IS_PRODUCTION else 1)
+# database = DataSource(
+#     ydb_endpoint=YDB_ENDPOINT,
+#     ydb_database=YDB_DATABASE,
+#     # access_token=SERVICE_API_KEY,
+#     logger=logger
+# )
+logger.v('pre-start loading is complete')
 
 
 # --------------------- bot ---------------------
@@ -22,7 +29,9 @@ def say_welcome(message):
     inline.add(types.InlineKeyboardButton('inline_button_1', callback_data='smth_1'))
     inline.add(types.InlineKeyboardButton('inline_button_2', callback_data='smth_2'))
     bot.send_message(message.chat.id,
-                     'Здарова, скоро тут будет супер трейд стратегия от Шлеппы, а пока - держи мой пульс https://www.tinkoff.ru/invest/social/profile/fleppa_war_crimes_fa?utm_source=share',
+                     'Здарова, скоро тут будет супер трейд стратегия от Шлеппы, '
+                     'а пока - держи мой пульс '
+                     'https://www.tinkoff.ru/invest/social/profile/fleppa_war_crimes_fa?utm_source=share',
                      reply_markup=inline,
                      )
 
@@ -30,6 +39,12 @@ def say_welcome(message):
 @bot.message_handler(func=lambda message: True)
 def echo(message):
     logger.v("income message: " + str(message))
+    split_by_space = message.chat.text.split()
+    message_author = message.from_user.id
+    if split_by_space[0] == 'sudo':
+        if message_author in SUDO_USERS:
+            bot.send_message(message.chat.id, 'Sudo user detected ;)')
+            return
     bot.send_message(message.chat.id, 'Чел я умею только скидывать свой пульс))))))))))')
 
 
@@ -40,15 +55,13 @@ def callback_query(call):
 
 @bot.message_handler(content_types=['text', 'sticker'])
 def get_sticker_messages(message):
-  logger.v(str(message))
+    logger.v(str(message))
 
 
 if __name__ == '__main__':
+    logger.v('local infinity_polling is started')
     bot.infinity_polling()
 # else:
 #     bot.set_webhook("https://d5dsfuv2brgj4buc3uam.apigw.yandexcloud.net")
-
-
-
-
-
+# message.from_user.id -> id of user who sent this message
+# message.from_user.first_name -> first name of user who sent this message

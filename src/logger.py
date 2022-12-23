@@ -1,11 +1,31 @@
+def error_color():
+    return '\033[95m'
+
+
+def verbose_color():
+    return '\033[96m'
+
+
+def pink_color():
+    return '\033[91m'
+
+
+def green_color():
+    return '\033[92m'
+
+
+def blue_color():
+    return '\033[94m'
+
+
 class Logger:
     log_levels: dict = {
         0: True,  # This is "error" logging level
         1: False  # This is "verbose" logging level
     }
     log_level_color: dict = {
-        0: '\033[95m',
-        1: '\033[91m'
+        0: error_color(),
+        1: verbose_color(),
         # HEADER = '\033[95m'
         # OKBLUE = '\033[94m'
         # OKCYAN = '\033[96m'
@@ -30,12 +50,13 @@ class Logger:
             f"Logger set up complete, ready to log, log level: {log_level}"
         )
 
-    def __log(self, message: str, level: int):
+    def __log(self, message: str, level: int, override_color: str = None):
+        real_color = override_color if override_color is not None else self.log_level_color[level]
         if self.log_levels[level]:
-            print(self.log_level_color[level] + self.log_levels_names[level] + message + '\033[0m')
+            print(real_color + self.log_levels_names[level] + message + '\033[0m')
 
-    def v(self, message: str):
-        self.__log(message, level=0)
+    def v(self, message: str, override_color: str = None):
+        self.__log(message, level=0, override_color=override_color)
 
-    def e(self, message: str):
-        self.__log(message, level=1)
+    def e(self, message: str, override_color: str = None):
+        self.__log(message, level=1,  override_color=override_color)

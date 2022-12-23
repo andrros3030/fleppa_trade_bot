@@ -51,6 +51,13 @@ __:hand: - Не разрабатываем на текущей стадии, н�
 #### Описание в профиле бота (/mybots -> About): ***Бот для ржакича про инвестиции***
 
 ## Полезные ресурсы:
+
+<a href=https://cloud.yandex.ru/docs/iam/concepts/authorization/oauth-token>Get OAuth token</a> for YC CLI
+
 <a href=https://www.moex.com/a2193>Документация ИСС Мосбиржи</a> 
 
 <a href=http://iss.moex.com/iss/reference/>Спецификация API</a>
+
+<a href=https://cloud.yandex.ru/docs/functions/tutorials/connect-to-ydb>Работа с YDB</a>
+
+<a href=https://github.com/ydb-platform/ydb-python-sdk/blob/main/examples/access-token-credentials/main.py>Use access token to YDB</a>
