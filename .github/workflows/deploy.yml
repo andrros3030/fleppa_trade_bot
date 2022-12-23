@@ -9,7 +9,7 @@ jobs:
       matrix:
         python-version: ["3.8", "3.9", "3.10"]
     steps:
-#     - uses: actions/checkout@v3
+    - uses: actions/checkout@v3
 #     - name: Set up Python ${{ matrix.python-version }}
 #       uses: actions/setup-python@v3
 #       with:
@@ -21,17 +21,11 @@ jobs:
 #     - name: Analysing the code with pylint
 #       run: |
 #         pylint $(git ls-files '*.py')
-    - name: About config
-      run: |
-        ls
-        pwd
-        ls ./
     - name: Deploy Function
       id: sls-func
       uses: yc-actions/yc-sls-function@v2
       with:
         yc-sa-json-credentials: ${{ secrets.YC_SA_JSON_CREDENTIALS }}
-        bucket: ${{ secrets.BUCKET }}
         folder-id: ${{ secrets.FOLDER_ID }}
         function-name: ${{ secrets.FUNCTION_NAME }}
         runtime: 'python310'
