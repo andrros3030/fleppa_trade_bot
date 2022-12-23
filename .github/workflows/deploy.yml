@@ -38,6 +38,5 @@ jobs:
           SERVICE_STATIC_KEY = ${{ secrets.SERVICE_STATIC_KEY }}
           YDB_DATABASE = ${{ secrets.YDB_DATABASE }}
           YDB_ENDPOINT = ${{ secrets.YDB_ENDPOINT }}
-        include: | 
+        include: |
           ./src
-          package.json
