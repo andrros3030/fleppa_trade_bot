@@ -9,7 +9,7 @@ jobs:
       matrix:
         python-version: ["3.8", "3.9", "3.10"]
     steps:
-#     - uses: actions/checkout@v3
+    - uses: actions/checkout@v3
 #     - name: Set up Python ${{ matrix.python-version }}
 #       uses: actions/setup-python@v3
 #       with:
@@ -26,10 +26,9 @@ jobs:
       uses: yc-actions/yc-sls-function@v2
       with:
         yc-sa-json-credentials: ${{ secrets.YC_SA_JSON_CREDENTIALS }}
-        bucket: ${{ secrets.BUCKET }}
         folder-id: ${{ secrets.FOLDER_ID }}
         function-name: ${{ secrets.FUNCTION_NAME }}
-        runtime: 'python310'
+        runtime: 'python39'
         memory: '256Mb'
         entrypoint: 'src/entrypoint.handler'
         environment: |
@@ -38,6 +37,5 @@ jobs:
           SERVICE_STATIC_KEY = ${{ secrets.SERVICE_STATIC_KEY }}
           YDB_DATABASE = ${{ secrets.YDB_DATABASE }}
           YDB_ENDPOINT = ${{ secrets.YDB_ENDPOINT }}
-        include: | 
-          ./src
-          package.json
+        include: |
+          src
