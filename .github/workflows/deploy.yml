@@ -21,6 +21,11 @@ jobs:
 #     - name: Analysing the code with pylint
 #       run: |
 #         pylint $(git ls-files '*.py')
+    - name: About config
+      run: |
+        ls
+        pwd
+        ls ./
     - name: Deploy Function
       id: sls-func
       uses: yc-actions/yc-sls-function@v2
