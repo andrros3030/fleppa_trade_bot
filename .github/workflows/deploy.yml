@@ -37,3 +37,4 @@ jobs:
           YDB_ENDPOINT = ${{ secrets.YDB_ENDPOINT }}
         include: |
           src
+          requirements.txt
