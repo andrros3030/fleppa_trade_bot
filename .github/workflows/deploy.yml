@@ -28,7 +28,7 @@ jobs:
         function-name: ${{ secrets.FUNCTION_NAME }}
         runtime: 'python39'
         memory: '256Mb'
-        entrypoint: 'src/entrypoint.handler'
+        entrypoint: 'src.entrypoint.handler'
         environment: |
           BOT_TOKEN = ${{ secrets.BOT_TOKEN }}
           SERVICE_API_KEY = ${{ secrets.SERVICE_API_KEY }}
