@@ -39,12 +39,11 @@ def say_welcome(message):
 @bot.message_handler(func=lambda message: True)
 def echo(message):
     logger.v("income message: " + str(message))
-    split_by_space = message.chat.text.split()
     message_author = message.from_user.id
-    if split_by_space[0] == 'sudo':
-        if message_author in SUDO_USERS:
-            bot.send_message(message.chat.id, 'Sudo user detected ;)')
-            return
+    if message_author in SUDO_USERS:
+        bot.send_message(message.chat.id, 'Sudo user detected ;)')
+        bot.send_message(message.chat.id, str(message))
+        return
     bot.send_message(message.chat.id, 'Чел я умею только скидывать свой пульс))))))))))')
 
 

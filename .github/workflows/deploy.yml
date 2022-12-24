@@ -36,5 +36,5 @@ jobs:
           YDB_DATABASE = ${{ secrets.YDB_DATABASE }}
           YDB_ENDPOINT = ${{ secrets.YDB_ENDPOINT }}
         include: |
-          *.py
+          src
           requirements.txt
