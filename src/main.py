@@ -1,7 +1,7 @@
-from constants import BOT_TOKEN, IS_PRODUCTION, SUDO_USERS  # ,SERVICE_API_KEY,YDB_DATABASE, YDB_ENDPOINT
+from src.constants import BOT_TOKEN, IS_PRODUCTION, SUDO_USERS  # ,SERVICE_API_KEY,YDB_DATABASE, YDB_ENDPOINT
 import telebot
 from telebot import types
-from logger import Logger
+from src.logger import Logger
 # from data_source import DataSource
 
 bot = telebot.TeleBot(BOT_TOKEN)
@@ -61,6 +61,6 @@ if __name__ == '__main__':
     logger.v('local infinity_polling is started')
     bot.infinity_polling()
 # else:
-#     bot.set_webhook("https://d5dsfuv2brgj4buc3uam.apigw.yandexcloud.net")
+#
 # message.from_user.id -> id of user who sent this message
 # message.from_user.first_name -> first name of user who sent this message

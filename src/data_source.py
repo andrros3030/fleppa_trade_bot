@@ -1,5 +1,5 @@
 import ydb
-from logger import Logger, blue_color
+from src.logger import Logger, blue_color
 
 
 class DataSource:

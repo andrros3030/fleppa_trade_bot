@@ -1,5 +1,5 @@
 import telebot
-from main import bot
+from src.main import bot
 
 
 def handler(event, _):
