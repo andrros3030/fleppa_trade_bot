@@ -7,6 +7,7 @@ on:
   push:
     paths_ignore:
       - 'src/**'
+      - 'requirements.txt'
     branches:
       - master
 jobs:

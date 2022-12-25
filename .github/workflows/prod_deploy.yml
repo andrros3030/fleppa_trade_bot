@@ -7,6 +7,7 @@ on:
   push:
     paths:
       - 'src/**'
+      - 'requirements.txt'
     branches:
       - master
 jobs:
