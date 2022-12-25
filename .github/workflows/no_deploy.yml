@@ -1,4 +1,4 @@
-name: Deploy to yandex-cloud serverless function to work in production bot
+name: Skip deploy to YCF
 
 # Этот workflow срабатывает при залитии документации и других штук в ветку master:
 # не стартует билд и не льет новую версию в бота т.к. отсутствуют изменения в коде
