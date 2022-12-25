@@ -10,8 +10,8 @@ jobs:
     timeout-minutes: 5
     steps:
     - uses: actions/checkout@v3
-    - name: Linter
-      uses: wemake-services/wemake-python-styleguide@latest
+    - name: wemake-python-styleguide
+      uses: wemake-services/wemake-python-styleguide
       with:
         path: /src
         reporter: 'github-pr-review'
