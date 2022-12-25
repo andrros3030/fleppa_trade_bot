@@ -1,0 +1,17 @@
+name: Deploy to yandex-cloud serverless function to work in production bot
+
+# Этот workflow срабатывает при залитии документации и других штук в ветку master:
+# не стартует билд и не льет новую версию в бота т.к. отсутствуют изменения в коде
+
+on:
+  push:
+    paths_ignore:
+      - 'src/**'
+    branches:
+      - master
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+    - run: 'echo "No delpoy required for this changes"'

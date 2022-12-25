@@ -1,5 +1,8 @@
 name: Linter action to check PEP8 rules
 
+# Этот workflow сработает на пуш в любую ветку, кроме master
+# Он проверяет код-стайл и вывод в консоль результат работы
+
 on:
   push:
     branches-ignore:

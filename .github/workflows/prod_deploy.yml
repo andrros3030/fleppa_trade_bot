@@ -5,6 +5,8 @@ name: Deploy to yandex-cloud serverless function to work in production bot
 
 on:
   push:
+    paths:
+      - 'src/**'
     branches:
       - master
 jobs:
