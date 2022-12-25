@@ -1,0 +1,19 @@
+name: Linter action to check PEP8 rules
+
+on:
+  push:
+    branches-ignore:
+      - master
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+    - uses: actions/checkout@v3
+    - name: Linter
+      uses: wemake-services/wemake-python-styleguide@latest
+      with:
+        path: /src
+        reporter: 'github-pr-review'
+      env:
+        GITHUB_TOKEN: ${{ secrets.CREATOR_GITHUB_TOKEN }}
