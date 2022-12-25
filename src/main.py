@@ -1,4 +1,5 @@
-from src.constants import BOT_TOKEN, IS_PRODUCTION, SUDO_USERS  # ,SERVICE_API_KEY,YDB_DATABASE, YDB_ENDPOINT
+from src.constants import BOT_TOKEN, IS_PRODUCTION, SUDO_USERS, set_testing_mode
+# ,SERVICE_API_KEY,YDB_DATABASE, YDB_ENDPOINT
 import telebot
 from telebot import types
 from src.logger import Logger
@@ -6,7 +7,7 @@ from src.logger import Logger
 
 bot = telebot.TeleBot(BOT_TOKEN)
 if __name__ == '__main__':
-    IS_PRODUCTION = False
+    set_testing_mode()
     bot.remove_webhook()
 logger = Logger(log_level=0 if IS_PRODUCTION else 1)
 # database = DataSource(
