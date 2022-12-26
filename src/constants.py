@@ -1,8 +1,11 @@
 import os
 
 
-YDB_ENDPOINT = os.getenv('YDB_ENDPOINT')
-YDB_DATABASE = os.getenv('YDB_DATABASE')
+DB_HOST = os.getenv('DB_HOST')
+DB_PORT = os.getenv('DB_PORT')
+DB_NAME = os.getenv('DB_NAME')
+DB_USER = os.getenv('DB_USER')
+DB_USER_PASSWORD = os.getenv('DB_USER_PASSWORD')
 SERVICE_STATIC_KEY = os.getenv('SERVICE_STATIC_KEY')
 SERVICE_API_KEY = os.getenv('SERVICE_API_KEY')
 BOT_TOKEN = os.getenv('BOT_TOKEN')
