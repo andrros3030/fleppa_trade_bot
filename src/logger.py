@@ -56,7 +56,7 @@ class Logger:
             print(real_color + self.log_levels_names[level] + message + '\033[0m')
 
     def v(self, message: str, override_color: str = None):
-        self.__log(message, level=0, override_color=override_color)
+        self.__log(message, level=1, override_color=override_color)
 
     def e(self, message: str, override_color: str = None):
-        self.__log(message, level=1,  override_color=override_color)
+        self.__log(message, level=0,  override_color=override_color)

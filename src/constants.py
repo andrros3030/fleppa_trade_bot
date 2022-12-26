@@ -14,5 +14,6 @@ SUDO_USERS = [
 
 
 def set_testing_mode():
+    # TODO: replace environment variables values here
     global IS_PRODUCTION
     IS_PRODUCTION = False
