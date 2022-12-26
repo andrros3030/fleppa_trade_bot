@@ -11,7 +11,7 @@ on:
     branches:
       - master
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -35,3 +35,23 @@ jobs:
         include: |
           src
           requirements.txt
+
+  register_webhook:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Python 3.9
+      uses: actions/setup-python@v4.4.0
+      with:
+        python-version: 3.9
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+    - name: Register webhook
+      env:
+        BOT_TOKEN = ${{ secrets.BOT_TOKEN }}
+        WEBHOOK= ${{ secrets.WEBHOOK }}
+      run: |
+        python common/register_webhook.py
