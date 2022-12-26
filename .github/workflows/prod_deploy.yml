@@ -51,7 +51,7 @@ jobs:
         pip install -r requirements.txt
     - name: Register webhook
       env:
-        BOT_TOKEN = ${{ secrets.BOT_TOKEN }}
-        WEBHOOK= ${{ secrets.WEBHOOK }}
+        BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+        WEBHOOK: ${{ secrets.WEBHOOK }}
       run: |
         python common/register_webhook.py
