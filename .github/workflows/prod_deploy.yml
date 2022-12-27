@@ -26,6 +26,7 @@ jobs:
         runtime: 'python39'
         memory: '256Mb'
         entrypoint: 'src.entrypoint.handler'
+        service-account: ${{ secrets.SERVICE_ACCOUNT }}
         environment: |
           BOT_TOKEN = ${{ secrets.BOT_TOKEN }}
           DB_HOST = ${{ secrets.DB_HOST }}

@@ -11,7 +11,7 @@ IS_PRODUCTION = True
 SUDO_USERS = [
     439133935,  # Андрей
 ]
-context = None
+context = 'initial context, like NONE'
 
 
 def set_testing_mode():

@@ -36,7 +36,7 @@ def default_handler(message):
 
             if command in Commands.environment.commands:
                 bot.send_message(message.chat.id, f'PROD: {IS_PRODUCTION}\n'
-                                                  f'context: {str(context)}')
+                                                  f'context: {context}')
             elif command in Commands.db.commands:
                 database = DataSource(
                     host=DB_HOST,
