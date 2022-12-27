@@ -37,14 +37,7 @@ def default_handler(message):
                 bot.send_message(message.chat.id, f'PROD: {global_context.IS_PRODUCTION}\n'
                                                   f'context: {global_context.context}')
             elif command in Commands.db.commands:
-                database = DataSource(
-                    host=global_context.DB_HOST,
-                    port=global_context.DB_PORT,
-                    dbname=global_context.DB_NAME,
-                    user=global_context.DB_USER,
-                    password=global_context.DB_USER_PASSWORD,
-                    logger=logger
-                )
+                database = DataSource(auth_context=global_context.auth_context, logger=logger)
                 bot.send_message(message.chat.id, str(database.unsafe_exec(' '.join(splitted_message[1:]))))
             else:
                 bot.send_message(message.chat.id, 'Кажется такой команды нет, создатель')

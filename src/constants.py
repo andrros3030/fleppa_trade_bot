@@ -1,4 +1,5 @@
 import os
+from src.data_source import DBAuthContext
 
 
 class Context:
@@ -14,7 +15,7 @@ class Context:
         self.SUDO_USERS = [
             439133935,  # Андрей
         ]
-        self.context = 'initial context, like NONE'
+        self.context = None
 
     def set_testing_mode(self):
         # TODO: replace environment variables values here
@@ -25,6 +26,17 @@ class Context:
 
     def update_db_user_password(self, new_token):
         self.DB_USER_PASSWORD = new_token
+
+    @property
+    def auth_context(self) -> DBAuthContext:
+        return DBAuthContext(
+            user=self.DB_USER,
+            password=self.context.token["access_token"] if self.IS_PRODUCTION else self.DB_USER_PASSWORD,
+            host=self.DB_HOST,
+            port=self.DB_PORT,
+            is_prod=self.IS_PRODUCTION,
+            dbname=self.DB_NAME,
+        )
 
 
 global_context = Context()

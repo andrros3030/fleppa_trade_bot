@@ -1,40 +1,49 @@
 import psycopg2
 from src.logger import Logger
-from src.constants import global_context
+
+
+class DBAuthContext:
+    def __init__(self, user: str, password: str, host: str, port: str, is_prod: bool, dbname: str = None):
+        self.user = user
+        self.password = password
+        self.host = host
+        self.port = port
+        self.is_prod = is_prod
+        if is_prod:
+            self.database = host.split('.')[0]
+        else:
+            self.dbname = dbname
+
+    @property
+    def get_config(self):
+        if self.is_prod:
+            return f"""
+            database={self.database}
+            host={self.host}
+            port={self.port}
+            user={self.user}
+            password={self.password}
+            sslmode="require"
+            """
+        else:
+            return f"""
+                host={self.host}
+                port={self.port}
+                dbname={self.dbname}
+                user={self.user}
+                password={self.password}
+                target_session_attrs=read-write
+            """
 
 
 # TODO: почитать про   sslmode=verify-full
 class DataSource:
     def init_connection(self):
-        if global_context.IS_PRODUCTION:
-            self.conn = psycopg2.connect(
-                database=self.host.split('.')[0],  # Идентификатор подключения
-                user=self.user,  # Пользователь БД
-                password=self.password,
-                host=self.host,  # Точка входа
-                port=self.port,
-                sslmode="require",
-            )
-            # context.token["access_token"]
-            # akflka8fhhde7dkske86
-        else:
-            self.conn = psycopg2.connect(f"""
-                                   host={self.host}
-                                   port={self.port}
-                                   dbname={self.dbname}
-                                   user={self.user}
-                                   password={self.password}
-                                   target_session_attrs=read-write
-                               """)
+        self.conn = psycopg2.connect(self.auth_context)
         self.logger.v('Connection to DB set up')
 
-    def __init__(self,  logger: Logger, host: str = None, port: str = None, dbname: str = None, user: str = None,
-                 password: str = None,):
-        self.host = host
-        self.port = port
-        self.dbname = dbname
-        self.user = user
-        self.password = password
+    def __init__(self, logger: Logger, auth_context: DBAuthContext):
+        self.auth_context = auth_context
         self.conn = None
         self.logger = logger
         self.init_connection()
