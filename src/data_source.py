@@ -1,21 +1,35 @@
 import psycopg2
 from src.logger import Logger
+from src.constants import IS_PRODUCTION
 
 
 # TODO: почитать про   sslmode=verify-full
 class DataSource:
     def init_connection(self):
-        self.conn = psycopg2.connect(f"""
-                        host={self.host}
-                        port={self.port}
-                        dbname={self.dbname}
-                        user={self.user}
-                        password={self.password}
-                        target_session_attrs=read-write
-                    """)
+        if IS_PRODUCTION:
+            self.conn = psycopg2.connect(
+                database=self.host.split('.')[0],  # Идентификатор подключения
+                user=self.user,  # Пользователь БД
+                password=self.password,
+                host=self.host,  # Точка входа
+                port=self.port,
+                sslmode="require",
+            )
+            # context.token["access_token"]
+            # akflka8fhhde7dkske86
+        else:
+            self.conn = psycopg2.connect(f"""
+                                   host={self.host}
+                                   port={self.port}
+                                   dbname={self.dbname}
+                                   user={self.user}
+                                   password={self.password}
+                                   target_session_attrs=read-write
+                               """)
         self.logger.v('Connection to DB set up')
 
-    def __init__(self, host: str, port: str, dbname: str, user: str, password: str, logger: Logger):
+    def __init__(self,  logger: Logger, host: str = None, port: str = None, dbname: str = None, user: str = None,
+                 password: str = None,):
         self.host = host
         self.port = port
         self.dbname = dbname
