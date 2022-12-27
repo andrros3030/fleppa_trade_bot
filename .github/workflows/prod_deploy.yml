@@ -51,7 +51,12 @@ jobs:
         pip install -r requirements.txt
     - name: Register webhook
       env:
+        DB_HOST: ${{ secrets.DB_HOST }}
+        DB_PORT: ${{ secrets.DB_PORT }}
+        DB_NAME: ${{ secrets.DB_NAME }}
+        DB_USER: ${{ secrets.DB_USER }}
+        DB_USER_PASSWORD: ${{ secrets.DB_USER_PASSWORD }}
         BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
         WEBHOOK: ${{ secrets.WEBHOOK }}
       run: |
-        python common/register_webhook.py
+        python -m common.register_webhook

@@ -1,9 +1,18 @@
-from src.constants import BOT_TOKEN, IS_PRODUCTION, SUDO_USERS
+from src.constants import BOT_TOKEN, IS_PRODUCTION, SUDO_USERS, DB_USER, DB_USER_PASSWORD, DB_HOST, DB_NAME, DB_PORT
+from src.commands import Commands
 import telebot
 from src.logger import Logger
+from src.data_source import DataSource
 
 bot = telebot.TeleBot(BOT_TOKEN)
 logger = Logger(log_level=0 if IS_PRODUCTION else 1)
+database = DataSource(
+    host=DB_HOST,
+    port=DB_PORT,
+    dbname=DB_NAME,
+    user=DB_USER,
+    password=DB_USER_PASSWORD
+)
 
 
 @bot.message_handler(commands=['start'])
@@ -28,9 +37,13 @@ def default_handler(message):
     message_author = message.from_user.id
     if message_author in SUDO_USERS:
         try:
-            real_command = list(map(lambda el: str(el).lower(), message.text.split()))
-            if real_command[0] in ['env', 'prod', 'environment', 'среда']:
+            splitted_message = list(map(lambda el: str(el).lower(), message.text.split()))
+            command = splitted_message[0]
+
+            if command in Commands.environment.commands:
                 bot.send_message(message.chat.id, f'PROD: {IS_PRODUCTION}')
+            elif command in Commands.db.commands:
+                bot.send_message(message.chat.id, str(database.exec(' '.join(splitted_message[1:]))))
             else:
                 bot.send_message(message.chat.id, 'Кажется такой команды нет, создатель')
         except Exception as e:
