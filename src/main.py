@@ -6,14 +6,6 @@ from src.data_source import DataSource
 
 bot = telebot.TeleBot(BOT_TOKEN)
 logger = Logger(log_level=0 if IS_PRODUCTION else 1)
-database = DataSource(
-    host=DB_HOST,
-    port=DB_PORT,
-    dbname=DB_NAME,
-    user=DB_USER,
-    password=DB_USER_PASSWORD,
-    logger=logger
-)
 
 
 @bot.message_handler(commands=['start'])
@@ -44,6 +36,14 @@ def default_handler(message):
             if command in Commands.environment.commands:
                 bot.send_message(message.chat.id, f'PROD: {IS_PRODUCTION}')
             elif command in Commands.db.commands:
+                database = DataSource(
+                    host=DB_HOST,
+                    port=DB_PORT,
+                    dbname=DB_NAME,
+                    user=DB_USER,
+                    password=DB_USER_PASSWORD,
+                    logger=logger
+                )
                 bot.send_message(message.chat.id, str(database.unsafe_exec(' '.join(splitted_message[1:]))))
             else:
                 bot.send_message(message.chat.id, 'Кажется такой команды нет, создатель')

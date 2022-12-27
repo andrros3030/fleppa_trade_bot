@@ -1,6 +1,5 @@
 import os
 
-
 DB_HOST = os.getenv('DB_HOST')
 DB_PORT = os.getenv('DB_PORT')
 DB_NAME = os.getenv('DB_NAME')
@@ -18,3 +17,8 @@ def set_testing_mode():
     # TODO: replace environment variables values here
     global IS_PRODUCTION
     IS_PRODUCTION = False
+
+
+def update_db_user_password(new_token):
+    global DB_USER_PASSWORD
+    DB_USER_PASSWORD = new_token
