@@ -1,4 +1,5 @@
-from src.constants import BOT_TOKEN, IS_PRODUCTION, SUDO_USERS, DB_USER, DB_USER_PASSWORD, DB_HOST, DB_NAME, DB_PORT
+from src.constants import BOT_TOKEN, IS_PRODUCTION, SUDO_USERS, DB_USER, DB_USER_PASSWORD, DB_HOST, DB_NAME, DB_PORT, \
+    context
 from src.commands import Commands
 import telebot
 from src.logger import Logger
@@ -34,7 +35,8 @@ def default_handler(message):
             command = splitted_message[0]
 
             if command in Commands.environment.commands:
-                bot.send_message(message.chat.id, f'PROD: {IS_PRODUCTION}')
+                bot.send_message(message.chat.id, f'PROD: {IS_PRODUCTION}\n'
+                                                  f'context: {str(context)}')
             elif command in Commands.db.commands:
                 database = DataSource(
                     host=DB_HOST,

@@ -11,12 +11,18 @@ IS_PRODUCTION = True
 SUDO_USERS = [
     439133935,  # Андрей
 ]
+context = None
 
 
 def set_testing_mode():
     # TODO: replace environment variables values here
     global IS_PRODUCTION
     IS_PRODUCTION = False
+
+
+def set_context(new_context):
+    global context
+    context = new_context
 
 
 def update_db_user_password(new_token):
