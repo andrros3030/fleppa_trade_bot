@@ -25,6 +25,11 @@ class DataSource:
         self.logger = logger
         self.init_connection()
 
+    def __error_handler(self, error):
+        self.logger.e(error)
+        self.init_connection()
+        return error
+
     def unsafe_exec(self, querry: str):
         """
         Команда не для использования внутри бизнес логики!!!
@@ -45,9 +50,15 @@ class DataSource:
                 return q.statusmessage
             return q.fetchall()
         except Exception as e:
-            self.logger.e(str(e))
-            self.init_connection()
-            return str(e)
+            return self.__error_handler(e)
+
+    def save_user(self, user_id: str):
+        try:
+            self.logger.v('Saving user with id ' + user_id)
+            # TODO: implement insert into DB + check if not exists
+            pass
+        except Exception as e:
+            return self.__error_handler(e)
 
     def __exit__(self, exc_type, exc_value, traceback):
         self.conn.close()
