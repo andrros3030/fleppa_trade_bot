@@ -1,12 +1,11 @@
-from src.constants import BOT_TOKEN, IS_PRODUCTION, SUDO_USERS, DB_USER, DB_USER_PASSWORD, DB_HOST, DB_NAME, DB_PORT, \
-    context
+from src.constants import global_context
 from src.commands import Commands
 import telebot
 from src.logger import Logger
 from src.data_source import DataSource
 
-bot = telebot.TeleBot(BOT_TOKEN)
-logger = Logger(log_level=0 if IS_PRODUCTION else 1)
+bot = telebot.TeleBot(global_context.BOT_TOKEN)
+logger = Logger(log_level=0 if global_context.IS_PRODUCTION else 1)
 
 
 @bot.message_handler(commands=['start'])
@@ -29,21 +28,21 @@ def say_help(message):
 def default_handler(message):
     logger.v("income message: " + str(message))
     message_author = message.from_user.id
-    if message_author in SUDO_USERS:
+    if message_author in global_context.SUDO_USERS:
         try:
             splitted_message = list(map(lambda el: str(el).lower(), message.text.split()))
             command = splitted_message[0]
 
             if command in Commands.environment.commands:
-                bot.send_message(message.chat.id, f'PROD: {IS_PRODUCTION}\n'
-                                                  f'context: {context}')
+                bot.send_message(message.chat.id, f'PROD: {global_context.IS_PRODUCTION}\n'
+                                                  f'context: {global_context.context}')
             elif command in Commands.db.commands:
                 database = DataSource(
-                    host=DB_HOST,
-                    port=DB_PORT,
-                    dbname=DB_NAME,
-                    user=DB_USER,
-                    password=DB_USER_PASSWORD,
+                    host=global_context.DB_HOST,
+                    port=global_context.DB_PORT,
+                    dbname=global_context.DB_NAME,
+                    user=global_context.DB_USER,
+                    password=global_context.DB_USER_PASSWORD,
                     logger=logger
                 )
                 bot.send_message(message.chat.id, str(database.unsafe_exec(' '.join(splitted_message[1:]))))

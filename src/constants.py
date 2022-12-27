@@ -1,30 +1,30 @@
 import os
 
-DB_HOST = os.getenv('DB_HOST')
-DB_PORT = os.getenv('DB_PORT')
-DB_NAME = os.getenv('DB_NAME')
-DB_USER = os.getenv('DB_USER')
-DB_USER_PASSWORD = os.getenv('DB_USER_PASSWORD')
-BOT_TOKEN = os.getenv('BOT_TOKEN')
-WEBHOOK = os.getenv('WEBHOOK')
-IS_PRODUCTION = True
-SUDO_USERS = [
-    439133935,  # Андрей
-]
-context = 'initial context, like NONE'
+
+class Context:
+    def __init__(self):
+        self.DB_HOST = os.getenv('DB_HOST')
+        self.DB_PORT = os.getenv('DB_PORT')
+        self.DB_NAME = os.getenv('DB_NAME')
+        self.DB_USER = os.getenv('DB_USER')
+        self.DB_USER_PASSWORD = os.getenv('DB_USER_PASSWORD')
+        self.BOT_TOKEN = os.getenv('BOT_TOKEN')
+        self.WEBHOOK = os.getenv('WEBHOOK')
+        self.IS_PRODUCTION = True
+        self.SUDO_USERS = [
+            439133935,  # Андрей
+        ]
+        self.context = 'initial context, like NONE'
+
+    def set_testing_mode(self):
+        # TODO: replace environment variables values here
+        self.IS_PRODUCTION = False
+
+    def set_context(self, new_context):
+        self.context = new_context
+
+    def update_db_user_password(self, new_token):
+        self.DB_USER_PASSWORD = new_token
 
 
-def set_testing_mode():
-    # TODO: replace environment variables values here
-    global IS_PRODUCTION
-    IS_PRODUCTION = False
-
-
-def set_context(new_context):
-    global context
-    context = new_context
-
-
-def update_db_user_password(new_token):
-    global DB_USER_PASSWORD
-    DB_USER_PASSWORD = new_token
+global_context = Context()

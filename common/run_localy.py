@@ -1,4 +1,4 @@
-from src.constants import set_testing_mode
+from src.constants import global_context
 
 
 def run():
@@ -9,5 +9,5 @@ def run():
     bot.infinity_polling()
 
 
-set_testing_mode()
+global_context.set_testing_mode()
 run()

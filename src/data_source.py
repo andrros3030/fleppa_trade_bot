@@ -1,12 +1,12 @@
 import psycopg2
 from src.logger import Logger
-from src.constants import IS_PRODUCTION
+from src.constants import global_context
 
 
 # TODO: почитать про   sslmode=verify-full
 class DataSource:
     def init_connection(self):
-        if IS_PRODUCTION:
+        if global_context.IS_PRODUCTION:
             self.conn = psycopg2.connect(
                 database=self.host.split('.')[0],  # Идентификатор подключения
                 user=self.user,  # Пользователь БД
