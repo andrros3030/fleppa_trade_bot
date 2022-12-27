@@ -11,7 +11,8 @@ database = DataSource(
     port=DB_PORT,
     dbname=DB_NAME,
     user=DB_USER,
-    password=DB_USER_PASSWORD
+    password=DB_USER_PASSWORD,
+    logger=logger
 )
 
 
@@ -43,7 +44,7 @@ def default_handler(message):
             if command in Commands.environment.commands:
                 bot.send_message(message.chat.id, f'PROD: {IS_PRODUCTION}')
             elif command in Commands.db.commands:
-                bot.send_message(message.chat.id, str(database.exec(' '.join(splitted_message[1:]))))
+                bot.send_message(message.chat.id, str(database.unsafe_exec(' '.join(splitted_message[1:]))))
             else:
                 bot.send_message(message.chat.id, 'Кажется такой команды нет, создатель')
         except Exception as e:

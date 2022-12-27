@@ -37,8 +37,8 @@ class Logger:
         # UNDERLINE = '\033[4m'
     }
     log_levels_names: dict = {
-        0: 'LOGGER/VERBOSE: ',
-        1: 'LOGGER/ERROR: '
+        0: 'LOGGER/ERROR: ',
+        1: 'LOGGER/VERBOSE: '
     }
 
     def __init__(self, log_level: int = 1):

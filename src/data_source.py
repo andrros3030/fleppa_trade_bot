@@ -1,22 +1,53 @@
 import psycopg2
+from src.logger import Logger
 
 
 # TODO: почитать про   sslmode=verify-full
 class DataSource:
-    def __init__(self, host, port, dbname, user, password):
+    def init_connection(self):
         self.conn = psycopg2.connect(f"""
-                host={host}
-                port={port}
-                dbname={dbname}
-                user={user}
-                password={password}
-                target_session_attrs=read-write
-            """)
+                        host={self.host}
+                        port={self.port}
+                        dbname={self.dbname}
+                        user={self.user}
+                        password={self.password}
+                        target_session_attrs=read-write
+                    """)
+        self.logger.v('Connection to DB set up')
 
-    def exec(self, querry):
-        q = self.conn.cursor()
-        q.execute(querry)
-        return q.fetchone()
+    def __init__(self, host: str, port: str, dbname: str, user: str, password: str, logger: Logger):
+        self.host = host
+        self.port = port
+        self.dbname = dbname
+        self.user = user
+        self.password = password
+        self.conn = None
+        self.logger = logger
+        self.init_connection()
+
+    def unsafe_exec(self, querry: str):
+        """
+        Команда не для использования внутри бизнес логики!!!
+        Предназначена лишь для доступа к базе из телеграм бота администраторами
+        :param querry:
+        Запрос к базе данных
+        :return:
+        """
+        querry = querry.replace('“', "'").replace('”', "'").replace("‘", "'").replace("’", "'")
+        try:
+            self.logger.v('Starting querry from connection: ' + str(self.conn))
+            q = self.conn.cursor()
+            self.logger.v('Got cursor, executing querry: ' + querry)
+            q.execute(querry)
+            self.logger.v('Querry OK, commiting')
+            self.conn.commit()
+            if q.statusmessage.split()[0] == 'INSERT':
+                return q.statusmessage
+            return q.fetchall()
+        except Exception as e:
+            self.logger.e(str(e))
+            self.init_connection()
+            return str(e)
 
     def __exit__(self, exc_type, exc_value, traceback):
         self.conn.close()
