@@ -66,6 +66,12 @@ __:hand: - Не разрабатываем на текущей стадии, н�
 
 <a href=http://iss.moex.com/iss/reference/>Спецификация API</a>
 
+<a href=https://cloud.yandex.ru/docs/functions/lang/python/context>Про контекст вызова</a>
+
+<a href=https://cloud.yandex.ru/docs/functions/operations/database-connection>Работа с PGSQL из CF</a>
+
+---
+
 <a href=https://cloud.yandex.ru/docs/functions/tutorials/connect-to-ydb>Работа с YDB</a>
 
 <a href=https://github.com/ydb-platform/ydb-python-sdk/blob/main/examples/access-token-credentials/main.py>Use access token to YDB</a>

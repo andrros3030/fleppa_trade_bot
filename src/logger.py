@@ -41,19 +41,19 @@ class Logger:
         1: 'LOGGER/VERBOSE: '
     }
 
-    def __init__(self, log_level: int = 1):
-        if log_level > 0:
+    def __init__(self, is_poduction: bool):
+        self.is_production = is_poduction
+        if not is_poduction:
             self.log_levels[1] = True
-        elif log_level < 0:
-            self.log_levels[0] = False
         self.v(
-            f"Logger set up complete, ready to log, log level: {log_level}"
+            f"Logger set up complete, ready to log, prod: {is_poduction}"
         )
 
     def __log(self, message: str, level: int, override_color: str = None):
         real_color = override_color if override_color is not None else self.log_level_color[level]
+        end_char = '\r' if self.is_production else '\n'
         if self.log_levels[level]:
-            print(real_color + self.log_levels_names[level] + str(message) + '\033[0m')
+            print(real_color + self.log_levels_names[level] + str(message) + '\033[0m', end=end_char)
 
     def v(self, message: str, override_color: str = None):
         self.__log(message, level=1, override_color=override_color)

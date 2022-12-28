@@ -5,7 +5,7 @@ from src.logger import Logger
 from src.data_source import DataSource
 
 bot = telebot.TeleBot(global_context.BOT_TOKEN)
-logger = Logger(log_level=0 if global_context.IS_PRODUCTION else 1)
+logger = Logger(is_poduction=global_context.IS_PRODUCTION)
 
 
 @bot.message_handler(commands=['start'])
