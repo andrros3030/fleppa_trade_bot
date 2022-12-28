@@ -6,12 +6,12 @@ from src.data_source import DataSource
 
 bot = telebot.TeleBot(global_context.BOT_TOKEN)
 logger = Logger(is_poduction=global_context.IS_PRODUCTION)
+database = DataSource(auth_context=global_context.auth_context, logger=logger)
 
 
 @bot.message_handler(commands=['start'])
 def say_welcome(message):
     logger.v("income command: " + str(message))
-    database = DataSource(auth_context=global_context.auth_context, logger=logger)
     database.save_user(str(message.from_user.id))
     bot.send_message(message.chat.id,
                      'Здарова, скоро тут будет супер трейд стратегия от Шлеппы, '
@@ -23,7 +23,6 @@ def say_welcome(message):
 @bot.message_handler(commands=['help'])
 def say_help(message):
     logger.v("income command: " + str(message))
-    database = DataSource(auth_context=global_context.auth_context, logger=logger)
     database.save_user(str(message.from_user.id))
     bot.send_message(message.chat.id, 'Вряд ли я смогу тебе рассказать о том, что я умею...'
                                       'Ведь создатели ещё не придумали зачем я нужен...')
@@ -32,10 +31,9 @@ def say_help(message):
 @bot.message_handler(func=lambda message: True)
 def default_handler(message):
     logger.v("income message: " + str(message))
-    database = DataSource(auth_context=global_context.auth_context, logger=logger)
     database.save_user(str(message.from_user.id))
     message_author = message.from_user.id
-    if message_author in global_context.SUDO_USERS:
+    if database.is_admin(message_author) or message_author in global_context.SUDO_USERS:
         try:
             splitted_message = list(map(lambda el: str(el).lower(), message.text.split()))
             command = splitted_message[0]
@@ -43,8 +41,13 @@ def default_handler(message):
             if command in Commands.environment.commands:
                 bot.send_message(message.chat.id, str(global_context))
             elif command in Commands.db.commands:
-                database = DataSource(auth_context=global_context.auth_context, logger=logger)
                 bot.send_message(message.chat.id, str(database.unsafe_exec(' '.join(splitted_message[1:]))))
+            elif command in Commands.set_admin.commands:
+                if len(splitted_message) != 2:
+                    bot.send_message(message.chat.id, 'Комманда принимает на вход один аргумент - id человека, '
+                                                      'назначаемого админом')
+                    return
+                bot.send_message(message.chat.id, str(database.set_admin(splitted_message[1])))
             else:
                 bot.send_message(message.chat.id, 'Кажется такой команды нет, создатель')
         except Exception as e:

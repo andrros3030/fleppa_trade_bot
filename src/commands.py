@@ -27,5 +27,11 @@ class Commands:
     db = Command(
         alias=['sql', 'db'],
         desc='Взаимодействие с базой данных',
-        admin_only=True
+        admin_only=True,
+    )
+
+    set_admin = Command(
+        alias=['set_admin', 'make_admin', 'do_admin'],
+        desc='Сделать пользователя админом',
+        admin_only=True,
     )

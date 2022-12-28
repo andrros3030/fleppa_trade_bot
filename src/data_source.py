@@ -87,5 +87,16 @@ class DataSource:
         querry = "INSERT INTO T_USERS (pk_id) values(%s) ON CONFLICT DO NOTHING;"
         return self.__make_querry(querry, params=(user_id,))
 
+    def is_admin(self, user_id: str):
+        querry = "SELECT l_admin from t_users where pk_id = '%s'"
+        result = self.__make_querry(querry, params=(user_id,))
+        if len(result) == 0:
+            return False
+        return result[0][0]
+
+    def set_admin(self, user_id: str):
+        querry = "INSERT INTO T_USERS (pk_id, l_admin) values(%s, true) on conflict (pk_id) do update set l_admin=true"
+        return self.__make_querry(querry, params=(user_id,))
+
     def __exit__(self, exc_type, exc_value, traceback):
         self.conn.close()
