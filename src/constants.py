@@ -33,6 +33,12 @@ class Context:
 
     @property
     def auth_context(self) -> DBAuthContext:
+        """
+        Сформированные данные для авторизации в yc mdb pg
+        Это свойство может быть запрошено до смены контекста на ненулевое значение, keep in mind
+        :return:
+        контекст для авторизации в DataSource
+        """
         return DBAuthContext(
             user=self.DB_USER,
             password=self.context.token["access_token"] if self.IS_PRODUCTION else self.DB_USER_PASSWORD,

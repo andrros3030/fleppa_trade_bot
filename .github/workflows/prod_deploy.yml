@@ -29,7 +29,7 @@ jobs:
         service-account: ${{ secrets.SERVICE_ACCOUNT }}
         environment: |
           BOT_TOKEN = ${{ secrets.BOT_TOKEN }}
-          DB_HOST = ${{ secrets.DB_HOST }}
+          DB_HOST = ${{ secrets.INNER_DB_HOST }}
           DB_PORT = ${{ secrets.DB_PORT }}
           DB_NAME = ${{ secrets.DB_NAME }}
           DB_USER = ${{ secrets.DB_USER }}
@@ -53,7 +53,7 @@ jobs:
         pip install -r requirements.txt
     - name: Register webhook
       env:
-        DB_HOST: ${{ secrets.DB_HOST }}
+        DB_HOST: ${{ secrets.OUTER_DB_HOST }}
         DB_PORT: ${{ secrets.DB_PORT }}
         DB_NAME: ${{ secrets.DB_NAME }}
         DB_USER: ${{ secrets.DB_USER }}
