@@ -53,7 +53,7 @@ class Logger:
     def __log(self, message: str, level: int, override_color: str = None):
         real_color = override_color if override_color is not None else self.log_level_color[level]
         if self.log_levels[level]:
-            print(real_color + self.log_levels_names[level] + message + '\033[0m')
+            print(real_color + self.log_levels_names[level] + str(message) + '\033[0m')
 
     def v(self, message: str, override_color: str = None):
         self.__log(message, level=1, override_color=override_color)

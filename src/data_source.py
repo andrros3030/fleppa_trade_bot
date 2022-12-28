@@ -18,12 +18,12 @@ class DBAuthContext:
     def get_config(self):
         if self.is_prod:
             return f"""
-            database={self.database}
+            dbname={self.database}
             host={self.host}
             port={self.port}
             user={self.user}
             password={self.password}
-            sslmode="require"
+            sslmode=require
             """
         else:
             return f"""
@@ -36,10 +36,14 @@ class DBAuthContext:
             """
 
 
-# TODO: почитать про   sslmode=verify-full
+def brackets_handler(querry: str):
+    querry = querry.lower().replace('“', "'").replace('”', "'").replace("‘", "'").replace("’", "'")
+    return querry
+
+
 class DataSource:
     def init_connection(self):
-        self.conn = psycopg2.connect(self.auth_context)
+        self.conn = psycopg2.connect(self.auth_context.get_config)
         self.logger.v('Connection to DB set up')
 
     def __init__(self, logger: Logger, auth_context: DBAuthContext):
@@ -47,6 +51,22 @@ class DataSource:
         self.conn = None
         self.logger = logger
         self.init_connection()
+
+    def __make_querry(self, querry: str, safe_mode: bool = True, params=None):
+        if safe_mode:
+            querry = brackets_handler(querry)
+        try:
+            self.logger.v('Starting querry from connection: ' + str(self.conn))
+            q = self.conn.cursor()
+            self.logger.v('Got cursor, executing querry: ' + querry)
+            q.execute(querry, params)
+            self.logger.v('Querry OK, commiting')
+            self.conn.commit()
+            if q.statusmessage.split()[0] == 'INSERT':
+                return q.statusmessage
+            return q.fetchall()
+        except Exception as e:
+            return self.__error_handler(e)
 
     def __error_handler(self, error):
         self.logger.e(error)
@@ -61,27 +81,11 @@ class DataSource:
         Запрос к базе данных
         :return:
         """
-        querry = querry.replace('“', "'").replace('”', "'").replace("‘", "'").replace("’", "'")
-        try:
-            self.logger.v('Starting querry from connection: ' + str(self.conn))
-            q = self.conn.cursor()
-            self.logger.v('Got cursor, executing querry: ' + querry)
-            q.execute(querry)
-            self.logger.v('Querry OK, commiting')
-            self.conn.commit()
-            if q.statusmessage.split()[0] == 'INSERT':
-                return q.statusmessage
-            return q.fetchall()
-        except Exception as e:
-            return self.__error_handler(e)
+        return self.__make_querry(querry=querry)
 
     def save_user(self, user_id: str):
-        try:
-            self.logger.v('Saving user with id ' + user_id)
-            # TODO: implement insert into DB + check if not exists
-            pass
-        except Exception as e:
-            return self.__error_handler(e)
+        querry = "INSERT INTO T_USERS (pk_id) values(%s) ON CONFLICT DO NOTHING;"
+        return self.__make_querry(querry, params=(user_id,))
 
     def __exit__(self, exc_type, exc_value, traceback):
         self.conn.close()

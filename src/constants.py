@@ -2,6 +2,10 @@ import os
 from src.data_source import DBAuthContext
 
 
+def mask_token(token: str):
+    return token[0:4]+'*'*(len(token)-5)
+
+
 class Context:
     def __init__(self):
         self.DB_HOST = os.getenv('DB_HOST')
@@ -37,6 +41,13 @@ class Context:
             is_prod=self.IS_PRODUCTION,
             dbname=self.DB_NAME,
         )
+
+    def __str__(self):
+        token = self.context.token["access_token"] if self.IS_PRODUCTION else self.DB_USER_PASSWORD
+        return f"""PROD: {self.IS_PRODUCTION}
+        CNXT: {self.context}
+        DB_TOKEN: {mask_token(token)}
+        """
 
 
 global_context = Context()
