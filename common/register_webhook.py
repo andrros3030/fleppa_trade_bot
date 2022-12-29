@@ -9,4 +9,3 @@ def run():
 
 global_context.set_testing_mode()
 run()
-
