@@ -3,6 +3,7 @@ from src.commands import Commands
 import telebot
 from src.logger import Logger
 from src.data_source import DataSource
+from src.drawer import get_plot
 
 bot = telebot.TeleBot(global_context.BOT_TOKEN)
 logger = Logger(is_poduction=global_context.IS_PRODUCTION)
@@ -26,6 +27,12 @@ def say_help(message):
     database.save_user(str(message.from_user.id))
     bot.send_message(message.chat.id, 'Вряд ли я смогу тебе рассказать о том, что я умею...'
                                       'Ведь создатели ещё не придумали зачем я нужен...')
+
+
+@bot.message_handler(commands=['random_graph'])
+def random_graph(message):
+    logger.v("income command: " + str(message))
+    bot.send_photo(message.chat.id, photo=get_plot([1, 2, 3], [1, 2, 3]), caption='ну держи')
 
 
 @bot.message_handler(func=lambda message: True)
