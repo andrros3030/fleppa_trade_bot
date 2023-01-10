@@ -35,3 +35,9 @@ class Commands:
         desc='Сделать пользователя админом',
         admin_only=True,
     )
+
+    generate_link = Command(
+        alias=['make_link', 'getlink', 'ссылка', 'start_link'],
+        desc='Создать ссылку на бота',
+        admin_only=True
+    )
