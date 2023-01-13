@@ -3,12 +3,22 @@ from src.commands import Commands
 import telebot
 from src.logger import Logger
 from src.data_source import DataSource
-from src.execute_decorator import execute_decorator
+from src.execute_decorator import message_execute_decorator
 
 bot = telebot.TeleBot(global_context.BOT_TOKEN)
+
+
+def error_handler(message, error):
+    bot.send_message(message.chat.id, 'FATAL ERROR')  # TODO: прописать текстовку
+    for admin in global_context.SUDO_USERS:
+        bot.send_message(admin, f'Catched error in decorator: {str(error)}'
+                                f'\nUser: {str(message.from_user.id)}'
+                                f'\nJSON: {str(message)}')
+
+
 logger = Logger(is_poduction=global_context.IS_PRODUCTION)
 database = DataSource(auth_context=global_context.auth_context, logger=logger)
-msg_executor = execute_decorator(logger=logger, is_from_message=True)
+msg_executor = message_execute_decorator(logger=logger, on_error=error_handler)
 
 
 @bot.message_handler(commands=['start'])
@@ -25,6 +35,13 @@ def say_welcome(message):
 def say_help(message):
     bot.send_message(message.chat.id, 'Вряд ли я смогу тебе рассказать о том, что я умею...'
                                       'Ведь создатели ещё не придумали зачем я нужен...')
+
+
+@bot.message_handler(commands=['crash'])
+@msg_executor
+def say_help(message):
+    bot.send_message(message.chat.id, 'Крашаюсь, проверяй')
+    raise Exception('Краш вызван специально')
 
 
 @bot.message_handler(func=lambda message: True)
