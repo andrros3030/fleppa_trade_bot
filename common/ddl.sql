@@ -46,6 +46,19 @@
 --     fk_command      integer references t_commands(pk_id)
 -- );
 /*
+ Сущность ССЫЛКА-ПРИВЛЕЧЕНИЯ
+ содержит уникальный идентификатор (его используем при старте бота)
+ содержит описание, для внутренней идентификации ссылки
+ является:
+ (1) статистическим инструментом для внутренней аналитики и оценки качества рекламных каналов
+ [2] заделом для создания партнёрской программы (создания рекомендаций)
+*/
+create table t_involve(
+    pk_id                       varchar(40) primary key not null,
+    v_desc                      varchar(200) not null,
+    v_override_start_message    varchar(4000) null
+);
+/*
  Сущность ПОЛЬЗОВАТЕЛЬ:
  имеет уникальный id в Телеграмме
  может являться админом, но по умолчанию не является им
@@ -55,7 +68,6 @@
 create table t_users(
     pk_id       varchar(40) primary key not null,
     l_admin     bool not null default false,
-    t_reg       timestamp not null default current_timestamp,
---     fk_route    integer references t_routes(pk_id) default 0,
+    ts_reg      timestamp not null default current_timestamp,
+    fk_involve  varchar(40) null references t_involve(pk_id) on delete set null
 );
--- alter table t_users add column fk_route integer references t_routes(pk_id) default 1
