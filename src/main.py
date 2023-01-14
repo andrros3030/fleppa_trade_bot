@@ -39,7 +39,7 @@ def say_help(message):
 
 @bot.message_handler(commands=['crash'])
 @msg_executor
-def say_help(message):
+def do_crash(message):
     bot.send_message(message.chat.id, 'Крашаюсь, проверяй')
     raise Exception('Краш вызван специально')
 
