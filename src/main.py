@@ -40,8 +40,10 @@ def say_help(message):
 @bot.message_handler(commands=['crash'])
 @msg_executor
 def do_crash(message):
-    bot.send_message(message.chat.id, 'Крашаюсь, проверяй')
-    raise Exception('Краш вызван специально')
+    message_author = message.from_user.id
+    if database.is_admin(message_author) or message_author in global_context.SUDO_USERS:
+        bot.send_message(message.chat.id, 'Крашаюсь, проверяй')
+        raise Exception('Краш вызван специально')
 
 
 @bot.message_handler(func=lambda message: True)
