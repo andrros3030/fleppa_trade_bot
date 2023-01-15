@@ -46,6 +46,12 @@ def do_crash(message):
         raise Exception('Краш вызван специально')
 
 
+@bot.message_handler(commands=['diploma'])
+@msg_executor
+def get_diploma(message):
+    pass
+
+
 @bot.message_handler(func=lambda message: True)
 @msg_executor
 def default_handler(message):
