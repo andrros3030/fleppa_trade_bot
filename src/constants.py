@@ -19,6 +19,9 @@ class Context:
         self.SUDO_USERS = [
             439133935,  # Андрей
         ]
+        self.FEEDBACK_CHAT_ID = [
+            -898292404,  # Фидбэчница
+        ]
         self.context = None
 
     def set_testing_mode(self):

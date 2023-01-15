@@ -20,13 +20,34 @@ def error_handler(message, error):
         try:
             bot.send_message(admin, error_data)
         except Exception as e:
-            logger.e(f"FATAL: can't send error message to admin, causing error: {str(e) }"
+            logger.e(f"FATAL: can't send error message to admin, causing error: {str(e)}"
                      f'\nError to send: {error_data}')
 
 
 logger = Logger(is_poduction=global_context.IS_PRODUCTION)
 database = DataSource(auth_context=global_context.auth_context, logger=logger)
 msg_executor = message_execute_decorator(logger=logger, on_error=error_handler)
+
+
+@bot.message_handler(commands=['feedback'])
+@msg_executor
+def start_feedback(message):
+    chat_id = message.chat.id
+    message_author = message.from_user.id
+    if database.is_banned(message_author):
+        bot.send_message(chat_id, 'Отправка фидбэка недоступна')
+        return
+    database.set_route(message_author, route=Commands.feedback.route)
+    bot.send_message(chat_id, 'Пожалуйста, отправьте свой фид-бэк о работе бота. '
+                              'Вы можете добавить фото или видео о работе бота')
+
+
+# @bot.message_handler(commands=['reply'])
+# @msg_executor
+# def reply(message):
+#     # bot.send_message(reply_to_message_id=)
+#     # bot.forward_message(to_chat_id, from_chat_id, message_id)
+#     pass
 
 
 @bot.message_handler(commands=['start'])
@@ -59,6 +80,12 @@ def do_crash(message):
 def default_handler(message):
     chat_id = message.chat.id
     message_author = message.from_user.id
+    if database.get_current_route(message_author) == Commands.feedback.route:
+        for feedback_chat in global_context.FEEDBACK_CHAT_ID:
+            bot.forward_message(feedback_chat, chat_id, message.message_id)
+        bot.send_message(chat_id, 'Фид-бэк отправлен админам, спасибо')
+        database.set_route(message_author)
+        return
     if database.is_admin(message_author) or message_author in global_context.SUDO_USERS:
         try:
             splitted_message = list(map(lambda el: str(el).lower(), message.text.split()))
@@ -91,3 +118,17 @@ def default_handler(message):
             bot.send_message(chat_id, str(e))
         return
     bot.send_message(chat_id, 'Кажется я не знаю такой команды')
+
+
+@bot.message_handler(func=lambda message: True, content_types=['audio', 'photo', 'voice', 'video', 'document',
+                                                               'text', 'location', 'contact', 'sticker'])
+@msg_executor
+def absolutely_all_handler(message):
+    chat_id = message.chat.id
+    message_author = message.from_user.id
+    if database.get_current_route(message_author) == Commands.feedback.route:
+        for feedback_chat in global_context.FEEDBACK_CHAT_ID:
+            bot.forward_message(feedback_chat, chat_id, message.message_id)
+        bot.send_message(chat_id, 'Фид-бэк отправлен админам, спасибо')
+        database.set_route(message_author)
+        return

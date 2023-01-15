@@ -63,7 +63,7 @@ class DataSource:
             q.execute(querry, params)
             self.logger.v('Querry OK, commiting')
             self.conn.commit()
-            if q.statusmessage.split()[0] == 'INSERT':
+            if q.statusmessage.split()[0] in ['INSERT', 'UPDATE', 'DELETE']:
                 return q.statusmessage
             return q.fetchall()
         except Exception as e:
@@ -96,6 +96,48 @@ class DataSource:
             querry = "SELECT l_admin from t_users where pk_id = '%s'"
         else:
             querry = "SELECT l_admin from t_users where pk_id = %s"
+        result = self.__make_querry(querry, params=(user_id,))
+        try:
+            if len(result) == 0:
+                return False
+            return result[0][0]
+        except Exception as e:
+            self.logger.e(str(e))
+            return False
+
+    def is_banned(self, user_id):
+        if type(user_id) is int:
+            querry = "SELECT l_banned from t_users where pk_id = '%s'"
+        else:
+            querry = "SELECT l_banned from t_users where pk_id = %s"
+        result = self.__make_querry(querry, params=(user_id,))
+        try:
+            if len(result) == 0:
+                return False
+            return result[0][0]
+        except Exception as e:
+            self.logger.e(str(e))
+            return False
+
+    def set_route(self, user_id, route='/'):
+        if type(user_id) is int:
+            querry = f"UPDATE t_users SET v_position='{route}' WHERE pk_id = '%s'"
+        else:
+            querry = f"UPDATE t_users SET v_position='{route}' WHERE pk_id = %s"
+        result = self.__make_querry(querry, params=(user_id,))
+        try:
+            if len(result) == 0:
+                return False
+            return result[0][0]
+        except Exception as e:
+            self.logger.e(str(e))
+            return False
+
+    def get_current_route(self, user_id):
+        if type(user_id) is int:
+            querry = "SELECT v_position from t_users where pk_id = '%s'"
+        else:
+            querry = "SELECT v_position from t_users where pk_id = %s"
         result = self.__make_querry(querry, params=(user_id,))
         try:
             if len(result) == 0:

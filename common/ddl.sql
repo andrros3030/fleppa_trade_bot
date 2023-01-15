@@ -62,12 +62,16 @@ create table t_involve(
  Сущность ПОЛЬЗОВАТЕЛЬ:
  имеет уникальный id в Телеграмме
  может являться админом, но по умолчанию не является им
+ несет флаг о бане пользовательского фидбэка
+ имеет поле о текущей позиции пользователя
  имеет timestamp регистрации
  имеет ссылку на путь, в котором сейчас находится
 */
 create table t_users(
     pk_id       varchar(40) primary key not null,
     l_admin     bool not null default false,
+    l_banned    bool not null default false,
+    v_position  varchar(200) not null default '/',
     ts_reg      timestamp not null default current_timestamp,
     fk_involve  varchar(40) null references t_involve(pk_id) on delete set null
 );

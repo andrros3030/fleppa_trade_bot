@@ -1,12 +1,14 @@
 class Command:
+    _route: str
     _alias: list
     _desc: str
     _admin_only: bool
 
-    def __init__(self, alias: list, desc: str, admin_only=False, ):
+    def __init__(self, alias: list, desc: str, route='/', admin_only=False):
         self._alias = alias
         self._desc = desc
         self._admin_only = admin_only
+        self._route = route
 
     @property
     def commands(self):
@@ -16,8 +18,19 @@ class Command:
     def public(self):
         return not self._admin_only
 
+    @property
+    def route(self):
+        return self._route
+
 
 class Commands:
+    feedback = Command(
+        alias=['/feedback'],
+        desc='Оставить отзыв о работе бота или предложить функциональность',
+        admin_only=False,
+        route='/feedback'
+    )
+
     environment = Command(
         alias=['env', 'prod', 'environment', 'среда'],
         desc='Вывести тип окружения',
