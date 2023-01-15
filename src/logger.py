@@ -60,8 +60,10 @@ class Logger:
     def __log(self, message: str, level: int, override_color: str = None):
         real_color = override_color if override_color is not None else self.log_level_color[level]
         end_char = '\r' if self.is_production else '\n'
+        replace_char = '\n' if self.is_production else '\r'
+        message = str(message).replace(replace_char, end_char)
         if self.log_levels[level]:
-            return self.base_func(real_color + self.log_levels_names[level] + str(message) + '\033[0m', end=end_char)
+            return self.base_func(real_color + self.log_levels_names[level] + message + '\033[0m', end=end_char)
 
     def v(self, message: str, override_color: str = None):
         return self.__log(message, level=3, override_color=override_color)
