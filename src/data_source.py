@@ -1,4 +1,5 @@
 import psycopg2
+import uuid
 from src.logger import Logger
 
 
@@ -83,20 +84,58 @@ class DataSource:
         """
         return self.__make_querry(querry=querry)
 
-    def save_user(self, user_id: str):
+    def save_user(self, user_id: str, involve_link: str):
+        if involve_link is not None:
+            querry = "INSERT INTO T_USERS (pk_id, fk_involve) values(%s, %s) ON CONFLICT DO NOTHING;"
+            return self.__make_querry(querry, params=(user_id, involve_link))
         querry = "INSERT INTO T_USERS (pk_id) values(%s) ON CONFLICT DO NOTHING;"
         return self.__make_querry(querry, params=(user_id,))
 
-    def is_admin(self, user_id: str):
-        querry = "SELECT l_admin from t_users where pk_id = '%s'"
+    def is_admin(self, user_id):
+        if type(user_id) is int:
+            querry = "SELECT l_admin from t_users where pk_id = '%s'"
+        else:
+            querry = "SELECT l_admin from t_users where pk_id = %s"
         result = self.__make_querry(querry, params=(user_id,))
-        if len(result) == 0:
+        try:
+            if len(result) == 0:
+                return False
+            return result[0][0]
+        except Exception as e:
+            self.logger.e(str(e))
             return False
-        return result[0][0]
 
     def set_admin(self, user_id: str):
         querry = "INSERT INTO T_USERS (pk_id, l_admin) values(%s, true) on conflict (pk_id) do update set l_admin=true"
         return self.__make_querry(querry, params=(user_id,))
+
+    def generate_link(self, description: str, startup_message: str) -> str:
+        link_id = str(uuid.uuid4())
+        if startup_message is None:
+            querry = "INSERT INTO T_INVOLVE (pk_id, v_desc) values(%s, %s) on conflict (pk_id) do nothing;"
+            self.__make_querry(querry, params=(link_id, description))
+        else:
+            querry = "INSERT INTO T_INVOLVE (pk_id, v_desc, v_override_start_message) " \
+                     "values(%s, %s, %s) on conflict (pk_id) do nothing;"
+            self.__make_querry(querry, params=(link_id, description, startup_message))
+        return link_id
+
+    def get_start_message(self, start_link: str = None) -> str:
+        msg = 'Здарова, скоро тут будет супер трейд стратегия от Шлеппы, ' \
+               'а пока - держи мой пульс ' \
+               'https://www.tinkoff.ru/invest/social/profile/fleppa_war_crimes_fa?utm_source=share'
+        self.logger.v('Trying to get start message for link: ' + str(start_link))
+        if start_link is not None:
+            try:
+                return self.__make_querry(
+                    querry='SELECT v_override_start_message FROM T_INVOLVE WHERE pk_id = %s',
+                    params=(start_link,),
+                )[0]
+            except Exception as e:
+                self.logger.e(str(e))
+            finally:
+                pass
+        return msg
 
     def __exit__(self, exc_type, exc_value, traceback):
         self.conn.close()
