@@ -83,18 +83,18 @@ def currency(message):
     result = []
 
     if usd_change < 0:
-        result.append(('USD:', usd_today, f'(-{usd_change} % 🔴)'))
+        result.append(f'USD: {usd_today} (-{usd_change} % 🔴)')
     elif usd_change > 0:
-        result.append(('USD:', usd_today, f'(+{usd_change} % 🟢)'))
+        result.append(f'USD: {usd_today} (+{usd_change} % 🟢)')
     else:
-        print('USD:', usd_today, f'({usd_change} % ⚪)')
+        result.append(f'USD: {usd_today} ({usd_change} % ⚪)')
 
     if eur_change < 0:
-        result.append(('EUR', eur_today, f'(-{eur_change} % 🔴)'))
+        result.append(f'EUR: {eur_today} (-{eur_change} % 🔴)')
     elif eur_change > 0:
-        result.append(('EUR:', eur_today, f'(+{eur_change} % 🟢)'))
+        result.append(f'EUR: {eur_today} (+{eur_change} % 🟢)')
     else:
-        result.append(('EUR:', eur_today, f'({eur_change} % ⚪)'))
+        result.append(f'EUR: {eur_today} ({eur_change} % ⚪)')
 
-    bot.send_message(message.chat.id, result)
+    bot.send_message(message.chat.id, [i for i in result])
 
