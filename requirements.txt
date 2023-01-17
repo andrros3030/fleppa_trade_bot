@@ -1,5 +1,3 @@
 wheel
 pyTelegramBotAPI
-ydb
-yandexcloud
 psycopg2
