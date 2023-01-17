@@ -32,37 +32,9 @@ def say_help(message):
                                       'Ведь создатели ещё не придумали зачем я нужен...')
 
 
-@bot.message_handler(func=lambda message: message.text.upper() != 'MOEX')
-def default_handler(message):
-    logger.v("income message: " + str(message))
-    database.save_user(str(message.from_user.id))
-    message_author = message.from_user.id
-    if database.is_admin(message_author) or message_author in global_context.SUDO_USERS:
-        try:
-            splitted_message = list(map(lambda el: str(el).lower(), message.text.split()))
-            command = splitted_message[0]
-
-            if command in Commands.environment.commands:
-                bot.send_message(message.chat.id, str(global_context))
-            elif command in Commands.db.commands:
-                bot.send_message(message.chat.id, str(database.unsafe_exec(' '.join(splitted_message[1:]))))
-            elif command in Commands.set_admin.commands:
-                if len(splitted_message) != 2:
-                    bot.send_message(message.chat.id, 'Комманда принимает на вход один аргумент - id человека, '
-                                                      'назначаемого админом')
-                    return
-                bot.send_message(message.chat.id, str(database.set_admin(splitted_message[1])))
-            else:
-                bot.send_message(message.chat.id, 'Кажется такой команды нет, создатель')
-        except Exception as e:
-            bot.send_message(message.chat.id, "Не удалось понять сообщение от sudo_user'а: " + str(message.text))
-            bot.send_message(message.chat.id, str(e))
-        return
-    bot.send_message(message.chat.id, 'Кажется я не знаю такой команды')
-
-
 @bot.message_handler(commands=['currency'])
 def currency(message):
+
     today = datetime.now()
     yesterday = today - timedelta(days=7)
 
@@ -98,3 +70,31 @@ def currency(message):
 
     bot.send_message(message.chat.id, '\n'.join(result))
 
+
+@bot.message_handler(func=lambda message: message.text.upper() != 'MOEX')
+def default_handler(message):
+    logger.v("income message: " + str(message))
+    database.save_user(str(message.from_user.id))
+    message_author = message.from_user.id
+    if database.is_admin(message_author) or message_author in global_context.SUDO_USERS:
+        try:
+            splitted_message = list(map(lambda el: str(el).lower(), message.text.split()))
+            command = splitted_message[0]
+
+            if command in Commands.environment.commands:
+                bot.send_message(message.chat.id, str(global_context))
+            elif command in Commands.db.commands:
+                bot.send_message(message.chat.id, str(database.unsafe_exec(' '.join(splitted_message[1:]))))
+            elif command in Commands.set_admin.commands:
+                if len(splitted_message) != 2:
+                    bot.send_message(message.chat.id, 'Комманда принимает на вход один аргумент - id человека, '
+                                                      'назначаемого админом')
+                    return
+                bot.send_message(message.chat.id, str(database.set_admin(splitted_message[1])))
+            else:
+                bot.send_message(message.chat.id, 'Кажется такой команды нет, создатель')
+        except Exception as e:
+            bot.send_message(message.chat.id, "Не удалось понять сообщение от sudo_user'а: " + str(message.text))
+            bot.send_message(message.chat.id, str(e))
+        return
+    bot.send_message(message.chat.id, 'Кажется я не знаю такой команды')
