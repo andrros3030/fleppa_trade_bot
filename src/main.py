@@ -7,7 +7,6 @@ from src.logger import Logger
 from src.data_source import DataSource
 
 
-
 bot = telebot.TeleBot(global_context.BOT_TOKEN)
 logger = Logger(is_poduction=global_context.IS_PRODUCTION)
 database = DataSource(auth_context=global_context.auth_context, logger=logger)
