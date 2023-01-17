@@ -37,17 +37,18 @@ def currency(message):
 
     today = datetime.now()
     yesterday = today - timedelta(days=7)
-
     today, yesterday = today.strftime('%Y-%m-%d'), yesterday.strftime('%Y-%m-%d')
 
     response_usd = requests.get(
-        f'http://iss.moex.com/iss/statistics/engines/futures/markets/indicativerates/securities/usd//rub.json?from={yesterday}&till={today}')
+        f'http://iss.moex.com/iss/statistics/engines/futures/markets/indicativerates/'
+        f'securities/usd//rub.json?from={yesterday}&till={today}')
     data_usd = response_usd.json()['securities']['data']
     usd_today = data_usd[-1][-1]
     usd_change = round((data_usd[-1][-1] - data_usd[-2][-1]) / data_usd[-2][-1] * 100, 2)
 
     response_eur = requests.get(
-        f'http://iss.moex.com/iss/statistics/engines/futures/markets/indicativerates/securities/eur//rub.json?from={yesterday}&till={today}')
+        f'http://iss.moex.com/iss/statistics/engines/futures/markets/indicativerates'
+        f'/securities/eur//rub.json?from={yesterday}&till={today}')
     data_eur = response_eur.json()['securities']['data']
     eur_today = data_eur[-1][-1]
     eur_change = round((data_eur[-1][-1] - data_eur[-2][-1]) / data_eur[-2][-1] * 100, 2)
