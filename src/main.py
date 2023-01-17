@@ -96,5 +96,5 @@ def currency(message):
     else:
         result.append(f'EUR: {eur_today} ({eur_change} % ⚪)')
 
-    bot.send_message(message.chat.id, [i for i in result])
+    bot.send_message(message.chat.id, '\n'.join(result))
 
