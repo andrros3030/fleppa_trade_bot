@@ -52,6 +52,12 @@ def get_diploma(message):
     pass
 
 
+@bot.message_handler(commands=["self_photo"])
+def user_photo(message):
+    photo = bot.get_user_profile_photos(message.from_user.id)
+    bot.send_photo(message.chat.id, photo.photos[0][2].file_id)
+
+
 @bot.message_handler(func=lambda message: True)
 @msg_executor
 def default_handler(message):
