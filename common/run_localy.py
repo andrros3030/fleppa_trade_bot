@@ -9,5 +9,7 @@ def run():
     bot.infinity_polling()
 
 
+
 global_context.set_testing_mode()
 run()
+
