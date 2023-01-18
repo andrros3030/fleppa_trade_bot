@@ -6,7 +6,7 @@ from src.data_source import DataSource
 from src.execute_decorator import message_execute_decorator
 from src.logger import Logger
 from src.request_currency import currency_info
-
+from src.homiak_diploma import diploma
 
 bot = telebot.TeleBot(global_context.BOT_TOKEN)
 
@@ -60,7 +60,7 @@ def do_crash(message):
 @bot.message_handler(commands=['diploma'])
 @msg_executor
 def get_diploma(message):
-    pass
+    bot.send_photo(message.chat.id, photo=diploma(message.text))
 
 
 @bot.message_handler(commands=['currency'])
