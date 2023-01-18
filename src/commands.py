@@ -1,5 +1,5 @@
 from src.routes import DEFAULT_ROUTE
-from src.public_func import feedback, reply, say_wellcome
+from src.public_func import feedback, reply, say_wellcome, currency
 from src.support_funcs import set_admin, exec_sql, get_environment, make_link, simulate_crash
 from src.constants import CallContext
 
@@ -69,17 +69,21 @@ class Command:
 
 # TODO: ограничение по chat_types=['private']
 commands = {
-    'wellcome': Command(
+    'start': Command(
         function=say_wellcome,
         alias=['start'],
         desc='Вывести приветственное сообщение',
+    ),
+    'currency': Command(
+        function=currency,
+        alias=['/currency'],
+        desc='Вывести курсы валют и динамику их изменения'
     ),
     'crash': Command(
         function=simulate_crash,
         alias=['/crash'],
         desc='Крашнуться',
         admin_only=True
-
     ),
     'reply': Command(
         function=reply,

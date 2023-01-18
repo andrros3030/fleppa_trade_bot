@@ -1,4 +1,5 @@
 from src.constants import global_context, CallContext
+from src.request_currency import currency_info
 
 
 # TODO: !!!!!!!!!!!!ОБРАБОТКА ОШИБОК!!!!!!!!
@@ -27,7 +28,6 @@ def feedback(cc: CallContext):
 
 def reply(cc: CallContext):
     if cc.text == '/reply':
-        # TODO: проверка на админа
         if cc.reply_data is None:
             cc.bot.send_message(cc.chat_id, 'Команда доступна при ответе на сообщение')
             return
@@ -78,3 +78,13 @@ def say_wellcome(cc: CallContext):
     start_link = cc.splitted_message[1] if len(cc.splitted_message) > 1 else None
     cc.database.save_user(user_id=str(cc.message_author), involve_link=start_link)
     cc.bot.send_message(cc.chat_id, cc.database.get_start_message(start_link=start_link))
+
+
+def currency(cc: CallContext):
+    currency_tickers = ['USD', 'EUR']
+    info = currency_info(currency_tickers)
+    result = []
+    for i in currency_tickers:
+        result.append(info[i]['full_info'])
+
+    cc.bot.send_message(cc.chat_id, '\n'.join(result))
