@@ -1,3 +1,5 @@
+import telebot
+
 from src.constants import global_context
 from src.commands import commands
 import telebot
@@ -5,6 +7,7 @@ from src.logger import Logger
 from src.data_source import DataSource
 from src.execute_decorator import message_execute_decorator
 from src.routes import DEFAULT_ROUTE
+
 
 bot = telebot.TeleBot(global_context.BOT_TOKEN)
 
@@ -35,6 +38,18 @@ msg_executor = message_execute_decorator(logger=logger, on_error=error_handler)
 def say_help(message):
     bot.send_message(message.chat.id, 'Вряд ли я смогу тебе рассказать о том, что я умею...'
                                       'Ведь создатели ещё не придумали зачем я нужен...')
+
+
+@bot.message_handler(commands=['currency'])
+@msg_executor
+def currency(message):
+    currency_tickers = ['USD', 'EUR']
+    info = currency_info(currency_tickers)
+    result = []
+    for i in currency_tickers:
+        result.append(info[i]['full_info'])
+
+    bot.send_message(message.chat.id, '\n'.join(result))
 
 
 @bot.message_handler(func=lambda message: True, content_types=['audio', 'photo', 'voice', 'video', 'document',
