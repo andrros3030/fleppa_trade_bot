@@ -1,9 +1,12 @@
-from src.constants import global_context
-from src.commands import Commands
 import telebot
-from src.logger import Logger
+
+from src.commands import Commands
+from src.constants import global_context
 from src.data_source import DataSource
 from src.execute_decorator import message_execute_decorator
+from src.logger import Logger
+from src.request_currency import currency_info
+
 
 bot = telebot.TeleBot(global_context.BOT_TOKEN)
 
@@ -52,6 +55,18 @@ def do_crash(message):
     if database.is_admin(message_author) or message_author in global_context.SUDO_USERS:
         bot.send_message(message.chat.id, 'Крашаюсь, проверяй')
         raise Exception('Краш вызван специально')
+
+
+@bot.message_handler(commands=['currency'])
+@msg_executor
+def currency(message):
+    currency_tickers = ['USD', 'EUR']
+    info = currency_info(currency_tickers)
+    result = []
+    for i in currency_tickers:
+        result.append(info[i]['full_info'])
+
+    bot.send_message(message.chat.id, '\n'.join(result))
 
 
 @bot.message_handler(func=lambda message: True)
