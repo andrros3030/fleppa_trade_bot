@@ -18,13 +18,14 @@ def currency_info(currency_ticker):
         currency_change = round((currency_data[-1][-1] - currency_data[-2][-1]) / currency_data[-2][-1] * 100, 2)
 
         if currency_change < 0:
-            currency_resume = f'{currency.upper()}: {currency_today} ({currency_change} % 🔴)'
+            currency_content = f'{currency.upper()}: {currency_today} ({currency_change} % 🔴)'
         elif currency_change > 0:
-            currency_resume = f'{currency.upper()}: {currency_today} ({currency_change} % 🟢)'
+            currency_content = f'{currency.upper()}: {currency_today} ({currency_change} % 🟢)'
         else:
-            currency_resume = f'{currency.upper()}: {currency_today} ({currency_change} % ⚪)'
+            currency_content = f'{currency.upper()}: {currency_today} ({currency_change} % ⚪)'
 
         result.update(
-            {f"{currency.upper()}": {'value': currency_today, 'change': currency_change, 'resume': currency_resume}})
+            {f"{currency.upper()}": {'value': currency_today, 'change': currency_change, 'full_info': currency_content}}
+        )
 
     return result
