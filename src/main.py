@@ -60,12 +60,11 @@ def do_crash(message):
 @bot.message_handler(commands=['currency'])
 @msg_executor
 def currency(message):
-
     currency_tickers = ['USD', 'EUR']
     info = currency_info(currency_tickers)
     result = []
     for i in currency_tickers:
-        result.append(info[i]['resume'])
+        result.append(info[i]['full_info'])
 
     bot.send_message(message.chat.id, '\n'.join(result))
 
