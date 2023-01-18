@@ -1,6 +1,6 @@
 wheel
 pyTelegramBotAPI
-ydb
-yandexcloud
 psycopg2
 Pillow
+
+requests
