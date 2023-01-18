@@ -1,6 +1,7 @@
 import psycopg2
 import uuid
 from src.logger import Logger
+from src.routes import DEFAULT_ROUTE, ParsedRoute
 
 
 class DBAuthContext:
@@ -119,7 +120,7 @@ class DataSource:
             self.logger.e(str(e))
             return False
 
-    def set_route(self, user_id, route='/'):
+    def set_route(self, user_id, route=DEFAULT_ROUTE):
         if type(user_id) is int:
             querry = f"UPDATE t_users SET v_position='{route}' WHERE pk_id = '%s'"
         else:
@@ -133,7 +134,7 @@ class DataSource:
             self.logger.e(str(e))
             return False
 
-    def get_current_route(self, user_id):
+    def __get_current_route(self, user_id) -> str:
         if type(user_id) is int:
             querry = "SELECT v_position from t_users where pk_id = '%s'"
         else:
@@ -141,11 +142,36 @@ class DataSource:
         result = self.__make_querry(querry, params=(user_id,))
         try:
             if len(result) == 0:
-                return False
+                return DEFAULT_ROUTE
             return result[0][0]
         except Exception as e:
             self.logger.e(str(e))
-            return False
+            return DEFAULT_ROUTE
+
+    def get_current_route(self, user_id) -> ParsedRoute:
+        route = self.__get_current_route(user_id)
+        self.logger.v('Got route ' + str(route) + ' for user ' + str(user_id))
+        return ParsedRoute(route)
+
+    def save_feedback_origin(self, user_id, origin_message_id, forwarded_message_id):
+        link_id = str(uuid.uuid4())
+        querry = "INSERT INTO t_feedback (pk_id, fk_user, v_message_id, v_forwarded_id) " \
+                 "values(%s, %s, %s, %s);"
+        return self.__make_querry(querry, params=(link_id, user_id, origin_message_id, forwarded_message_id))
+
+    def get_feedback_origin(self, forwarded_message_id, author_id):
+        if type(author_id) is int:
+            querry = "SELECT v_message_id FROM t_feedback where v_forwarded_id='%s' and fk_user='%s'"
+        else:
+            querry = "SELECT v_message_id FROM t_feedback where v_forwarded_id=%s and fk_user=%s"
+        result = self.__make_querry(querry, params=(forwarded_message_id, author_id))
+        try:
+            if len(result) == 0:
+                return None
+            return result[0][0]
+        except Exception as e:
+            self.logger.e(str(e))
+            return None
 
     def set_admin(self, user_id: str):
         querry = "INSERT INTO T_USERS (pk_id, l_admin) values(%s, true) on conflict (pk_id) do update set l_admin=true"

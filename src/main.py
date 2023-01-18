@@ -29,28 +29,29 @@ database = DataSource(auth_context=global_context.auth_context, logger=logger)
 msg_executor = message_execute_decorator(logger=logger, on_error=error_handler)
 
 
-@bot.message_handler(commands=['feedback'])
+@bot.message_handler(commands=['feedback'], chat_types=['private'])
 @msg_executor
 def start_feedback(message):
-    chat_id = message.chat.id
-    message_author = message.from_user.id
-    if database.is_banned(message_author):
-        bot.send_message(chat_id, 'Отправка фидбэка недоступна')
-        return
-    database.set_route(message_author, route=Commands.feedback.route)
-    bot.send_message(chat_id, 'Пожалуйста, отправьте свой фид-бэк о работе бота. '
-                              'Вы можете добавить фото или видео о работе бота')
+    return Commands.feedback.run(
+        message=message,
+        bot=bot,
+        database=database,
+        current_route='/'
+    )
 
 
-# @bot.message_handler(commands=['reply'])
-# @msg_executor
-# def reply(message):
-#     # bot.send_message(reply_to_message_id=)
-#     # bot.forward_message(to_chat_id, from_chat_id, message_id)
-#     pass
+@bot.message_handler(commands=['reply'])
+@msg_executor
+def start_reply(message):
+    return Commands.reply.run(
+        message=message,
+        bot=bot,
+        database=database,
+        current_route='/'
+    )
 
 
-@bot.message_handler(commands=['start'])
+@bot.message_handler(commands=['start'], chat_types=['private'])
 @msg_executor
 def say_welcome(message):
     message_content = list(message.text.split())
@@ -75,42 +76,48 @@ def do_crash(message):
         raise Exception('Краш вызван специально')
 
 
-@bot.message_handler(func=lambda message: True)
+@bot.message_handler(func=lambda message: True, content_types=['audio', 'photo', 'voice', 'video', 'document',
+                                                               'text', 'location', 'contact', 'sticker'])
 @msg_executor
-def default_handler(message):
+def absolutely_all_handler(message):
     chat_id = message.chat.id
     message_author = message.from_user.id
-    if database.get_current_route(message_author) == Commands.feedback.route:
-        for feedback_chat in global_context.FEEDBACK_CHAT_ID:
-            bot.forward_message(feedback_chat, chat_id, message.message_id)
-        bot.send_message(chat_id, 'Фид-бэк отправлен админам, спасибо')
-        database.set_route(message_author)
-        return
+    current_route = database.get_current_route(message_author)
+    if current_route.route == Commands.feedback.route:
+        return Commands.feedback.run(
+            message=message,
+            bot=bot,
+            database=database,
+            current_route=current_route
+        )
+    if current_route.route == Commands.reply.route:
+        return Commands.reply.run(
+            message=message,
+            bot=bot,
+            database=database,
+            current_route=current_route
+        )
     if database.is_admin(message_author) or message_author in global_context.SUDO_USERS:
         try:
             splitted_message = list(map(lambda el: str(el).lower(), message.text.split()))
             command = splitted_message[0]
 
             if command in Commands.environment.commands:
-                bot.send_message(chat_id, str(global_context))
+                Commands.environment.run(
+                    message, bot, database, current_route
+                )
             elif command in Commands.db.commands:
-                bot.send_message(chat_id, str(database.unsafe_exec(' '.join(splitted_message[1:]))))
+                Commands.db.run(
+                    message, bot, database, current_route
+                )
             elif command in Commands.set_admin.commands:
-                if len(splitted_message) != 2:
-                    bot.send_message(chat_id, 'Комманда принимает на вход один аргумент - id человека, '
-                                              'назначаемого админом')
-                    return
-                bot.send_message(chat_id, str(database.set_admin(splitted_message[1])))
+                Commands.set_admin.run(
+                    message, bot, database, current_route
+                )
             elif command in Commands.generate_link.commands:
-                if len(splitted_message) < 2:
-                    bot.send_message(chat_id, 'Введите описание создаваемой ссылки и, '
-                                              'если необходимо, стартовое сообщение через ;')
-                    return
-                content = ' '.join(splitted_message[1:])
-                desc = content.split(';')[0]
-                sm = content.split(';')[1] if len(content.split(';')) > 1 else None
-                link = database.generate_link(description=desc, startup_message=sm)
-                bot.send_message(chat_id, 't.me/' + bot.get_me().username + '?start=' + link)
+                Commands.generate_link.run(
+                    message, bot, database, current_route
+                )
             else:
                 bot.send_message(chat_id, 'Кажется такой команды нет, создатель')
         except Exception as e:
@@ -118,17 +125,3 @@ def default_handler(message):
             bot.send_message(chat_id, str(e))
         return
     bot.send_message(chat_id, 'Кажется я не знаю такой команды')
-
-
-@bot.message_handler(func=lambda message: True, content_types=['audio', 'photo', 'voice', 'video', 'document',
-                                                               'text', 'location', 'contact', 'sticker'])
-@msg_executor
-def absolutely_all_handler(message):
-    chat_id = message.chat.id
-    message_author = message.from_user.id
-    if database.get_current_route(message_author) == Commands.feedback.route:
-        for feedback_chat in global_context.FEEDBACK_CHAT_ID:
-            bot.forward_message(feedback_chat, chat_id, message.message_id)
-        bot.send_message(chat_id, 'Фид-бэк отправлен админам, спасибо')
-        database.set_route(message_author)
-        return

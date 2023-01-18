@@ -75,3 +75,12 @@ create table t_users(
     ts_reg      timestamp not null default current_timestamp,
     fk_involve  varchar(40) null references t_involve(pk_id) on delete set null
 );
+create table t_feedback(
+    pk_id           varchar(40) primary key not null,
+    fk_user         varchar(40) not null references t_users(pk_id) on delete cascade,
+    v_message_id    varchar(40) not null,
+    v_forwarded_id  varchar(40) not null,
+    l_answered      bool not null default false,
+    ts_requested    timestamp not null default current_timestamp,
+    ts_answered     timestamp null
+);

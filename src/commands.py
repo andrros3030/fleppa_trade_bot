@@ -1,14 +1,28 @@
-class Command:
-    _route: str
-    _alias: list
-    _desc: str
-    _admin_only: bool
+from src.routes import DEFAULT_ROUTE
+from src.feedback import feedback, reply
+from src.support_funcs import set_admin, exec_sql, get_environment, make_link
+from src.constants import CallContext
 
-    def __init__(self, alias: list, desc: str, route='/', admin_only=False):
+
+class Command:
+    _route: str  # если функция не выполняется за одно сообщение - у нее должен быть путь, иначе она работает в корне
+    _alias: list  # набор псевдонимов для вызываемой команды
+    _desc: str  # описание команды, которое можно отобразить пользователю
+    _admin_only: bool  # доступна ли команда только админам
+    _accept_text: bool
+    _accept_photo: bool
+    _accept_sticker: bool
+
+    def __init__(self, alias: list, desc: str, route=DEFAULT_ROUTE, admin_only=False, function=None,
+                 accept_text=True, accept_photo=False, accept_sticker=False):
+        self._function = function
         self._alias = alias
         self._desc = desc
         self._admin_only = admin_only
         self._route = route
+        self._accept_text = accept_text
+        self._accept_photo = accept_photo
+        self._accept_sticker = accept_sticker
 
     @property
     def commands(self):
@@ -22,9 +36,48 @@ class Command:
     def route(self):
         return self._route
 
+    @property
+    def content_types(self):
+        res = []
+        if self._accept_sticker:
+            res.append('sticker')
+        if self._accept_text:
+            res.append('text')
+        if self._accept_photo:
+            res.append('photo')
+        return res
+
+    def run(self, message, bot, database, current_route):
+        return self._function(
+            cc=CallContext(
+                chat_id=message.chat.id,
+                message_author=message.from_user.id,
+                bot=bot,
+                database=database,
+                message_id=message.message_id,
+                text=message.text,
+                reply_data=message.reply_to_message,
+                content_type=message.content_type,
+                current_route=current_route,
+                sticker=message.sticker,
+                photo=message.photo,
+                caption=message.caption,
+                base_route=self._route
+            )
+        )
+
 
 class Commands:
+    reply = Command(
+        function=reply,
+        alias=['/reply'],
+        desc='Ответить на фидбэк',
+        admin_only=True,
+        route='/reply'
+    )
+
     feedback = Command(
+        function=feedback,
         alias=['/feedback'],
         desc='Оставить отзыв о работе бота или предложить функциональность',
         admin_only=False,
@@ -32,24 +85,28 @@ class Commands:
     )
 
     environment = Command(
+        function=get_environment,
         alias=['env', 'prod', 'environment', 'среда'],
         desc='Вывести тип окружения',
         admin_only=True,
     )
 
     db = Command(
+        function=exec_sql,
         alias=['sql', 'db'],
         desc='Взаимодействие с базой данных',
         admin_only=True,
     )
 
     set_admin = Command(
+        function=set_admin,
         alias=['set_admin', 'make_admin', 'do_admin'],
         desc='Сделать пользователя админом',
         admin_only=True,
     )
 
     generate_link = Command(
+        function=make_link,
         alias=['make_link', 'getlink', 'ссылка', 'start_link'],
         desc='Создать ссылку на бота',
         admin_only=True
