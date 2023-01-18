@@ -5,6 +5,7 @@ from src.logger import Logger
 from src.data_source import DataSource
 from src.execute_decorator import message_execute_decorator
 from src.drawer import get_plot
+from src.drawer import currency_data
 
 bot = telebot.TeleBot(global_context.BOT_TOKEN)
 
@@ -50,7 +51,11 @@ def do_crash(message):
 @bot.message_handler(commands=['random_graph'])
 @msg_executor
 def random_graph(message):
-    bot.send_photo(message.chat.id, photo=get_plot([1, 2, 3], [1, 2, 3]), caption='ну держи')
+    currency_tickers = ['USD', 'EUR']
+
+    for i in currency_tickers:
+        curr = currency_data(i)
+        bot.send_photo(message.chat.id, photo=get_plot(curr[0], curr[1], i), caption='ну держи')
 
 
 @bot.message_handler(func=lambda message: True)
