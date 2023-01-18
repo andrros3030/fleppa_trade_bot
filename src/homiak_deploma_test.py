@@ -1,7 +1,20 @@
-from PIL import Image
+from PIL import Image, ImageDraw, ImageFont
 from urllib.request import urlopen
 
-url = "http://risovach.ru/upload/2014/02/mem/muzhik-bleat_43233947_orig_.jpg"
+name = "Алексей"
+surname = "Проверка"
+xcv = " "
+aboba = name + xcv + surname
 
-image = Image.open(urlopen(url))
-image.show()
+def diploma(aboba):
+
+    url = "https://storage.yandexcloud.net/telegram-trade-bot/homyak_diploma.jpg"
+    image = Image.open(urlopen(url))
+    
+    font = ImageFont.truetype("arial.ttf", 75)
+    drawer = ImageDraw.Draw(image)
+    drawer.text((500, 1070), aboba, font=font, fill='black')
+
+    image.show()
+
+    return
