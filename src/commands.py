@@ -1,6 +1,6 @@
 from src.routes import DEFAULT_ROUTE
-from src.feedback import feedback, reply
-from src.support_funcs import set_admin, exec_sql, get_environment, make_link
+from src.public_func import feedback, reply, say_wellcome
+from src.support_funcs import set_admin, exec_sql, get_environment, make_link, simulate_crash
 from src.constants import CallContext
 
 
@@ -67,47 +67,57 @@ class Command:
         )
 
 
-class Commands:
-    reply = Command(
+# TODO: ограничение по chat_types=['private']
+commands = {
+    'wellcome': Command(
+        function=say_wellcome,
+        alias=['start'],
+        desc='Вывести приветственное сообщение',
+        admin_only=False
+    ),
+    'crash': Command(
+        function=simulate_crash,
+        alias=['/crash'],
+        desc='Крашнуться',
+        admin_only=True
+
+    ),
+    'reply': Command(
         function=reply,
         alias=['/reply'],
         desc='Ответить на фидбэк',
         admin_only=True,
         route='/reply'
-    )
-
-    feedback = Command(
+    ),
+    'feedback': Command(
         function=feedback,
         alias=['/feedback'],
         desc='Оставить отзыв о работе бота или предложить функциональность',
         admin_only=False,
         route='/feedback'
-    )
-
-    environment = Command(
+    ),
+    'environment': Command(
         function=get_environment,
         alias=['env', 'prod', 'environment', 'среда'],
         desc='Вывести тип окружения',
         admin_only=True,
-    )
-
-    db = Command(
+    ),
+    'db': Command(
         function=exec_sql,
         alias=['sql', 'db'],
         desc='Взаимодействие с базой данных',
         admin_only=True,
-    )
-
-    set_admin = Command(
+    ),
+    'set_admin': Command(
         function=set_admin,
         alias=['set_admin', 'make_admin', 'do_admin'],
         desc='Сделать пользователя админом',
         admin_only=True,
-    )
-
-    generate_link = Command(
+    ),
+    'generate_link': Command(
         function=make_link,
         alias=['make_link', 'getlink', 'ссылка', 'start_link'],
         desc='Создать ссылку на бота',
         admin_only=True
     )
+}

@@ -72,3 +72,9 @@ def reply(cc: CallContext):
             return
         cc.bot.send_message(cc.chat_id, 'Ответ отправлен')
         cc.database.set_route(cc.message_author)
+
+
+def say_wellcome(cc: CallContext):
+    start_link = cc.splitted_message[1] if len(cc.splitted_message) > 1 else None
+    cc.database.save_user(user_id=str(cc.message_author), involve_link=start_link)
+    cc.bot.send_message(cc.chat_id, cc.database.get_start_message(start_link=start_link))

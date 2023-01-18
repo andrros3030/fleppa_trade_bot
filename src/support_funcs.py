@@ -26,3 +26,8 @@ def make_link(cc: CallContext):
     sm = content.split(';')[1] if len(content.split(';')) > 1 else None
     link = cc.database.generate_link(description=desc, startup_message=sm)
     cc.bot.send_message(cc.chat_id, 't.me/' + cc.bot.get_me().username + '?start=' + link)
+
+
+def simulate_crash(cc: CallContext):
+    cc.bot.send_message(cc.chat_id, 'Крашаюсь, проверяй')
+    raise Exception('Краш вызван специально')
