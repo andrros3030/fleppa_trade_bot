@@ -1,11 +1,12 @@
-from src.constants import global_context
-from src.commands import Commands
 import telebot
-from datetime import datetime, timedelta
-import requests
-from src.logger import Logger
+
+from src.commands import Commands
+from src.constants import global_context
 from src.data_source import DataSource
 from src.execute_decorator import message_execute_decorator
+from src.logger import Logger
+from src.request_currency import currency_info
+
 
 bot = telebot.TeleBot(global_context.BOT_TOKEN)
 
@@ -60,39 +61,11 @@ def do_crash(message):
 @msg_executor
 def currency(message):
 
-    today = datetime.now()
-    yesterday = today - timedelta(days=7)
-    today, yesterday = today.strftime('%Y-%m-%d'), yesterday.strftime('%Y-%m-%d')
-
-    response_usd = requests.get(
-        f'http://iss.moex.com/iss/statistics/engines/futures/markets/indicativerates/'
-        f'securities/usd//rub.json?from={yesterday}&till={today}')
-    data_usd = response_usd.json()['securities']['data']
-    usd_today = data_usd[-1][-1]
-    usd_change = round((data_usd[-1][-1] - data_usd[-2][-1]) / data_usd[-2][-1] * 100, 2)
-
-    response_eur = requests.get(
-        f'http://iss.moex.com/iss/statistics/engines/futures/markets/indicativerates'
-        f'/securities/eur//rub.json?from={yesterday}&till={today}')
-    data_eur = response_eur.json()['securities']['data']
-    eur_today = data_eur[-1][-1]
-    eur_change = round((data_eur[-1][-1] - data_eur[-2][-1]) / data_eur[-2][-1] * 100, 2)
-
+    currency_tickers = ['USD', 'EUR']
+    info = currency_info(currency_tickers)
     result = []
-
-    if usd_change < 0:
-        result.append(f'USD: {usd_today} (-{usd_change} % 🔴)')
-    elif usd_change > 0:
-        result.append(f'USD: {usd_today} (+{usd_change} % 🟢)')
-    else:
-        result.append(f'USD: {usd_today} ({usd_change} % ⚪)')
-
-    if eur_change < 0:
-        result.append(f'EUR: {eur_today} (-{eur_change} % 🔴)')
-    elif eur_change > 0:
-        result.append(f'EUR: {eur_today} (+{eur_change} % 🟢)')
-    else:
-        result.append(f'EUR: {eur_today} ({eur_change} % ⚪)')
+    for i in currency_tickers:
+        result.append(info[i]['resume'])
 
     bot.send_message(message.chat.id, '\n'.join(result))
 
