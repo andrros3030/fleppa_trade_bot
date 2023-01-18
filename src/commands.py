@@ -73,7 +73,6 @@ commands = {
         function=say_wellcome,
         alias=['start'],
         desc='Вывести приветственное сообщение',
-        admin_only=False
     ),
     'crash': Command(
         function=simulate_crash,
@@ -93,7 +92,6 @@ commands = {
         function=feedback,
         alias=['/feedback'],
         desc='Оставить отзыв о работе бота или предложить функциональность',
-        admin_only=False,
         route='/feedback'
     ),
     'environment': Command(

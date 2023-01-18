@@ -22,4 +22,4 @@ class ParsedRoute:
         res = f'{self.route}'
         if self.args is None:
             return res
-        return res + '?' + '&&'.join(map(lambda x,y: f'{x}={y}', self.args.items()))
+        return res + '?' + '&&'.join(map(lambda x, y: f'{x}={y}', self.args.items()))
