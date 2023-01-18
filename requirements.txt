@@ -3,3 +3,4 @@ pyTelegramBotAPI
 ydb
 yandexcloud
 psycopg2
+PIL
