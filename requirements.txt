@@ -2,5 +2,4 @@ wheel
 pyTelegramBotAPI
 psycopg2
 Pillow
-
 requests
