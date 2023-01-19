@@ -47,7 +47,13 @@ class Command:
             res.append('photo')
         return res
 
-    def run(self, message, bot, database, current_route):
+    @property
+    def description(self):
+        if self.public:
+            return self._desc
+        return f'[ADMIN] {self._desc}'
+
+    def run(self, message, bot, database, current_route, is_admin):
         return self._function(
             cc=CallContext(
                 chat_id=message.chat.id,
@@ -62,64 +68,79 @@ class Command:
                 sticker=message.sticker,
                 photo=message.photo,
                 caption=message.caption,
-                base_route=self._route
+                base_route=self._route,
+                is_admin=is_admin
             )
         )
 
 
+def generate_help(cc: CallContext):
+    all_commands = []
+    for key, value in commands.items():
+        if cc.is_admin or value.public:
+            all_commands.append(f'/{value.commands[0]} — {value.description}')
+    res = '\n'.join(all_commands)
+    return cc.bot.send_message(cc.chat_id, res)
+
+
 # TODO: ограничение по chat_types=['private']
 commands = {
+    'help': Command(
+        function=generate_help,
+        alias=['help'],
+        desc='Что умеет этот бот'
+    ),
     'start': Command(
         function=say_wellcome,
         alias=['start'],
-        desc='Вывести приветственное сообщение',
+        desc='вывести приветственное сообщение',
     ),
     'currency': Command(
         function=currency,
-        alias=['/currency'],
-        desc='Вывести курсы валют и динамику их изменения'
+        alias=['currency'],
+        desc='вывести курсы валют и динамику их изменения'
     ),
     'crash': Command(
         function=simulate_crash,
-        alias=['/crash'],
-        desc='Крашнуться',
+        alias=['crash'],
+        desc='крашнуться',
         admin_only=True
     ),
     'reply': Command(
         function=reply,
-        alias=['/reply'],
-        desc='Ответить на фидбэк',
+        alias=['reply'],
+        desc='ответить на фидбэк',
         admin_only=True,
-        route='/reply'
+        route='reply'
     ),
     'feedback': Command(
         function=feedback,
-        alias=['/feedback'],
-        desc='Оставить отзыв о работе бота или предложить функциональность',
+        alias=['feedback'],
+        desc='оставить отзыв о работе бота или предложить функциональность',
         route='/feedback'
     ),
     'environment': Command(
         function=get_environment,
         alias=['env', 'prod', 'environment', 'среда'],
-        desc='Вывести тип окружения',
+        desc='вывести тип окружения',
         admin_only=True,
     ),
     'db': Command(
         function=exec_sql,
         alias=['sql', 'db'],
-        desc='Взаимодействие с базой данных',
+        desc='взаимодействие с базой данных',
         admin_only=True,
     ),
     'set_admin': Command(
         function=set_admin,
         alias=['set_admin', 'make_admin', 'do_admin'],
-        desc='Сделать пользователя админом',
+        desc='сделать пользователя админом',
         admin_only=True,
     ),
     'generate_link': Command(
         function=make_link,
         alias=['make_link', 'getlink', 'ссылка', 'start_link'],
-        desc='Создать ссылку на бота',
+        desc='создать ссылку на бота',
         admin_only=True
     )
 }

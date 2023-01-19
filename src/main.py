@@ -32,13 +32,6 @@ database = DataSource(auth_context=global_context.auth_context, logger=logger)
 msg_executor = message_execute_decorator(logger=logger, on_error=error_handler)
 
 
-@bot.message_handler(commands=['help'])
-@msg_executor
-def say_help(message):
-    bot.send_message(message.chat.id, 'Вряд ли я смогу тебе рассказать о том, что я умею...'
-                                      'Ведь создатели ещё не придумали зачем я нужен...')
-
-
 @bot.message_handler(func=lambda message: True, content_types=['audio', 'photo', 'voice', 'video', 'document',
                                                                'text', 'location', 'contact', 'sticker'])
 @msg_executor
@@ -48,6 +41,8 @@ def absolutely_all_handler(message):
     current_route = database.get_current_route(message_author)
     is_admin = database.is_admin(message_author) or message_author in global_context.SUDO_USERS
     first_word = message.text.split()[0].lower()
+    if first_word[0] == '/':
+        first_word = first_word[1:]
     for key, command in commands.items():
         if command.public or is_admin:
             if first_word in command.commands or \
@@ -56,6 +51,7 @@ def absolutely_all_handler(message):
                     message=message,
                     bot=bot,
                     database=database,
-                    current_route=current_route
+                    current_route=current_route,
+                    is_admin=is_admin
                 )
     bot.send_message(chat_id, 'Кажется я не знаю такой команды. Попробуй /help')

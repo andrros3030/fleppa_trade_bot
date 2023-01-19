@@ -55,7 +55,7 @@ def reply(cc: CallContext):
             author_id=reply_chat_id
         )
         if reply_id is None:
-            cc.bot.send_message(cc.chat_id, f'Не удалось найти initial message id в базе данных')
+            cc.bot.send_message(cc.chat_id, 'Не удалось найти initial message id в базе данных')
             return
         if cc.content_type == 'text':
             cc.bot.send_message(reply_chat_id, reply_to_message_id=reply_id, text=cc.text)
