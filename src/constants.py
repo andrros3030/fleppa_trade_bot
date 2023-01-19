@@ -19,6 +19,9 @@ class Context:
         self.SUDO_USERS = [
             439133935,  # Андрей
         ]
+        self.FEEDBACK_CHAT_ID = [
+            -898292404,  # Фидбэчница
+        ]
         self.context = None
 
     def set_testing_mode(self):
@@ -53,6 +56,29 @@ class Context:
         return f"PROD: {self.IS_PRODUCTION}\n" \
                f"CNXT: {self.context}\n" \
                f"DB_TOKEN: {mask_token(token)}"
+
+
+class CallContext:
+    def __init__(self, chat_id, message_author, bot, database, message_id, text, is_admin,
+                 reply_data, content_type, current_route, sticker, photo, caption, base_route):
+        self.chat_id = chat_id
+        self.message_author = message_author
+        self.bot = bot
+        self.database = database
+        self.message_id = message_id
+        self.text = text
+        self.reply_data = reply_data
+        self.content_type = content_type
+        self.current_route = current_route
+        self.sticker = sticker
+        self.photo = photo
+        self.caption = caption
+        self.base_route = base_route
+        self.splitted_message = list(map(lambda el: str(el).lower(), text.split())),
+        self.is_admin = is_admin
+
+    def __str__(self):
+        return str(self.__dict__)
 
 
 global_context = Context()

@@ -1,6 +1,7 @@
 import psycopg2
 import uuid
 from src.logger import Logger
+from src.routes import DEFAULT_ROUTE, ParsedRoute
 
 
 class DBAuthContext:
@@ -63,7 +64,7 @@ class DataSource:
             q.execute(querry, params)
             self.logger.v('Querry OK, commiting')
             self.conn.commit()
-            if q.statusmessage.split()[0] == 'INSERT':
+            if q.statusmessage.split()[0] in ['INSERT', 'UPDATE', 'DELETE']:
                 return q.statusmessage
             return q.fetchall()
         except Exception as e:
@@ -105,6 +106,96 @@ class DataSource:
             self.logger.e(str(e))
             return False
 
+    def is_banned(self, user_id):
+        if type(user_id) is int:
+            querry = "SELECT l_banned from t_users where pk_id = '%s'"
+        else:
+            querry = "SELECT l_banned from t_users where pk_id = %s"
+        result = self.__make_querry(querry, params=(user_id,))
+        try:
+            if len(result) == 0:
+                return False
+            return result[0][0]
+        except Exception as e:
+            self.logger.e(str(e))
+            return False
+
+    def set_route(self, user_id, route=DEFAULT_ROUTE):
+        if type(user_id) is int:
+            querry = f"UPDATE t_users SET v_position='{route}' WHERE pk_id = '%s'"
+        else:
+            querry = f"UPDATE t_users SET v_position='{route}' WHERE pk_id = %s"
+        result = self.__make_querry(querry, params=(user_id,))
+        try:
+            if len(result) == 0:
+                return False
+            return result[0][0]
+        except Exception as e:
+            self.logger.e(str(e))
+            return False
+
+    def __get_current_route(self, user_id) -> str:
+        if type(user_id) is int:
+            querry = "SELECT v_position from t_users where pk_id = '%s'"
+        else:
+            querry = "SELECT v_position from t_users where pk_id = %s"
+        result = self.__make_querry(querry, params=(user_id,))
+        try:
+            if len(result) == 0:
+                return DEFAULT_ROUTE
+            return result[0][0]
+        except Exception as e:
+            self.logger.e(str(e))
+            return DEFAULT_ROUTE
+
+    def get_current_route(self, user_id) -> ParsedRoute:
+        route = self.__get_current_route(user_id)
+        self.logger.v('Got route ' + str(route) + ' for user ' + str(user_id))
+        return ParsedRoute(route)
+
+    def save_feedback_origin(self, user_id, origin_message_id, forwarded_message_id):
+        link_id = str(uuid.uuid4())
+        querry = "INSERT INTO t_feedback (pk_id, fk_user, v_message_id, v_forwarded_id) " \
+                 "values(%s, %s, %s, %s);"
+        return self.__make_querry(querry, params=(link_id, user_id, origin_message_id, forwarded_message_id))
+
+    def resolve_feedback(self, user_id, origin_message_id, forwarded_message_id):
+        user_id = str(user_id)
+        origin_message_id = str(origin_message_id)
+        forwarded_message_id = str(forwarded_message_id)
+        querry = "UPDATE t_feedback SET l_answered=true, ts_answered=current_timestamp " \
+                 "where fk_user=%s and v_message_id=%s and v_forwarded_id=%s"
+        return self.__make_querry(querry, params=(user_id, origin_message_id, forwarded_message_id))
+
+    def get_resolve_time(self, author_id, forwarded_message_id):
+        author_id = str(author_id)
+        forwarded_message_id = str(forwarded_message_id)
+        querry = "SELECT ts_answered, ts_requested FROM t_feedback where v_forwarded_id=%s and fk_user=%s"
+        result = self.__make_querry(querry, params=(forwarded_message_id, author_id))
+        print(result)
+        try:
+            if len(result) == 0:
+                return None
+            diff = result[0][0] - result[0][1]
+            return diff.total_seconds()
+        except Exception as e:
+            self.logger.e(str(e))
+            return None
+
+    def get_feedback_origin(self, forwarded_message_id, author_id):
+        if type(author_id) is int:
+            querry = "SELECT v_message_id FROM t_feedback where v_forwarded_id='%s' and fk_user='%s'"
+        else:
+            querry = "SELECT v_message_id FROM t_feedback where v_forwarded_id=%s and fk_user=%s"
+        result = self.__make_querry(querry, params=(forwarded_message_id, author_id))
+        try:
+            if len(result) == 0:
+                return None
+            return result[0][0]
+        except Exception as e:
+            self.logger.e(str(e))
+            return None
+
     def set_admin(self, user_id: str):
         querry = "INSERT INTO T_USERS (pk_id, l_admin) values(%s, true) on conflict (pk_id) do update set l_admin=true"
         return self.__make_querry(querry, params=(user_id,))
@@ -122,8 +213,8 @@ class DataSource:
 
     def get_start_message(self, start_link: str = None) -> str:
         msg = 'Здарова, скоро тут будет супер трейд стратегия от Шлеппы, ' \
-               'а пока - держи мой пульс ' \
-               'https://www.tinkoff.ru/invest/social/profile/fleppa_war_crimes_fa?utm_source=share'
+              'а пока - держи мой пульс ' \
+              'https://www.tinkoff.ru/invest/social/profile/fleppa_war_crimes_fa?utm_source=share'
         self.logger.v('Trying to get start message for link: ' + str(start_link))
         if start_link is not None:
             try:
