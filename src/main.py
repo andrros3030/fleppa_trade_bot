@@ -43,11 +43,11 @@ def absolutely_all_handler(message):
     first_word = message.text.split()[0].lower()
     if first_word[0] == '/':
         first_word = first_word[1:]
-    for key, command in commands.items():
-        if command.public or is_admin:
-            if first_word in command.commands or \
-                    (current_route.route == command.route and command.route != DEFAULT_ROUTE):
-                return command.run(
+    for cmd in commands:
+        if cmd.public or is_admin:
+            if first_word in cmd.commands or \
+                    (current_route.route == cmd.route and cmd.route != DEFAULT_ROUTE):
+                return cmd.run(
                     message=message,
                     bot=bot,
                     database=database,

@@ -76,71 +76,74 @@ class Command:
 
 def generate_help(cc: CallContext):
     all_commands = []
-    for key, value in commands.items():
-        if cc.is_admin or value.public:
-            all_commands.append(f'/{value.commands[0]} — {value.description}')
+    for cmd in commands:
+        if cc.is_admin or cmd.public:
+            all_commands.append(f'/{cmd.commands[0]} — {cmd.description}')
     res = '\n'.join(all_commands)
     return cc.bot.send_message(cc.chat_id, res)
 
 
 # TODO: ограничение по chat_types=['private']
-commands = {
-    'help': Command(
+# TODO: кажется у пользователя не должно быть возможности запускать корневые функции,
+# когда он находится в контексте другой функции [/feedback, /reply и др]
+# в таком случае route будет вторым тригером для запуска функции, но не ясно, как показать, какие есть подкоманды
+commands = [
+    Command(
         function=generate_help,
         alias=['help'],
-        desc='Что умеет этот бот'
+        desc='что умеет этот бот'
     ),
-    'start': Command(
+    Command(
         function=say_wellcome,
         alias=['start'],
         desc='вывести приветственное сообщение',
     ),
-    'currency': Command(
+    Command(
         function=currency,
         alias=['currency'],
         desc='вывести курсы валют и динамику их изменения'
     ),
-    'crash': Command(
-        function=simulate_crash,
-        alias=['crash'],
-        desc='крашнуться',
-        admin_only=True
-    ),
-    'reply': Command(
-        function=reply,
-        alias=['reply'],
-        desc='ответить на фидбэк',
-        admin_only=True,
-        route='reply'
-    ),
-    'feedback': Command(
+    Command(
         function=feedback,
         alias=['feedback'],
         desc='оставить отзыв о работе бота или предложить функциональность',
         route='/feedback'
     ),
-    'environment': Command(
+    Command(
+        function=simulate_crash,
+        alias=['crash'],
+        desc='крашнуться',
+        admin_only=True
+    ),
+    Command(
+        function=reply,
+        alias=['reply'],
+        desc='ответить на фидбэк',
+        admin_only=True,
+        route='/reply'
+    ),
+    Command(
         function=get_environment,
         alias=['env', 'prod', 'environment', 'среда'],
         desc='вывести тип окружения',
         admin_only=True,
     ),
-    'db': Command(
+    Command(
         function=exec_sql,
         alias=['sql', 'db'],
         desc='взаимодействие с базой данных',
         admin_only=True,
     ),
-    'set_admin': Command(
+    Command(
         function=set_admin,
         alias=['set_admin', 'make_admin', 'do_admin'],
         desc='сделать пользователя админом',
         admin_only=True,
     ),
-    'generate_link': Command(
+    Command(
         function=make_link,
         alias=['make_link', 'getlink', 'ссылка', 'start_link'],
         desc='создать ссылку на бота',
         admin_only=True
     )
-}
+]
