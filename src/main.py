@@ -4,8 +4,7 @@ import telebot
 from src.logger import Logger
 from src.data_source import DataSource
 from src.execute_decorator import message_execute_decorator
-from src.drawer import get_plot
-from src.drawer import currency_data
+from src.drawer import currency_plot, currency_data
 
 bot = telebot.TeleBot(global_context.BOT_TOKEN)
 
@@ -48,13 +47,13 @@ def do_crash(message):
         raise Exception('Краш вызван специально')
 
 
-@bot.message_handler(commands=['random_graph'])
+@bot.message_handler(commands=['currency_graph'])
 @msg_executor
-def random_graph(message):
+def currency_graph(message):
     currency_tickers = ['USD', 'EUR']
     for i in currency_tickers:
         curr = currency_data(i)
-        bot.send_photo(message.chat.id, photo=get_plot(curr[0], curr[1], i, True), caption=f'ну держи {i}/RUB')
+        bot.send_photo(message.chat.id, photo=currency_plot(curr[0], curr[1], i), caption=f'Вот тебе график {i}/RUB')
 
 
 @bot.message_handler(func=lambda message: True)

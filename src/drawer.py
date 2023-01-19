@@ -1,6 +1,5 @@
 import io
 import matplotlib.pyplot as plt
-from matplotlib.pyplot import MultipleLocator
 import datetime as dt
 import requests
 
@@ -16,11 +15,11 @@ def currency_data(currency):
     return date_value, currency_value
 
 
-def get_plot(date_value, currency_value, currency, night_theme=False):
+def currency_plot(date_value, currency_value, currency, night_theme=False):
     photo = io.BytesIO()
     fig = plt.figure()
     axes = fig.add_axes([0, 0, 1, 1])
-    x_major_locator = MultipleLocator(10)  # Установите интервал масштабирования оси x на 2 и сохраните его в переменной
+    x_major_locator = plt.MultipleLocator(10)
     ax = fig.gca()
     ax.xaxis.set_major_locator(x_major_locator)
     if night_theme:
@@ -40,4 +39,3 @@ def get_plot(date_value, currency_value, currency, night_theme=False):
     fig.savefig(photo, format='jpg', bbox_inches='tight')
     photo.seek(0)
     return photo
-
