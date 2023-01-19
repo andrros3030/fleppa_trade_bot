@@ -28,7 +28,7 @@ def currency_plot(date_value, currency_value, currency, night_theme=False):
         fig.patch.set_facecolor('#35353d')
         axes.set_xlabel('Дата', color='#e4e4eb')
         axes.set_ylabel(f'{currency}/RUB', color='#e4e4eb')
-        axes.tick_params(colors='#e4e4eb')  # Задаем цвет значений по верт/гориз.
+        axes.tick_params(colors='#e4e4eb')
     else:
         ax.set_facecolor('white')
         axes.plot(date_value, currency_value, label=f'{currency}/RUB', color='black', lw=2)
