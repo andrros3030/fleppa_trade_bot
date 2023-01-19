@@ -159,6 +159,29 @@ class DataSource:
                  "values(%s, %s, %s, %s);"
         return self.__make_querry(querry, params=(link_id, user_id, origin_message_id, forwarded_message_id))
 
+    def resolve_feedback(self, user_id, origin_message_id, forwarded_message_id):
+        user_id = str(user_id)
+        origin_message_id = str(origin_message_id)
+        forwarded_message_id = str(forwarded_message_id)
+        querry = "UPDATE t_feedback SET l_answered=true, ts_answered=current_timestamp " \
+                 "where fk_user=%s and v_message_id=%s and v_forwarded_id=%s"
+        return self.__make_querry(querry, params=(user_id, origin_message_id, forwarded_message_id))
+
+    def get_resolve_time(self, author_id, forwarded_message_id):
+        author_id = str(author_id)
+        forwarded_message_id = str(forwarded_message_id)
+        querry = "SELECT ts_answered, ts_requested FROM t_feedback where v_forwarded_id=%s and fk_user=%s"
+        result = self.__make_querry(querry, params=(forwarded_message_id, author_id))
+        print(result)
+        try:
+            if len(result) == 0:
+                return None
+            diff = result[0][0] - result[0][1]
+            return diff.total_seconds()
+        except Exception as e:
+            self.logger.e(str(e))
+            return None
+
     def get_feedback_origin(self, forwarded_message_id, author_id):
         if type(author_id) is int:
             querry = "SELECT v_message_id FROM t_feedback where v_forwarded_id='%s' and fk_user='%s'"
@@ -190,8 +213,8 @@ class DataSource:
 
     def get_start_message(self, start_link: str = None) -> str:
         msg = 'Здарова, скоро тут будет супер трейд стратегия от Шлеппы, ' \
-               'а пока - держи мой пульс ' \
-               'https://www.tinkoff.ru/invest/social/profile/fleppa_war_crimes_fa?utm_source=share'
+              'а пока - держи мой пульс ' \
+              'https://www.tinkoff.ru/invest/social/profile/fleppa_war_crimes_fa?utm_source=share'
         self.logger.v('Trying to get start message for link: ' + str(start_link))
         if start_link is not None:
             try:

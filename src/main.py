@@ -9,7 +9,6 @@ from src.routes import DEFAULT_ROUTE
 
 bot = telebot.TeleBot(global_context.BOT_TOKEN)
 
-
 def error_handler(message, error):
     error_data = f'Catched error in decorator: {str(error)}' \
                  f'\nUser: {str(message.from_user.id)}' \
