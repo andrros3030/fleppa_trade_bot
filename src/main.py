@@ -6,7 +6,7 @@ from src.data_source import DataSource
 from src.execute_decorator import message_execute_decorator
 from src.logger import Logger
 from src.request_currency import currency_info
-
+from src.drawer import currency_plot, currency_data
 
 bot = telebot.TeleBot(global_context.BOT_TOKEN)
 
@@ -67,6 +67,15 @@ def currency(message):
         result.append(info[i]['full_info'])
 
     bot.send_message(message.chat.id, '\n'.join(result))
+
+
+@bot.message_handler(commands=['currency_graph'])
+@msg_executor
+def currency_graph(message):
+    currency_tickers = ['USD', 'EUR']
+    for i in currency_tickers:
+        curr = currency_data(i)
+        bot.send_photo(message.chat.id, photo=currency_plot(curr[0], curr[1], i), caption=f'Вот тебе график {i}/RUB')
 
 
 @bot.message_handler(func=lambda message: True)
