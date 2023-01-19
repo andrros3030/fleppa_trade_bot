@@ -1,5 +1,5 @@
 from src.routes import DEFAULT_ROUTE
-from src.public_func import feedback, reply, say_wellcome, currency
+from src.public_func import feedback, reply, say_wellcome, currency, currency_graph
 from src.support_funcs import set_admin, exec_sql, get_environment, make_link, simulate_crash
 from src.constants import CallContext
 
@@ -102,6 +102,11 @@ commands = [
         function=currency,
         alias=['currency'],
         desc='вывести курсы валют и динамику их изменения'
+    ),
+    Command(
+        function=currency_graph,
+        alias=['currency_graph'],
+        desc='вывести график курсов валют'
     ),
     Command(
         function=feedback,

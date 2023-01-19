@@ -1,5 +1,6 @@
 from src.constants import global_context, CallContext
 from src.request_currency import currency_info
+from src.drawer import currency_plot, currency_data
 
 
 # TODO: !!!!!!!!!!!!ОБРАБОТКА ОШИБОК!!!!!!!!
@@ -88,3 +89,10 @@ def currency(cc: CallContext):
         result.append(info[i]['full_info'])
 
     cc.bot.send_message(cc.chat_id, '\n'.join(result))
+
+
+def currency_graph(cc: CallContext):
+    currency_tickers = ['USD', 'EUR']
+    for i in currency_tickers:
+        curr = currency_data(i)
+        cc.bot.send_photo(cc.chat_id, photo=currency_plot(curr[0], curr[1], i), caption=f'Вот тебе график {i}/RUB')

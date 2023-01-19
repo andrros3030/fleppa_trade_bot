@@ -6,7 +6,6 @@ from src.logger import Logger
 from src.data_source import DataSource
 from src.execute_decorator import message_execute_decorator
 from src.routes import DEFAULT_ROUTE
-from src.drawer import currency_plot, currency_data
 
 bot = telebot.TeleBot(global_context.BOT_TOKEN)
 
@@ -30,15 +29,6 @@ def error_handler(message, error):
 logger = Logger(is_poduction=global_context.IS_PRODUCTION)
 database = DataSource(auth_context=global_context.auth_context, logger=logger)
 msg_executor = message_execute_decorator(logger=logger, on_error=error_handler)
-
-
-@bot.message_handler(commands=['currency_graph'])
-@msg_executor
-def currency_graph(message):
-    currency_tickers = ['USD', 'EUR']
-    for i in currency_tickers:
-        curr = currency_data(i)
-        bot.send_photo(message.chat.id, photo=currency_plot(curr[0], curr[1], i), caption=f'Вот тебе график {i}/RUB')
 
 
 @bot.message_handler(func=lambda message: True, content_types=['audio', 'photo', 'voice', 'video', 'document',
