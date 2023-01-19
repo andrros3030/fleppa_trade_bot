@@ -93,4 +93,3 @@ def default_handler(message):
             bot.send_message(chat_id, str(e))
         return
     bot.send_message(chat_id, 'Кажется я не знаю такой команды')
-    
