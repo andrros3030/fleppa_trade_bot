@@ -8,25 +8,29 @@ from src.execute_decorator import message_execute_decorator
 from src.routes import DEFAULT_ROUTE
 
 bot = telebot.TeleBot(global_context.BOT_TOKEN)
+logger = Logger(is_poduction=global_context.IS_PRODUCTION)
+database = DataSource(auth_context=global_context.auth_context, logger=logger)
+
 
 def error_handler(message, error):
     error_data = f'Catched error in decorator: {str(error)}' \
                  f'\nUser: {str(message.from_user.id)}' \
                  f'\nJSON: {str(message)}'
     logger.w(error_data)
-    bot.send_message(message.chat.id, 'Необработанное исключение в работе бота. '
-                                      'Админы уже получили информацию об ошибке, но мы будем очень признательны, '
-                                      'если ты расскажешь, какая команда вызвала ошибку с помощью /feedback')
-    for admin in global_context.SUDO_USERS:
-        try:
-            bot.send_message(admin, error_data)
-        except Exception as e:
-            logger.e(f"FATAL: can't send error message to admin, causing error: {str(e)}"
-                     f'\nError to send: {error_data}')
+    if global_context.IS_PRODUCTION:
+        bot.send_message(message.chat.id, 'Необработанное исключение в работе бота. '
+                                          'Админы уже получили информацию об ошибке, но мы будем очень признательны, '
+                                          'если ты расскажешь, какая команда вызвала ошибку с помощью /feedback')
+        for admin in global_context.SUDO_USERS:
+            try:
+                bot.send_message(admin, error_data)
+            except Exception as e:
+                logger.e(f"FATAL: can't send error message to admin, causing error: {str(e)}"
+                         f'\nError to send: {error_data}')
+    else:
+        bot.send_message(message.chat.id, error_data)
 
 
-logger = Logger(is_poduction=global_context.IS_PRODUCTION)
-database = DataSource(auth_context=global_context.auth_context, logger=logger)
 msg_executor = message_execute_decorator(logger=logger, on_error=error_handler)
 
 
