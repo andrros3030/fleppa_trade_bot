@@ -1,20 +1,30 @@
-from src.constants import global_context
-from src.commands import Commands
 import telebot
-from src.logger import Logger
+
+from src.commands import Commands
+from src.constants import global_context
 from src.data_source import DataSource
 from src.execute_decorator import message_execute_decorator
+from src.logger import Logger
+from src.request_currency import currency_info
 from src.drawer import currency_plot, currency_data
 
 bot = telebot.TeleBot(global_context.BOT_TOKEN)
 
 
 def error_handler(message, error):
-    bot.send_message(message.chat.id, 'FATAL ERROR')  # TODO: прописать текстовку
+    error_data = f'Catched error in decorator: {str(error)}' \
+                 f'\nUser: {str(message.from_user.id)}' \
+                 f'\nJSON: {str(message)}'
+    logger.w(error_data)
+    bot.send_message(message.chat.id, 'Необработанное исключение в работе бота. '
+                                      'Админы уже получили информацию об ошибке, но мы будем очень признательны, '
+                                      'если ты расскажешь, какая команда вызвала ошибку с помощью /feedback')
     for admin in global_context.SUDO_USERS:
-        bot.send_message(admin, f'Catched error in decorator: {str(error)}'
-                                f'\nUser: {str(message.from_user.id)}'
-                                f'\nJSON: {str(message)}')
+        try:
+            bot.send_message(admin, error_data)
+        except Exception as e:
+            logger.e(f"FATAL: can't send error message to admin, causing error: {str(e) }"
+                     f'\nError to send: {error_data}')
 
 
 logger = Logger(is_poduction=global_context.IS_PRODUCTION)
@@ -45,6 +55,18 @@ def do_crash(message):
     if database.is_admin(message_author) or message_author in global_context.SUDO_USERS:
         bot.send_message(message.chat.id, 'Крашаюсь, проверяй')
         raise Exception('Краш вызван специально')
+
+
+@bot.message_handler(commands=['currency'])
+@msg_executor
+def currency(message):
+    currency_tickers = ['USD', 'EUR']
+    info = currency_info(currency_tickers)
+    result = []
+    for i in currency_tickers:
+        result.append(info[i]['full_info'])
+
+    bot.send_message(message.chat.id, '\n'.join(result))
 
 
 @bot.message_handler(commands=['currency_graph'])

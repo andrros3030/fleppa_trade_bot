@@ -2,3 +2,4 @@ wheel
 pyTelegramBotAPI
 psycopg2
 matplotlib
+requests
