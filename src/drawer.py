@@ -16,25 +16,23 @@ def currency_data(currency):
 
 
 def currency_plot(date_value, currency_value, currency, night_theme=False):
+    font_color = 'black'
+    bg_color = 'white'
+    if night_theme:
+        font_color = '#e4e4eb'
+        bg_color = '#35353d'
     photo = io.BytesIO()
     fig = plt.figure()
     axes = fig.add_axes([0, 0, 1, 1])
     x_major_locator = plt.MultipleLocator(10)
     ax = fig.gca()
     ax.xaxis.set_major_locator(x_major_locator)
-    if night_theme:
-        ax.set_facecolor('#35353d')
-        axes.plot(date_value, currency_value, label=f'{currency}/RUB', color='#e4e4eb', lw=2)
-        fig.patch.set_facecolor('#35353d')
-        axes.set_xlabel('Дата', color='#e4e4eb')
-        axes.set_ylabel(f'{currency}/RUB', color='#e4e4eb')
-        axes.tick_params(colors='#e4e4eb')
-    else:
-        ax.set_facecolor('white')
-        axes.plot(date_value, currency_value, label=f'{currency}/RUB', color='black', lw=2)
-        axes.set_xlabel('Дата', color='black')
-        axes.set_ylabel(f'{currency}/RUB', color='black')
-        axes.tick_params(colors='black')
+    ax.set_facecolor(bg_color)
+    axes.plot(date_value, currency_value, label=f'{currency}/RUB', color=font_color, lw=2)
+    fig.patch.set_facecolor(bg_color)
+    axes.set_xlabel('Дата', color=font_color)
+    axes.set_ylabel(f'{currency}/RUB', color=font_color)
+    axes.tick_params(colors=font_color)
     axes.grid(axis='both', linestyle='--')
     fig.savefig(photo, format='jpg', bbox_inches='tight')
     photo.seek(0)
