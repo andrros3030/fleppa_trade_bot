@@ -52,10 +52,9 @@ def do_crash(message):
 @msg_executor
 def random_graph(message):
     currency_tickers = ['USD', 'EUR']
-
     for i in currency_tickers:
         curr = currency_data(i)
-        bot.send_photo(message.chat.id, photo=get_plot(curr[0], curr[1], i), caption='ну держи')
+        bot.send_photo(message.chat.id, photo=get_plot(curr[0], curr[1], i, True), caption=f'ну держи {i}/RUB')
 
 
 @bot.message_handler(func=lambda message: True)
