@@ -1,6 +1,7 @@
 from src.constants import global_context, CallContext
 from src.request_currency import currency_info
 from src.drawer import currency_plot, currency_data
+from src.homiak_diploma import diploma
 
 
 # TODO: !!!!!!!!!!!!ОБРАБОТКА ОШИБОК!!!!!!!!
@@ -91,6 +92,15 @@ def currency(cc: CallContext):
         result.append(info[i]['full_info'])
 
     cc.bot.send_message(cc.chat_id, '\n'.join(result))
+
+
+def get_diploma(cc: CallContext):
+    lastname = cc.user_data.last_name
+    if lastname is None:
+        lastname = ""
+    else:
+        lastname = " " + lastname
+    cc.bot.send_photo(cc.chat_id, photo=diploma(cc.user_data.first_name + lastname))
 
 
 def currency_graph(cc: CallContext):

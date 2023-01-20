@@ -2,7 +2,7 @@
 Это - прокси файл, для хранения существующих команд в боте
 """
 from src.routes import DEFAULT_ROUTE
-from src.public_func import feedback, reply, say_wellcome, currency, currency_graph
+from src.public_func import feedback, reply, say_wellcome, currency, currency_graph, get_diploma
 from src.support_funcs import set_admin, exec_sql, get_environment, make_link, simulate_crash
 from src.constants import CallContext
 
@@ -103,6 +103,7 @@ class Command:
             cc=CallContext(
                 chat_id=message.chat.id,
                 message_author=message.from_user.id,
+                user_data=message.from_user,
                 bot=bot,
                 database=database,
                 message_id=message.message_id,
@@ -152,6 +153,11 @@ commands = [
         function=currency,
         alias=['currency'],
         desc='вывести курсы валют и динамику их изменения'
+    ),
+    Command(
+        function=get_diploma,
+        alias=['diploma'],
+        desc='получить диплом хомяка'
     ),
     Command(
         function=currency_graph,
