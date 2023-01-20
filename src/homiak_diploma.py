@@ -10,11 +10,11 @@ def diploma(name):
     try:
         url_image = requests.get(url)
         image = Image.open(BytesIO(url_image.content))
-    except Exception as _:
+    except Exception:
         raise Exception(f"Can't open image by passed URL {url}")
     try:
         font = ImageFont.truetype(font_path, 75)
-    except Exception as _:
+    except Exception:
         raise Exception(f"Can't open font in location {font_path}")
 
     drawer = ImageDraw.Draw(image)
