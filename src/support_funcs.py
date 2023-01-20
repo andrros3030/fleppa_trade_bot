@@ -1,4 +1,5 @@
 from src.constants import global_context, CallContext
+import requests
 
 
 def set_admin(cc: CallContext):
@@ -31,3 +32,11 @@ def make_link(cc: CallContext):
 def simulate_crash(cc: CallContext):
     cc.bot.send_message(cc.chat_id, 'Крашаюсь, проверяй')
     raise Exception('Краш вызван специально')
+
+
+def make_request(cc: CallContext):
+    if len(cc.splitted_message) != 3:
+        return cc.bot.send_message(cc.chat_id, 'Команда принимает на вход тип запроса и адрес ресурса через пробел')
+    _, method, resource_link = map(str, cc.splitted_message)
+    res = requests.request(method, resource_link)
+    cc.bot.send_message(cc.chat_id, str(res.status_code) + ': ' + str(res.headers) + '\n' + str(res.reason))

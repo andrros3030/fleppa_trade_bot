@@ -3,7 +3,7 @@
 """
 from src.routes import DEFAULT_ROUTE
 from src.public_func import feedback, reply, say_wellcome, currency, currency_graph, get_diploma
-from src.support_funcs import set_admin, exec_sql, get_environment, make_link, simulate_crash
+from src.support_funcs import set_admin, exec_sql, get_environment, make_link, simulate_crash, make_request
 from src.constants import CallContext
 
 
@@ -205,6 +205,12 @@ commands = [
         function=make_link,
         alias=['make_link', 'getlink', 'ссылка', 'start_link'],
         desc='создать ссылку на бота',
+        admin_only=True
+    ),
+    Command(
+        function=make_request,
+        alias=['request'],
+        desc='отправить запрос',
         admin_only=True
     )
 ]
