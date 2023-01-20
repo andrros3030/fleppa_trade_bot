@@ -1,8 +1,22 @@
-DEFAULT_ROUTE = '/'
+"""
+В этом файле описана логика работы с путями, которые мы храним для каждого пользователя
+"""
+DEFAULT_ROUTE = '/'  # Корневое значение, когда пользователь не зашёл ни в какуб команду
 
 
 class ParsedRoute:
+    """
+    Класс распарсенного пути.
+    Состоит из двух базовых частей:
+
+    route - путь, выглядит как /path1 или /path1/path2
+
+    args - словарь с ключами и значениями из пути, и ключ и значение - строка
+    """
     def __init__(self, unparsed_route: str):
+        """
+        :param unparsed_route: строка вида '/route?arg1=val1&&arg2=val2'
+        """
         split_by_question = list(unparsed_route.split('?'))
         split_len = len(split_by_question)
         if split_len == 0:

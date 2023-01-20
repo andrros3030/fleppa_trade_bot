@@ -74,7 +74,7 @@ class CallContext:
         self.photo = photo
         self.caption = caption
         self.base_route = base_route
-        self.splitted_message = list(map(lambda el: str(el).lower(), text.split())),
+        self.splitted_message = list(map(lambda el: str(el).lower(), text.split()))
         self.is_admin = is_admin
 
     def __str__(self):
