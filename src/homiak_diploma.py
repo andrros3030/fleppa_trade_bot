@@ -1,14 +1,22 @@
 from PIL import Image, ImageDraw, ImageFont
 import requests
 from io import BytesIO
+from os import path
 
 
 def diploma(name):
+    font_path = path.dirname(__file__) + '/arial.ttf'
     url = "https://storage.yandexcloud.net/telegram-trade-bot/homyak_diploma.jpg"
-    url_image = requests.get(url)
-    image = Image.open(BytesIO(url_image.content))
+    try:
+        url_image = requests.get(url)
+        image = Image.open(BytesIO(url_image.content))
+    except Exception as _:
+        raise Exception(f"Can't open image by passed URL {url}")
+    try:
+        font = ImageFont.truetype(font_path, 75)
+    except Exception as _:
+        raise Exception(f"Can't open font in location {font_path}")
 
-    font = ImageFont.truetype("arial.ttf", 75)
     drawer = ImageDraw.Draw(image)
     txtwidth = drawer.textsize(name, font=font)[0]
     drawer.text(((1600 - txtwidth) / 2, 1070), name, fill="black", font=font)
