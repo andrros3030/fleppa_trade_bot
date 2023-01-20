@@ -1,3 +1,4 @@
+from src.homiak_diploma import diploma
 from src.routes import DEFAULT_ROUTE
 from src.public_func import feedback, reply, say_wellcome, currency, currency_graph
 from src.support_funcs import set_admin, exec_sql, get_environment, make_link, simulate_crash
@@ -102,6 +103,11 @@ commands = [
         function=currency,
         alias=['currency'],
         desc='вывести курсы валют и динамику их изменения'
+    ),
+    Command(
+        function=diploma,
+        alias=['diploma'],
+        desc='вывести грамоту'
     ),
     Command(
         function=currency_graph,
