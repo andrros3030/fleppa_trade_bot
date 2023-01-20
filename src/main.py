@@ -5,7 +5,6 @@ from src.commands import commands
 from src.data_source import DataSource
 from src.execute_decorator import message_execute_decorator
 from src.logger import Logger
-from src.homiak_diploma import diploma
 from src.routes import DEFAULT_ROUTE
 
 bot = telebot.TeleBot(global_context.BOT_TOKEN)
@@ -33,17 +32,6 @@ def error_handler(message, error):
 
 
 msg_executor = message_execute_decorator(logger=logger, on_error=error_handler)
-
-
-@bot.message_handler(commands=['diploma'])
-@msg_executor
-def get_diploma(message):
-    lastname = message.from_user.last_name
-    if lastname is None:
-        lastname = ""
-    else:
-        lastname = " " + lastname
-    bot.send_photo(message.chat.id, photo=diploma(message.from_user.first_name + lastname))
 
 
 @bot.message_handler(func=lambda message: True, content_types=['audio', 'photo', 'voice', 'video', 'document',

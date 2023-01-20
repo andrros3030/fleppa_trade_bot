@@ -60,7 +60,7 @@ class Context:
 
 class CallContext:
     def __init__(self, chat_id, message_author, bot, database, message_id, text, is_admin,
-                 reply_data, content_type, current_route, sticker, photo, caption, base_route):
+                 reply_data, content_type, current_route, sticker, photo, caption, base_route, user_data):
         self.chat_id = chat_id
         self.message_author = message_author
         self.bot = bot
@@ -76,6 +76,7 @@ class CallContext:
         self.base_route = base_route
         self.splitted_message = list(map(lambda el: str(el).lower(), text.split())),
         self.is_admin = is_admin
+        self.user_data = user_data
 
     def __str__(self):
         return str(self.__dict__)
