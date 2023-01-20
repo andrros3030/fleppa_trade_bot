@@ -9,7 +9,8 @@ def diploma(name):
 
     font = ImageFont.truetype("arial.ttf", 75)
     drawer = ImageDraw.Draw(image)
-    drawer.text((600, 1070), name, font=font, fill='black', align="center")
+    txtwidth = drawer.textsize(name, font=font)[0]
+    drawer.text(((1600 - txtwidth) / 2, 1070), name, fill="black", font=font)
 
     # функция которая возвращает изображение, которое потом можно отправить сообщением
     my_stringIObytes = io.BytesIO()  # объект, который хранит данные изображения
