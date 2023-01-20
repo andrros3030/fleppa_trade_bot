@@ -40,7 +40,12 @@ msg_executor = message_execute_decorator(logger=logger, on_error=error_handler)
 @bot.message_handler(commands=['diploma'])
 @msg_executor
 def get_diploma(message):
-    bot.send_photo(message.chat.id, photo=diploma(message.text))
+    lastname = message.from_user.last_name
+    if lastname is None:
+        lastname = ""
+    else:
+        lastname = " " + lastname
+    bot.send_photo(message.chat.id, photo=diploma(message.from_user.first_name + lastname))
 
 
 @bot.message_handler(func=lambda message: True, content_types=['audio', 'photo', 'voice', 'video', 'document',
