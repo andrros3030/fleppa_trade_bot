@@ -1,11 +1,11 @@
 import telebot
 
-from src.constants import global_context
+from src.base_modules.context import global_context
 from src.commands import commands
-from src.logger import Logger
+from src.base_modules.logger import Logger
 from src.data_source import DataSource
 from src.execute_decorator import message_execute_decorator
-from src.routes import DEFAULT_ROUTE
+from src.base_modules.routes import DEFAULT_ROUTE
 
 bot = telebot.TeleBot(global_context.BOT_TOKEN)
 logger = Logger(is_poduction=global_context.IS_PRODUCTION)

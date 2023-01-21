@@ -1,41 +1,8 @@
 import psycopg2
 import uuid
-from src.logger import Logger
-from src.routes import DEFAULT_ROUTE, ParsedRoute
-
-
-class DBAuthContext:
-    def __init__(self, user: str, password: str, host: str, port: str, is_prod: bool, dbname: str = None):
-        self.user = user
-        self.password = password
-        self.host = host
-        self.port = port
-        self.is_prod = is_prod
-        if is_prod:
-            self.database = host.split('.')[0]
-        else:
-            self.dbname = dbname
-
-    @property
-    def get_config(self):
-        if self.is_prod:
-            return f"""
-            dbname={self.database}
-            host={self.host}
-            port={self.port}
-            user={self.user}
-            password={self.password}
-            sslmode=require
-            """
-        else:
-            return f"""
-                host={self.host}
-                port={self.port}
-                dbname={self.dbname}
-                user={self.user}
-                password={self.password}
-                target_session_attrs=read-write
-            """
+from src.base_modules.logger import Logger
+from src.base_modules.routes import DEFAULT_ROUTE, ParsedRoute
+from src.base_modules.context import DBAuthContext
 
 
 def brackets_handler(querry: str):
@@ -172,7 +139,6 @@ class DataSource:
         forwarded_message_id = str(forwarded_message_id)
         querry = "SELECT ts_answered, ts_requested FROM t_feedback where v_forwarded_id=%s and fk_user=%s"
         result = self.__make_querry(querry, params=(forwarded_message_id, author_id))
-        print(result)
         try:
             if len(result) == 0:
                 return None

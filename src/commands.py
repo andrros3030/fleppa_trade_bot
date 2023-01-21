@@ -1,10 +1,10 @@
 """
 Это - прокси файл, для хранения существующих команд в боте
 """
-from src.routes import DEFAULT_ROUTE
+from src.base_modules.routes import DEFAULT_ROUTE
 from src.public_func import feedback, reply, say_wellcome, currency, currency_graph, get_diploma
 from src.support_funcs import set_admin, exec_sql, get_environment, make_link, simulate_crash, make_request
-from src.constants import CallContext
+from src.base_modules.context import CallContext
 
 
 class Command:
@@ -101,19 +101,10 @@ class Command:
         """
         return self._function(
             cc=CallContext(
-                chat_id=message.chat.id,
-                message_author=message.from_user.id,
-                user_data=message.from_user,
+                message=message,
                 bot=bot,
                 database=database,
-                message_id=message.message_id,
-                text=message.text,
-                reply_data=message.reply_to_message,
-                content_type=message.content_type,
                 current_route=current_route,
-                sticker=message.sticker,
-                photo=message.photo,
-                caption=message.caption,
                 base_route=self._route,
                 is_admin=is_admin
             )

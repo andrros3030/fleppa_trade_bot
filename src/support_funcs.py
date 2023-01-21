@@ -1,4 +1,4 @@
-from src.constants import global_context, CallContext
+from src.base_modules.context import global_context, CallContext
 import requests
 
 

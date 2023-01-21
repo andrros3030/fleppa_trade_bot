@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
-from src.constants import global_context
+from src.base_modules.context import global_context
 from src.data_source import DataSource
-from src.logger import Logger
+from src.base_modules.logger import Logger
 
 
 global_context.set_testing_mode()
