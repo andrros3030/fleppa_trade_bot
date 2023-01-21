@@ -60,7 +60,7 @@ def do_crash(message):
 @bot.message_handler(commands=['currency'])
 @msg_executor
 def currency(message):
-    currency_tickers = ['USD', 'EUR']
+    currency_tickers = ['USD', 'EUR', 'CNY']
     info = currency_info(currency_tickers)
     result = []
     for i in currency_tickers:
