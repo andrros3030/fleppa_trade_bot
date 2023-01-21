@@ -89,7 +89,7 @@ def currency(cc: CallContext):
     info = currency_info(currency_tickers)
     result = []
     for i in currency_tickers:
-        result.append(info[i]['currency_price'])
+        result.append(info[i]['full_info'])
 
     cc.bot.send_message(cc.chat_id, '\n'.join(result))
 

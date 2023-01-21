@@ -1,4 +1,6 @@
 wheel
 pyTelegramBotAPI
 psycopg2
+Pillow
+matplotlib
 requests
