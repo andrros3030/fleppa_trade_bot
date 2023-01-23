@@ -8,6 +8,7 @@ import telebot.types
 from src.base_modules.db_auth_context import DBAuthContext
 from src.base_modules.routes import ParsedRoute
 from src.base_modules.logger import Logger
+from src.base_modules.totem import Totem
 from src.common_modules.data_source import DataSource
 
 
@@ -117,45 +118,46 @@ class CallContext:
         self.base_route = base_route
         self.splitted_message = list(map(lambda el: str(el).lower(), self.text.split()))
         self.logger = logger
+        self.totem = Totem(self.message_author)
 
     @property
-    def caption(self):
+    def caption(self) -> str or None:
         return self.__message.caption
 
     @property
-    def photo(self):
+    def photo(self):  # TODO: что за тип данных
         return self.__message.photo
 
     @property
-    def sticker(self):
+    def sticker(self) -> telebot.types.Sticker or None:
         return self.__message.sticker
 
     @property
-    def content_type(self):
+    def content_type(self) -> str:
         return self.__message.content_type
 
     @property
-    def message_author(self):
+    def message_author(self) -> int:
         return self.user_data.id
 
     @property
-    def chat_id(self):
+    def chat_id(self) -> int:
         return self.__message.chat.id
 
     @property
-    def user_data(self):
+    def user_data(self) -> telebot.types.User:
         return self.__message.from_user
 
     @property
-    def message_id(self):
+    def message_id(self) -> int:
         return self.__message.message_id
 
     @property
-    def text(self):
+    def text(self) -> str or None:
         return self.__message.text
 
     @property
-    def reply_data(self):
+    def reply_data(self) -> telebot.types.Message or None:
         return self.__message.reply_to_message
 
     def __str__(self):

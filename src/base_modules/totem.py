@@ -11,13 +11,21 @@ class Totem:
     def __init__(self, user_id):
         self._user_totem = ''
         self._rate = 0
-        if user_id % 100 == 0:
+        last_two = user_id % 100
+        # TODO: https://forex-pros.ru/birzha/zhivotnye-na-birzhe.html
+        if last_two == 0:  # 1% chance
             self._user_totem = 'Баффет'
             self._rate = 0.01
-        elif user_id % 100 == 1:
+        elif last_two == 1:  # 1% chance
             self._user_totem = 'Великая Наба'
             self._rate = 0.01
-        elif user_id % 100 <= 60:
+        elif last_two <= 5:  # 3% chance
+            pass
+        elif last_two <= 15:  # 10% chance
+            pass
+        elif last_two <= 45:  # 30% chance
+            pass
+        else:  # 55% chance
             self._user_totem = 'Хомячок'
 
     @property
