@@ -1,4 +1,4 @@
-from src.common.context import global_context
+from src.context import global_context
 
 
 def run():

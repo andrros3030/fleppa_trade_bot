@@ -13,7 +13,12 @@ def set_admin(cc: CallContext):
 
 
 def exec_sql(cc: CallContext):
-    return cc.bot.send_message(cc.chat_id, str(cc.database.unsafe_exec(' '.join(cc.splitted_message[1:]))))
+    query_result = cc.database.unsafe_exec(' '.join(cc.splitted_message[1:]))
+    if type(query_result) is list or type(query_result) is tuple:
+        query_result = '\n'.join(map(str, query_result))
+    else:
+        query_result = str(query_result)
+    return cc.bot.send_message(cc.chat_id, query_result)
 
 
 def get_environment(cc: CallContext):

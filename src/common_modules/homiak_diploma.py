@@ -8,7 +8,7 @@ from os import path
 
 
 def diploma(name):
-    font_path = path.dirname(__file__) + '/arial.ttf'
+    font_path = path.dirname(__file__) + '/../arial.ttf'
     url = "https://storage.yandexcloud.net/telegram-trade-bot/homyak_diploma.jpg"
     try:
         url_image = requests.get(url)
