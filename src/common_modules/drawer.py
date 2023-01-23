@@ -1,3 +1,6 @@
+"""
+NO PROJECT IMPORTS EXCEPT BASE_MODULES
+"""
 import io
 import matplotlib.pyplot as plt
 import matplotlib.dates as dts

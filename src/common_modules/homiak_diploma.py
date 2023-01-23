@@ -1,3 +1,6 @@
+"""
+NO PROJECT IMPORTS EXCEPT BASE_MODULES
+"""
 from PIL import Image, ImageDraw, ImageFont
 import requests
 from io import BytesIO

@@ -1,11 +1,12 @@
 """
 Модуль для работы с базой данных
+NO PROJECT IMPORTS EXCEPT BASE_MODULES
 """
 import psycopg2
 import uuid
 from src.base_modules.logger import Logger
 from src.base_modules.routes import DEFAULT_ROUTE, ParsedRoute
-from src.base_modules.context import DBAuthContext
+from src.base_modules.db_auth_context import DBAuthContext
 
 
 def _brackets_handler(query: str):
@@ -122,7 +123,7 @@ class DataSource:
             return False
 
     def set_route(self, user_id, route=DEFAULT_ROUTE):
-        query = "UPDATE t_users SET v_position=%s WHERE pk_id = %s"
+        query = "UPDATE t_users SET v_position = %s WHERE pk_id = %s"
         result = self.__make_query(query, params=(route, str(user_id),))
         try:
             if len(result) == 0:

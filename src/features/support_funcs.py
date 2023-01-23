@@ -1,4 +1,7 @@
-from src.base_modules.context import global_context, CallContext
+"""
+DO NOT IMPORT BASE_MODULES, OTHER FEATURES OR ROOT MODULES EXCEPT CONTEXT
+"""
+from src.context import global_context, CallContext
 import requests
 
 

@@ -1,5 +1,5 @@
-from src.base_modules.context import global_context
-from src.data_source import DataSource
+from src.common.context import global_context
+from src.common.data_source import DataSource
 from src.base_modules.logger import Logger
 
 

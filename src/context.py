@@ -1,9 +1,14 @@
 """
-Возможные виды контекста для использования в других модулях
-В основном контекст - это сокращенный вид доступа к какому-либо параметру или свойству запуска
-NO PROJECT IMPORTS IN THIS FILE
+Контекст для запуска бота и контекст для работы команд бота
+В основном контекст - это сокращенный вид доступа к какому-либо параметру или свойству запуска.
+ONLY BASE AND COMMON MODULES ALLOWED TO BE IMPORTED
 """
 import os
+import telebot.types
+from src.base_modules.db_auth_context import DBAuthContext
+from src.base_modules.routes import ParsedRoute
+from src.base_modules.logger import Logger
+from src.common_modules.data_source import DataSource
 
 
 def _mask_token(token: str):
@@ -15,44 +20,6 @@ def _mask_token(token: str):
     :returns: безопасное представление секрета
     """
     return token[0:4] + '*' * (len(token) - 5)
-
-
-class DBAuthContext:
-    """
-    Контекст для авторизации в базе данных
-    """
-    def __init__(self, user: str, password: str, host: str, port: str, is_prod: bool, dbname: str = None):
-        self.user = user
-        self.password = password
-        self.host = host
-        self.port = port
-        self.is_prod = is_prod
-        # TODO: посмотреть на логику, кажется она избыточна
-        if is_prod:
-            self.database = host.split('.')[0]
-        else:
-            self.dbname = dbname
-
-    @property
-    def get_config(self):
-        if self.is_prod:
-            return f"""
-            dbname={self.database}
-            host={self.host}
-            port={self.port}
-            user={self.user}
-            password={self.password}
-            sslmode=require
-            """
-        else:
-            return f"""
-                host={self.host}
-                port={self.port}
-                dbname={self.dbname}
-                user={self.user}
-                password={self.password}
-                target_session_attrs=read-write
-            """
 
 
 class Context:
@@ -133,8 +100,15 @@ class CallContext:
     Хранит экземпляр бота и базы данных, а так же данные о вызове:
     является ли автор сообщения админом, его распарсеный путь, а так же базовый путь команды
     """
+    bot: telebot.TeleBot
+    __message: telebot.types.Message
+    current_route: ParsedRoute
+    database: DataSource
+    logger: Logger
+
     # TODO: нужно ли прокидывать логер через контекст?
-    def __init__(self, bot, database, message, is_admin, current_route, base_route):
+    def __init__(self, bot: telebot.TeleBot, database: DataSource,
+                 message: telebot.types.Message, is_admin, current_route: ParsedRoute, base_route, logger: Logger):
         self.is_admin = is_admin
         self.__message = message
         self.bot = bot
@@ -142,6 +116,7 @@ class CallContext:
         self.current_route = current_route
         self.base_route = base_route
         self.splitted_message = list(map(lambda el: str(el).lower(), self.text.split()))
+        self.logger = logger
 
     @property
     def caption(self):
@@ -187,4 +162,5 @@ class CallContext:
         return str(self.__dict__)
 
 
+# TODO: тех долг, откзаться от глобальной переменной в пользу DI
 global_context = Context()

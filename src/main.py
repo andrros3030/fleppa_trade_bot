@@ -1,11 +1,15 @@
+"""
+THIS FILE IS A TRANSITION POINT FOR ALL COMMANDS
+DO NOT IMPORT FEATURES HERE
+"""
 import telebot
 
-from src.base_modules.context import global_context
+from src.context import global_context
 from src.commands import commands
 from src.base_modules.logger import Logger
-from src.data_source import DataSource
-from src.execute_decorator import message_execute_decorator
 from src.base_modules.routes import DEFAULT_ROUTE
+from src.common_modules.data_source import DataSource
+from src.common_modules.execute_decorator import message_execute_decorator
 
 bot = telebot.TeleBot(global_context.BOT_TOKEN)
 logger = Logger(is_poduction=global_context.IS_PRODUCTION)
@@ -54,6 +58,7 @@ def absolutely_all_handler(message):
                     bot=bot,
                     database=database,
                     current_route=current_route,
-                    is_admin=is_admin
+                    is_admin=is_admin,
+                    logger=logger
                 )
     bot.send_message(chat_id, 'Кажется я не знаю такой команды. Попробуй /help')

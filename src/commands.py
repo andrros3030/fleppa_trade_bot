@@ -2,9 +2,9 @@
 Это - прокси файл, для хранения существующих команд в боте
 """
 from src.base_modules.routes import DEFAULT_ROUTE
-from src.public_func import feedback, reply, say_wellcome, currency, currency_graph, get_diploma
-from src.support_funcs import set_admin, exec_sql, get_environment, make_link, simulate_crash, make_request
-from src.base_modules.context import CallContext
+from src.features.public_func import feedback, reply, say_wellcome, currency, currency_graph, get_diploma
+from src.features.support_funcs import set_admin, exec_sql, get_environment, make_link, simulate_crash, make_request
+from src.context import CallContext
 
 
 class Command:
@@ -88,7 +88,7 @@ class Command:
             return self._desc
         return f'[ADMIN] {self._desc}'
 
-    def run(self, message, bot, database, current_route, is_admin):
+    def run(self, message, bot, database, current_route, is_admin, logger):
         """
         Функция для запуска реальной функции команды (должна иметь cc: CallContext в сигнатуре)
 
@@ -106,7 +106,8 @@ class Command:
                 database=database,
                 current_route=current_route,
                 base_route=self._route,
-                is_admin=is_admin
+                is_admin=is_admin,
+                logger=logger
             )
         )
 
@@ -125,6 +126,7 @@ def generate_help(cc: CallContext):
     return cc.bot.send_message(cc.chat_id, res)
 
 
+# TODO: тех долг, откзаться от глобальной переменной в пользу DI
 # TODO: ограничение по chat_types=['private']
 # TODO: кажется у пользователя не должно быть возможности запускать корневые функции,
 # когда он находится в контексте другой функции [/feedback, /reply и др]

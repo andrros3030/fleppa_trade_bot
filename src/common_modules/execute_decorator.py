@@ -1,5 +1,6 @@
 """
 В этом файле описан декоратор для функций, работающих при вызове бота
+NO PROJECT IMPORTS EXCEPT BASE_MODULES
 """
 from functools import wraps
 from src.base_modules.logger import Logger

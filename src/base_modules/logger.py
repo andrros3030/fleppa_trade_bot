@@ -1,6 +1,6 @@
 """
 Файл хранящий всё необходимое для работы логера
-NO IMPORTS IN THIS FILE
+NO PROJECT IMPORTS IN THIS FILE
 """
 
 

@@ -1,7 +1,10 @@
-from src.base_modules.context import global_context, CallContext
-from src.request_currency import currency_info
-from src.drawer import currency_plot, currency_data
-from src.homiak_diploma import diploma
+"""
+DO NOT IMPORT BASE_MODULES, OTHER FEATURES OR ROOT MODULES EXCEPT CONTEXT
+"""
+from src.context import global_context, CallContext
+from src.common_modules.request_currency import currency_info
+from src.common_modules.drawer import currency_plot, currency_data
+from src.common_modules.homiak_diploma import diploma
 
 
 # TODO: !!!!!!!!!!!!ОБРАБОТКА ОШИБОК!!!!!!!!
