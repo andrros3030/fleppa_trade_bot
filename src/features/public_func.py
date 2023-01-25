@@ -109,7 +109,7 @@ def get_diploma(cc: CallContext):
         lastname = ""
     else:
         lastname = " " + lastname
-    cc.bot.send_photo(cc.chat_id, photo=diploma(cc.user_data.first_name + lastname))
+    cc.bot.send_photo(cc.chat_id, photo=diploma(cc.user_data.first_name + lastname, cc.totem.totem))
 
 
 def currency_graph(cc: CallContext):
