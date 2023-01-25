@@ -28,7 +28,7 @@ def currency_plot(date_value, currency_value, currency, night_theme=False):
         bg_color = '#35353d'
     photo = io.BytesIO()
     fig = plt.figure()
-    axes = fig.add_axes([0, 0, 1.2, 1])
+    axes = fig.add_axes([0, 0, 1.2, 1])  # Увечил ось x с 1 до 1.2 для более качественного отображения аннотации
     x_major_locator = plt.MultipleLocator(6)
     ax = fig.gca()
     ax.xaxis.set_major_locator(x_major_locator)
