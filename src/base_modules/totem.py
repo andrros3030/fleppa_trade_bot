@@ -20,9 +20,9 @@ class Totem:
             rate = 0.01
             self._sticker = '🔥🔥🔥'
         elif last_two <= 5:  # 3% chance
-            self._user_totem = 'квал с черешней'  # TODO
+            self._user_totem = 'квал с черешней'
             rate = 0.03
-            self._sticker = '😬'  # TODO
+            self._sticker = '😬'
         elif last_two <= 15:  # 10% chance
             self._user_totem = 'волк'
             rate = 0.1
@@ -45,4 +45,4 @@ class Totem:
         return self._user_totem.upper()
 
     def __str__(self):
-        return f'Вы {self._user_totem} {self._sticker}!\nТак себя назвать могут только {self._rate}% пользователей'
+        return f'Вы {self._user_totem} {self._sticker}\nТак себя назвать могут только {self._rate}% пользователей 🚨'
