@@ -10,6 +10,13 @@ from src.common_modules.homiak_diploma import diploma
 # TODO: !!!!!!!!!!!!ОБРАБОТКА ОШИБОК!!!!!!!!
 
 
+def get_totem(cc: CallContext):
+    cc.bot.send_message(cc.chat_id, str(cc.totem))
+    cc.bot.send_message(cc.chat_id, "Давай я выдам тебе диплом, "
+                                    "которым ты сможешь поделиться со своими друзьями хомячками? "
+                                    "Жми /diploma")
+
+
 def feedback(cc: CallContext):
     if cc.current_route.route != cc.base_route:
         if cc.database.is_banned(cc.message_author):
@@ -17,7 +24,7 @@ def feedback(cc: CallContext):
             return
         cc.database.set_route(cc.message_author, route=cc.base_route)
         cc.bot.send_message(cc.chat_id, 'Пожалуйста, отправьте свой фид-бэк о работе бота. '
-                                        'Вы можете добавить фото или видео о работе бота')
+                                        'Вы можете добавить фото или видео, админы посмотрят их и вернутся в чат')
     else:
         for feedback_chat in global_context.FEEDBACK_CHAT_ID:
             res = cc.bot.forward_message(feedback_chat, cc.chat_id, cc.message_id)
