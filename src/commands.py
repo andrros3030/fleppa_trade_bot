@@ -25,12 +25,19 @@ class Command:
                  accept_text=True, accept_photo=False, accept_sticker=False):
         """
         :param alias: набор слов, каждое из которых находясь на первом месте вызовет функцию
+
         :param desc: описание функции, которое используется при формировании help
+
         :param route: путь к функции, если она не отрабатывает за одно сообщение
+
         :param admin_only: ограничение доступа админам
+
         :param function: функция, которая вызывается при вызове команды
+
         :param accept_text: НЕ ИСПОЛЬЗУЕТСЯ ПОКА ЧТО
+
         :param accept_photo: НЕ ИСПОЛЬЗУЕТСЯ ПОКА ЧТО
+
         :param accept_sticker: НЕ ИСПОЛЬЗУЕТСЯ ПОКА ЧТО
         """
         self._function = function
@@ -134,9 +141,6 @@ def generate_help(cc: CallContext):
 
 # TODO: тех долг, откзаться от глобальной переменной в пользу DI
 # TODO: ограничение по chat_types=['private']
-# TODO: кажется у пользователя не должно быть возможности запускать корневые функции,
-# когда он находится в контексте другой функции [/feedback, /reply и др]
-# в таком случае route будет вторым тригером для запуска функции, но не ясно, как показать, какие есть подкоманды
 commands = [
     Command(
         function=generate_help,

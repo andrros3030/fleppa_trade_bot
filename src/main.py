@@ -57,13 +57,26 @@ def absolutely_all_handler(message):
     first_word = lower_message.split()[0]
     if first_word[0] == '/':
         first_word = first_word[1:]
+    should_run = None  # Команда, которую следует запустить по причине нахождения в её директории
+    may_run = None  # Команда, которую можно запустить по причине совпадения псевдонима и текста пользователя
+    # should_exit = False  # Пытается ли пользователь покинуть текущую команду
     for cmd in commands:
         if cmd.public or is_admin:
-            # TODO: сделать предсказумую логику для взаимодействия с командами по путям
-            # возможно придется написать обработчик посложнее для проверки сигнатуры команды
-            if first_word in cmd.commands or lower_message in cmd.commands or \
-                    (current_route.route == cmd.route and cmd.route != DEFAULT_ROUTE):
-                return cmd.run(
+            if current_route.route == cmd.route and cmd.route != DEFAULT_ROUTE:
+                should_run = cmd
+            if first_word in cmd.commands or lower_message in cmd.commands:
+                may_run = cmd
+    if should_run is not None:
+        return should_run.run(
+                    message=message,
+                    bot=bot,
+                    database=database,
+                    current_route=current_route,
+                    is_admin=is_admin,
+                    logger=logger
+                )
+    elif may_run is not None:
+        return may_run.run(
                     message=message,
                     bot=bot,
                     database=database,
