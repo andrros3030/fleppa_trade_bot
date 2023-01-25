@@ -37,7 +37,6 @@ class Totem:
             self._sticker = '🌚'
         self._rate = int(rate * 100)
 
-
     @property
     def totem(self):
         """
