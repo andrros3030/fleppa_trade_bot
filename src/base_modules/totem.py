@@ -10,22 +10,39 @@ class Totem:
     """
     def __init__(self, user_id):
         self._user_totem = ''
-        self._rate = 0
-        if user_id % 100 == 0:
-            self._user_totem = 'Баффет'
-            self._rate = 0.01
-        elif user_id % 100 == 1:
+        last_two = user_id % 100
+        if last_two == 0:  # 1% chance
+            self._user_totem = 'Уоррен Баффет'
+            rate = 0.01
+            self._sticker = '🔥🔥🔥'
+        elif last_two == 1:  # 1% chance
             self._user_totem = 'Великая Наба'
-            self._rate = 0.01
-        elif user_id % 100 <= 60:
-            self._user_totem = 'Хомячок'
+            rate = 0.01
+            self._sticker = '🔥🔥🔥'
+        elif last_two <= 5:  # 3% chance
+            self._user_totem = 'квал с черешней'  # TODO
+            rate = 0.03
+            self._sticker = '😬'  # TODO
+        elif last_two <= 15:  # 10% chance
+            self._user_totem = 'волк'
+            rate = 0.1
+            self._sticker = '🐺'
+        elif last_two <= 45:  # 30% chance
+            self._user_totem = 'пульсянин'
+            rate = 0.3
+            self._sticker = '🤘'
+        else:  # 55% chance
+            self._user_totem = 'хомячок обыкновенный'
+            rate = 0.55
+            self._sticker = '🌚'
+        self._rate = int(rate * 100)
 
     @property
     def totem(self):
         """
-        :return: тотем пользователя
+        :return: тотем пользователя капслоком для вывода в изображении
         """
-        return self._user_totem
+        return self._user_totem.upper()
 
     def __str__(self):
-        return f'Вы {self.totem}! Так себя назвать могут только {self._rate * 100}% пользователей 🔥'
+        return f'Вы {self._user_totem} {self._sticker}!\nТак себя назвать могут только {self._rate}% пользователей'

@@ -2,7 +2,7 @@
 Это - прокси файл, для хранения существующих команд в боте
 """
 from src.base_modules.routes import DEFAULT_ROUTE
-from src.features.public_func import feedback, reply, say_wellcome, currency, currency_graph, get_diploma
+from src.features.public_func import feedback, reply, say_wellcome, currency, currency_graph, get_diploma, get_totem
 from src.features.support_funcs import set_admin, exec_sql, get_environment, make_link, simulate_crash, make_request
 from src.context import CallContext
 
@@ -93,11 +93,17 @@ class Command:
         Функция для запуска реальной функции команды (должна иметь cc: CallContext в сигнатуре)
 
         :param message: тригерное сообщение
+
         :param bot: объект бота, в который будут отправляться сообщения
+
         :param database: объект базы данных, с которой работает функция
+
         :param current_route: распарсеный путь пользователя
+
         :param is_admin: является ли пользователь админом
         (нужно только в help, остальные функции должны работать одинаково, как для админа, так и для не админа)
+
+        :param logger: объект логера для записи информационных сообщений
         """
         return self._function(
             cc=CallContext(
@@ -134,32 +140,37 @@ def generate_help(cc: CallContext):
 commands = [
     Command(
         function=generate_help,
-        alias=['help'],
+        alias=['help', "помощь", "команды", "доступные команды"],
         desc='что умеет этот бот'
     ),
     Command(
         function=say_wellcome,
-        alias=['start'],
+        alias=['start', "начать"],
         desc='вывести приветственное сообщение',
     ),
     Command(
         function=currency,
-        alias=['currency'],
+        alias=['currency', "курс валюты"],
         desc='вывести курсы валют и динамику их изменения'
     ),
     Command(
+        function=get_totem,
+        alias=['totem', "тотем", "кто я"],
+        desc='узнать свой тотем биржи'
+    ),
+    Command(
         function=get_diploma,
-        alias=['diploma'],
+        alias=['diploma', "диплом", "хочу диплом"],
         desc='получить диплом хомяка'
     ),
     Command(
         function=currency_graph,
-        alias=['currency_graph'],
+        alias=['currency_graph', "график", "график валют"],
         desc='вывести график курсов валют'
     ),
     Command(
         function=feedback,
-        alias=['feedback'],
+        alias=['feedback', "отзыв", "фидбэк", "написать отзыв", "админ"],
         desc='оставить отзыв о работе бота или предложить функциональность',
         route='/feedback'
     ),
