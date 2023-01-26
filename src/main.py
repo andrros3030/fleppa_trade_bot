@@ -59,7 +59,6 @@ def absolutely_all_handler(message):
         first_word = first_word[1:]
     should_run = None  # Команда, которую следует запустить по причине нахождения в её директории
     may_run = None  # Команда, которую можно запустить по причине совпадения псевдонима и текста пользователя
-    # should_exit = False  # Пытается ли пользователь покинуть текущую команду
     for cmd in commands:
         if cmd.public or is_admin:
             if current_route.route == cmd.route and cmd.route != DEFAULT_ROUTE:
@@ -67,15 +66,24 @@ def absolutely_all_handler(message):
             if first_word in cmd.commands or lower_message in cmd.commands:
                 may_run = cmd
     if should_run is not None:
+        """
+        Если пользователь находится в директории одной из команд
+        - запускаем внутреннюю команду для этой команды
+        """
         return should_run.run(
                     message=message,
                     bot=bot,
                     database=database,
                     current_route=current_route,
                     is_admin=is_admin,
-                    logger=logger
+                    logger=logger,
+                    is_inner=True
                 )
     elif may_run is not None:
+        """
+        Если пользователь в данный момент не находится в директории какой-либо команды 
+        - мы запускаем команду с совпадением по псевдониму
+        """
         return may_run.run(
                     message=message,
                     bot=bot,
@@ -84,4 +92,7 @@ def absolutely_all_handler(message):
                     is_admin=is_admin,
                     logger=logger
                 )
+    """
+    Иначе, если не удалось подобрать команду по псевдониму и пользователь в корневой директории - выводим вот это 
+    """
     return bot.send_message(chat_id, 'Кажется я не знаю такой команды. Попробуй /help')

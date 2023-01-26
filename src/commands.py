@@ -2,98 +2,35 @@
 Это - прокси файл, для хранения существующих команд в боте
 """
 from src.base_modules.routes import DEFAULT_ROUTE
+from src.base_modules.command import Command
 from src.features.public_func import feedback, reply, say_wellcome, currency, currency_graph, get_diploma, get_totem
 from src.features.support_funcs import set_admin, exec_sql, get_environment, make_link, simulate_crash, make_request
 from src.context import CallContext
 
 
-class Command:
-    """
-    Структура данных "Команда", которая хранит все сведения о команде:
-    её путь (вторая точка тригера, помимо псевдонима), имена для вызова (псевдонимы),
-    описание, доступна ли только админам, какой тип контента принимает
-    """
+class RoutedCommand(Command):
     _route: str  # если функция не выполняется за одно сообщение - у нее должен быть путь, иначе она работает в корне
-    _alias: list  # набор псевдонимов для вызываемой команды
-    _desc: str  # описание команды, которое можно отобразить пользователю
-    _admin_only: bool  # доступна ли команда только админам
-    _accept_text: bool
-    _accept_photo: bool
-    _accept_sticker: bool
 
-    def __init__(self, alias: list, desc: str, route=DEFAULT_ROUTE, admin_only=False, function=None,
-                 accept_text=True, accept_photo=False, accept_sticker=False):
-        """
-        :param alias: набор слов, каждое из которых находясь на первом месте вызовет функцию
-
-        :param desc: описание функции, которое используется при формировании help
-
-        :param route: путь к функции, если она не отрабатывает за одно сообщение
-
-        :param admin_only: ограничение доступа админам
-
-        :param function: функция, которая вызывается при вызове команды
-
-        :param accept_text: НЕ ИСПОЛЬЗУЕТСЯ ПОКА ЧТО
-
-        :param accept_photo: НЕ ИСПОЛЬЗУЕТСЯ ПОКА ЧТО
-
-        :param accept_sticker: НЕ ИСПОЛЬЗУЕТСЯ ПОКА ЧТО
-        """
-        self._function = function
-        self._alias = alias
-        self._desc = desc
-        self._admin_only = admin_only
+    def __init__(self, alias: list, desc: str, inner_commands=None, admin_only=False, function=None,  # для super
+                 route=DEFAULT_ROUTE, block_back=False):
+        super().__init__(alias=alias, desc=desc,
+                         inner_commands=inner_commands, admin_only=admin_only, function=function)
         self._route = route
-        self._accept_text = accept_text
-        self._accept_photo = accept_photo
-        self._accept_sticker = accept_sticker
+        self._block_back = block_back
 
     @property
-    def commands(self):
-        """
-        :return: все псевдонимы команды
-        """
-        return self._alias
-
-    @property
-    def public(self):
-        """
-        :return: доступна ли не админам
-        """
-        return not self._admin_only
-
-    @property
-    def route(self):
+    def route(self) -> str:
         """
         :return: путь для команды
         """
         return self._route
 
-    @property
-    def content_types(self):
+    def match(self, inner_command_alias) -> Command or None:
         """
-        НЕ ИСПОЛЬЗУЕТСЯ ПОКА ЧТО
-
-        :return: массив принимаемых типов контента
+        По хорошему - выбирает необходимую команду для запуска изнутри этой команды
+        Если выбрать не удалось - запускает help
         """
-        res = []
-        if self._accept_sticker:
-            res.append('sticker')
-        if self._accept_text:
-            res.append('text')
-        if self._accept_photo:
-            res.append('photo')
-        return res
-
-    @property
-    def description(self):
-        """
-        :return: описание для /help
-        """
-        if self.public:
-            return self._desc
-        return f'[ADMIN] {self._desc}'
+        pass
 
     def run(self, message, bot, database, current_route, is_admin, logger):
         """
@@ -112,7 +49,7 @@ class Command:
 
         :param logger: объект логера для записи информационных сообщений
         """
-        return self._function(
+        return self.function(
             cc=CallContext(
                 message=message,
                 bot=bot,
@@ -125,6 +62,7 @@ class Command:
         )
 
 
+# TODO: architecture | move function somewhere inside?
 def generate_help(cc: CallContext):
     """
     Автоматически генерирует сообщение помощи для отображения всех команд
@@ -132,9 +70,13 @@ def generate_help(cc: CallContext):
     :param cc: контекст вызова функции
     """
     all_commands = []
-    for cmd in commands:
-        if cc.is_admin or cmd.public:
-            all_commands.append(f'/{cmd.commands[0]} — {cmd.description}')
+    if cc.current_route.route == DEFAULT_ROUTE:
+        for cmd in commands:
+            if cc.is_admin or cmd.public:
+                all_commands.append(str(cmd))
+    else:
+        # TODO: architecture | iterate over inner commands of command
+        pass
     res = '\n'.join(all_commands)
     return cc.bot.send_message(cc.chat_id, res)
 
@@ -142,80 +84,80 @@ def generate_help(cc: CallContext):
 # TODO: тех долг, откзаться от глобальной переменной в пользу DI
 # TODO: ограничение по chat_types=['private']
 commands = [
-    Command(
+    RoutedCommand(
         function=generate_help,
         alias=['help', "помощь", "команды", "доступные команды"],
         desc='что умеет этот бот'
     ),
-    Command(
+    RoutedCommand(
         function=say_wellcome,
         alias=['start', "начать"],
         desc='вывести приветственное сообщение',
     ),
-    Command(
+    RoutedCommand(
         function=currency,
         alias=['currency', "курс валюты"],
         desc='вывести курсы валют и динамику их изменения'
     ),
-    Command(
+    RoutedCommand(
         function=get_totem,
         alias=['totem', "тотем", "кто я"],
         desc='узнать свой тотем биржи'
     ),
-    Command(
+    RoutedCommand(
         function=get_diploma,
         alias=['diploma', "диплом", "хочу диплом"],
         desc='получить диплом хомяка'
     ),
-    Command(
+    RoutedCommand(
         function=currency_graph,
         alias=['currency_graph', "график", "график валют"],
         desc='вывести график курсов валют'
     ),
-    Command(
+    RoutedCommand(
         function=feedback,
         alias=['feedback', "отзыв", "фидбэк", "написать отзыв", "админ"],
         desc='оставить отзыв о работе бота или предложить функциональность',
         route='/feedback'
     ),
-    Command(
+    RoutedCommand(
         function=simulate_crash,
         alias=['crash'],
         desc='крашнуться',
         admin_only=True
     ),
-    Command(
+    RoutedCommand(
         function=reply,
         alias=['reply'],
         desc='ответить на фидбэк',
         admin_only=True,
         route='/reply'
     ),
-    Command(
+    RoutedCommand(
         function=get_environment,
         alias=['env', 'prod', 'environment', 'среда'],
         desc='вывести тип окружения',
         admin_only=True,
     ),
-    Command(
+    RoutedCommand(
         function=exec_sql,
         alias=['sql', 'db'],
         desc='взаимодействие с базой данных',
         admin_only=True,
     ),
-    Command(
+    RoutedCommand(
         function=set_admin,
         alias=['set_admin', 'make_admin', 'do_admin'],
         desc='сделать пользователя админом',
         admin_only=True,
     ),
-    Command(
+    RoutedCommand(
         function=make_link,
         alias=['make_link', 'getlink', 'ссылка', 'start_link'],
         desc='создать ссылку на бота',
         admin_only=True
     ),
-    Command(
+    RoutedCommand(
         function=make_request,
         alias=['request'],
         desc='отправить запрос',
