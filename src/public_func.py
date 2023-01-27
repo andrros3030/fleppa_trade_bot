@@ -87,7 +87,7 @@ def say_wellcome(cc: CallContext):
 def currency(cc: CallContext):
     currency_tickers = ['USD', 'EUR', 'CNY']
     info = currency_info(currency_tickers)
-    result = []
+    result = [f'Показаны курсы за {info["trade_day"]} и их изменение относительно закрытия {info["trade_date_before"]}', '']
     for i in currency_tickers:
         result.append(info[i]['full_info'])
 
