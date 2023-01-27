@@ -1,4 +1,4 @@
-from src.logger import Logger
+from src.base_modules.logger import Logger
 
 
 def __test_funct(arg, end):

@@ -1,8 +1,9 @@
 """
 В этом файле описан декоратор для функций, работающих при вызове бота
+NO PROJECT IMPORTS EXCEPT BASE_MODULES
 """
 from functools import wraps
-from src.logger import Logger
+from src.base_modules.logger import Logger
 
 
 def message_execute_decorator(logger: Logger, on_error):

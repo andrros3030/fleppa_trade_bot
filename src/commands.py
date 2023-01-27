@@ -1,10 +1,10 @@
 """
 Это - прокси файл, для хранения существующих команд в боте
 """
-from src.routes import DEFAULT_ROUTE
-from src.public_func import feedback, reply, say_wellcome, currency, currency_graph, get_diploma
-from src.support_funcs import set_admin, exec_sql, get_environment, make_link, simulate_crash, make_request
-from src.constants import CallContext
+from src.base_modules.routes import DEFAULT_ROUTE
+from src.features.public_func import feedback, reply, say_wellcome, currency, currency_graph, get_diploma, get_totem
+from src.features.support_funcs import set_admin, exec_sql, get_environment, make_link, simulate_crash, make_request
+from src.context import CallContext
 
 
 class Command:
@@ -88,34 +88,32 @@ class Command:
             return self._desc
         return f'[ADMIN] {self._desc}'
 
-    def run(self, message, bot, database, current_route, is_admin):
+    def run(self, message, bot, database, current_route, is_admin, logger):
         """
         Функция для запуска реальной функции команды (должна иметь cc: CallContext в сигнатуре)
 
         :param message: тригерное сообщение
+
         :param bot: объект бота, в который будут отправляться сообщения
+
         :param database: объект базы данных, с которой работает функция
+
         :param current_route: распарсеный путь пользователя
+
         :param is_admin: является ли пользователь админом
         (нужно только в help, остальные функции должны работать одинаково, как для админа, так и для не админа)
+
+        :param logger: объект логера для записи информационных сообщений
         """
         return self._function(
             cc=CallContext(
-                chat_id=message.chat.id,
-                message_author=message.from_user.id,
-                user_data=message.from_user,
+                message=message,
                 bot=bot,
                 database=database,
-                message_id=message.message_id,
-                text=message.text,
-                reply_data=message.reply_to_message,
-                content_type=message.content_type,
                 current_route=current_route,
-                sticker=message.sticker,
-                photo=message.photo,
-                caption=message.caption,
                 base_route=self._route,
-                is_admin=is_admin
+                is_admin=is_admin,
+                logger=logger
             )
         )
 
@@ -134,6 +132,7 @@ def generate_help(cc: CallContext):
     return cc.bot.send_message(cc.chat_id, res)
 
 
+# TODO: тех долг, откзаться от глобальной переменной в пользу DI
 # TODO: ограничение по chat_types=['private']
 # TODO: кажется у пользователя не должно быть возможности запускать корневые функции,
 # когда он находится в контексте другой функции [/feedback, /reply и др]
@@ -141,32 +140,37 @@ def generate_help(cc: CallContext):
 commands = [
     Command(
         function=generate_help,
-        alias=['help'],
+        alias=['help', "помощь", "команды", "доступные команды"],
         desc='что умеет этот бот'
     ),
     Command(
         function=say_wellcome,
-        alias=['start'],
+        alias=['start', "начать"],
         desc='вывести приветственное сообщение',
     ),
     Command(
         function=currency,
-        alias=['currency'],
+        alias=['currency', "курс валюты"],
         desc='вывести курсы валют и динамику их изменения'
     ),
     Command(
+        function=get_totem,
+        alias=['totem', "тотем", "кто я"],
+        desc='узнать свой тотем биржи'
+    ),
+    Command(
         function=get_diploma,
-        alias=['diploma'],
+        alias=['diploma', "диплом", "хочу диплом"],
         desc='получить диплом хомяка'
     ),
     Command(
         function=currency_graph,
-        alias=['currency_graph'],
+        alias=['currency_graph', "график", "график валют"],
         desc='вывести график курсов валют'
     ),
     Command(
         function=feedback,
-        alias=['feedback'],
+        alias=['feedback', "отзыв", "фидбэк", "написать отзыв", "админ"],
         desc='оставить отзыв о работе бота или предложить функциональность',
         route='/feedback'
     ),

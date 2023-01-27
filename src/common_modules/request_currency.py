@@ -1,3 +1,6 @@
+"""
+NO PROJECT IMPORTS EXCEPT BASE_MODULES
+"""
 from datetime import datetime, timedelta
 import requests
 

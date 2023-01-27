@@ -1,3 +1,6 @@
+"""
+NO PROJECT IMPORTS EXCEPT BASE_MODULES
+"""
 import io
 import matplotlib.pyplot as plt
 import matplotlib.dates as dts
@@ -12,7 +15,8 @@ def currency_data(currency):
     url = 'http://iss.moex.com' + f'/iss/statistics/engines/futures/markets/indicativerates/securities/' \
                                   f'{currency}//rub.json'
     r = requests.get(url, params=params).json()['securities']['data']
-    date_value, currency_value = [dt.datetime.strptime(i[0], '%Y-%m-%d') for i in r], [float(i[3]) for i in r]
+    date_value = [dt.datetime.strptime(i[0], '%Y-%m-%d') for i in r]
+    currency_value = [float(i[3]) for i in r]
     return date_value, currency_value
 
 
@@ -24,7 +28,7 @@ def currency_plot(date_value, currency_value, currency, night_theme=False):
         bg_color = '#35353d'
     photo = io.BytesIO()
     fig = plt.figure()
-    axes = fig.add_axes([0, 0, 1, 1])
+    axes = fig.add_axes([0, 0, 1.2, 1])  # (0, 0) - стартовые координаты осей, (1.2, 1) - конечные координаты осей
     x_major_locator = plt.MultipleLocator(6)
     ax = fig.gca()
     ax.xaxis.set_major_locator(x_major_locator)
@@ -39,10 +43,10 @@ def currency_plot(date_value, currency_value, currency, night_theme=False):
     axes.set_xlim(date_value[0])
     axes.tick_params(colors=font_color)
     axes.grid(axis='both', linestyle='--')
-    plt.scatter(date_value[-1], currency_value[-1], color=font_color, lw=1)
+    ax.plot(date_value[-1], currency_value[-1], marker='o', color=font_color, lw=0.3)
     axes.annotate(f'{round(currency_value[-1], 1)}', xy=(date_value[-1], currency_value[-1]),
-                  xytext=(date_value[-1], currency_value[-1] - 0.5), color=font_color)
+                  xytext=(date_value[-1]+0.5, currency_value[-1]-1), color=font_color)
     axes.plot(date_value, [currency_value[-1]] * len(date_value), linestyle='--', color=font_color, lw=1)
-    fig.savefig(photo, format='jpg', bbox_inches='tight')
+    fig.savefig(photo, format='jpg', bbox_inches='tight', dpi=300)
     photo.seek(0)
     return photo

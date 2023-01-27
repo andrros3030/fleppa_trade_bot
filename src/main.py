@@ -1,11 +1,15 @@
+"""
+THIS FILE IS A TRANSITION POINT FOR ALL COMMANDS
+DO NOT IMPORT FEATURES HERE
+"""
 import telebot
 
-from src.constants import global_context
+from src.context import global_context
 from src.commands import commands
-from src.logger import Logger
-from src.data_source import DataSource
-from src.execute_decorator import message_execute_decorator
-from src.routes import DEFAULT_ROUTE
+from src.base_modules.logger import Logger
+from src.base_modules.routes import DEFAULT_ROUTE
+from src.common_modules.data_source import DataSource
+from src.common_modules.execute_decorator import message_execute_decorator
 
 bot = telebot.TeleBot(global_context.BOT_TOKEN)
 logger = Logger(is_poduction=global_context.IS_PRODUCTION)
@@ -38,22 +42,33 @@ msg_executor = message_execute_decorator(logger=logger, on_error=error_handler)
                                                                'text', 'location', 'contact', 'sticker'])
 @msg_executor
 def absolutely_all_handler(message):
+    """
+    Агрегатор всех сообщений. Подбирает доступную команду пользователю для заданного сообщения и текущего пути.
+
+    :param message: сообщение, триггер функции
+
+    :return: результат выполнения команды
+    """
     chat_id = message.chat.id
     message_author = message.from_user.id
     current_route = database.get_current_route(message_author)
     is_admin = database.is_admin(message_author) or message_author in global_context.SUDO_USERS
-    first_word = message.text.split()[0].lower()
+    lower_message = message.text.lower()
+    first_word = lower_message.split()[0]
     if first_word[0] == '/':
         first_word = first_word[1:]
     for cmd in commands:
         if cmd.public or is_admin:
-            if first_word in cmd.commands or \
+            # TODO: сделать предсказумую логику для взаимодействия с командами по путям
+            # возможно придется написать обработчик посложнее для проверки сигнатуры команды
+            if first_word in cmd.commands or lower_message in cmd.commands or \
                     (current_route.route == cmd.route and cmd.route != DEFAULT_ROUTE):
                 return cmd.run(
                     message=message,
                     bot=bot,
                     database=database,
                     current_route=current_route,
-                    is_admin=is_admin
+                    is_admin=is_admin,
+                    logger=logger
                 )
-    bot.send_message(chat_id, 'Кажется я не знаю такой команды. Попробуй /help')
+    return bot.send_message(chat_id, 'Кажется я не знаю такой команды. Попробуй /help')

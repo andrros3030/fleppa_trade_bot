@@ -1,21 +1,31 @@
-from src.constants import global_context, CallContext
-from src.request_currency import currency_info
-from src.drawer import currency_plot, currency_data
-from src.homiak_diploma import diploma
+"""
+DO NOT IMPORT BASE_MODULES, OTHER FEATURES OR ROOT MODULES EXCEPT CONTEXT
+"""
+from src.context import global_context, CallContext
+from src.common_modules.request_currency import currency_info
+from src.common_modules.drawer import currency_plot, currency_data
+from src.common_modules.homiak_diploma import diploma
+from src.common_modules.photoshop import add_fleppa_wm
 
 
 # TODO: !!!!!!!!!!!!ОБРАБОТКА ОШИБОК!!!!!!!!
 
 
+def get_totem(cc: CallContext):
+    cc.bot.send_message(cc.chat_id, str(cc.totem))
+    cc.bot.send_message(cc.chat_id, "Давай я выдам тебе диплом, "
+                                    "которым ты сможешь поделиться со своими друзьями хомячками? "
+                                    "Жми /diploma")
+
+
 def feedback(cc: CallContext):
-    print(cc)
-    if cc.text == '/feedback':
+    if cc.current_route.route != cc.base_route:
         if cc.database.is_banned(cc.message_author):
             cc.bot.send_message(cc.chat_id, 'Отправка фидбэка недоступна')
             return
         cc.database.set_route(cc.message_author, route=cc.base_route)
         cc.bot.send_message(cc.chat_id, 'Пожалуйста, отправьте свой фид-бэк о работе бота. '
-                                        'Вы можете добавить фото или видео о работе бота')
+                                        'Вы можете добавить фото или видео, админы посмотрят их и вернутся в чат')
     else:
         for feedback_chat in global_context.FEEDBACK_CHAT_ID:
             res = cc.bot.forward_message(feedback_chat, cc.chat_id, cc.message_id)
@@ -29,7 +39,7 @@ def feedback(cc: CallContext):
 
 
 def reply(cc: CallContext):
-    if cc.text == '/reply':
+    if cc.current_route.route != cc.base_route:
         if cc.reply_data is None:
             return cc.bot.send_message(cc.chat_id, 'Команда доступна при ответе на сообщение')
         if cc.reply_data.forward_from is None:
@@ -80,7 +90,7 @@ def reply(cc: CallContext):
 
 def say_wellcome(cc: CallContext):
     start_link = cc.splitted_message[1] if len(cc.splitted_message) > 1 else None
-    cc.database.save_user(user_id=str(cc.message_author), involve_link=start_link)
+    cc.database.save_user(user_id=cc.message_author, involve_link=start_link)
     cc.bot.send_message(cc.chat_id, cc.database.get_start_message(start_link=start_link))
 
 
@@ -107,4 +117,38 @@ def currency_graph(cc: CallContext):
     currency_tickers = ['USD', 'EUR']
     for i in currency_tickers:
         curr = currency_data(i)
-        cc.bot.send_photo(cc.chat_id, photo=currency_plot(curr[0], curr[1], i), caption=f'Вот тебе график {i}/RUB')
+        cc.bot.send_photo(cc.chat_id, photo=add_fleppa_wm(currency_plot(curr[0], curr[1], i), 100, 50),
+                          caption=f'Вот тебе график {i}/RUB')
+    cc.bot.send_message(cc.chat_id, 'Если ты знаешь, как сделать этот график лучше — оставь свой отзыв, '
+                                    'вызвав команду /feedback')
+
+
+# Пример работы команды из двух сообщений
+# def command_name(cc: CallContext):
+#     if cc.current_route.route != cc.base_route:  # проверяем, что путь не является базовым для этой команды
+#         # do smth
+#         cc.database.set_route(
+#             cc.message_author,
+#             route=cc.base_route
+#         )  # сохранили информацию, что пользователь вошел в эту команду
+#     else:
+#         # выполняем второе действие
+#         cc.database.set_route(cc.message_author)  # НЕ ЗАБЫВАЕМ ОБНУЛИТЬ ПУТЬ
+
+
+# Пример работы команды из трёх и более сообщений
+# def command_name(cc: CallContext):
+#     if cc.current_route.route != cc.base_route:  # проверяем, что путь не является базовым для этой команды
+#         # do smth
+#         cc.database.set_route(
+#             cc.message_author,
+#             route=cc.base_route
+#         )  # сохранили информацию, что пользователь вошел в эту команду
+#     else:
+#         if cc.current_route.args is None:  # проверяем, что аргументов у пути пока нет
+#             # do smth
+#             cc.current_route.args = {'arg1': 'some_value'}
+#             cc.database.set_route(cc.message_author, str(cc.current_route))
+#         else:  # если аргумент у пути уже есть
+#             # выполняем третье действие или делаем еще одно ветвление
+#             cc.database.set_route(cc.message_author)  # НЕ ЗАБЫВАЕМ ОБНУЛИТЬ ПУТЬ

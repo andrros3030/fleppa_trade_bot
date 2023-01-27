@@ -1,4 +1,7 @@
-from src.constants import global_context, CallContext
+"""
+DO NOT IMPORT BASE_MODULES, OTHER FEATURES OR ROOT MODULES EXCEPT CONTEXT
+"""
+from src.context import global_context, CallContext
 import requests
 
 
@@ -10,7 +13,12 @@ def set_admin(cc: CallContext):
 
 
 def exec_sql(cc: CallContext):
-    return cc.bot.send_message(cc.chat_id, str(cc.database.unsafe_exec(' '.join(cc.splitted_message[1:]))))
+    query_result = cc.database.unsafe_exec(' '.join(cc.splitted_message[1:]))
+    if type(query_result) is list or type(query_result) is tuple:
+        query_result = '\n'.join(map(str, query_result))
+    else:
+        query_result = str(query_result)
+    return cc.bot.send_message(cc.chat_id, query_result)
 
 
 def get_environment(cc: CallContext):
@@ -26,7 +34,9 @@ def make_link(cc: CallContext):
     desc = content.split(';')[0]
     sm = content.split(';')[1] if len(content.split(';')) > 1 else None
     link = cc.database.generate_link(description=desc, startup_message=sm)
-    cc.bot.send_message(cc.chat_id, 't.me/' + cc.bot.get_me().username + '?start=' + link)
+    if link is None:
+        return cc.bot.send_message(cc.chat_id, 'Не удалось создать ссылку. Проверь логи взаимодействия с БД.')
+    return cc.bot.send_message(cc.chat_id, 't.me/' + cc.bot.get_me().username + '?start=' + link)
 
 
 def simulate_crash(cc: CallContext):
