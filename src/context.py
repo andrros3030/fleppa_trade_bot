@@ -9,6 +9,7 @@ from src.base_modules.db_auth_context import DBAuthContext
 from src.base_modules.routes import ParsedRoute
 from src.base_modules.logger import Logger
 from src.base_modules.totem import Totem
+from src.base_modules.command import Command
 from src.common_modules.data_source import DataSource
 
 
@@ -106,10 +107,12 @@ class CallContext:
     current_route: ParsedRoute
     database: DataSource
     logger: Logger
+    root_command: Command
 
     # TODO: нужно ли прокидывать логер через контекст?
     def __init__(self, bot: telebot.TeleBot, database: DataSource,
-                 message: telebot.types.Message, is_admin, current_route: ParsedRoute, base_route, logger: Logger):
+                 message: telebot.types.Message, is_admin, current_route: ParsedRoute, base_route, logger: Logger,
+                 root_command: Command):
         self.is_admin = is_admin
         self.__message = message
         self.bot = bot
@@ -119,6 +122,7 @@ class CallContext:
         self.splitted_message = list(map(lambda el: str(el).lower(), self.text.split()))
         self.logger = logger
         self.totem = Totem(self.message_author)
+        self.root_command = root_command
 
     @property
     def caption(self) -> str or None:
