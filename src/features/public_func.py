@@ -5,6 +5,7 @@ from src.context import global_context, CallContext
 from src.common_modules.request_currency import currency_info
 from src.common_modules.drawer import currency_plot, currency_data
 from src.common_modules.homiak_diploma import diploma
+from src.common_modules.photoshop import add_fleppa_wm
 
 
 # TODO: !!!!!!!!!!!!ОБРАБОТКА ОШИБОК!!!!!!!!
@@ -116,7 +117,10 @@ def currency_graph(cc: CallContext):
     currency_tickers = ['USD', 'EUR']
     for i in currency_tickers:
         curr = currency_data(i)
-        cc.bot.send_photo(cc.chat_id, photo=currency_plot(curr[0], curr[1], i), caption=f'Вот тебе график {i}/RUB')
+        cc.bot.send_photo(cc.chat_id, photo=add_fleppa_wm(currency_plot(curr[0], curr[1], i), 100, 50),
+                          caption=f'Вот тебе график {i}/RUB')
+    cc.bot.send_message(cc.chat_id, 'Если ты знаешь, как сделать этот график лучше — оставь свой отзыв, '
+                                    'вызвав команду /feedback')
 
 
 # Пример работы команды из двух сообщений
