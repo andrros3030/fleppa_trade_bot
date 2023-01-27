@@ -7,9 +7,10 @@ from io import BytesIO
 from os import path
 
 
-def diploma(name):
+def diploma(name, totem):
     font_path = path.dirname(__file__) + '/../arial.ttf'
     url = "https://storage.yandexcloud.net/telegram-trade-bot/homyak_diploma.jpg"
+
     try:
         url_image = requests.get(url)
         image = Image.open(BytesIO(url_image.content))
@@ -23,6 +24,9 @@ def diploma(name):
     drawer = ImageDraw.Draw(image)
     txtwidth = drawer.textsize(name, font=font)[0]
     drawer.text(((1600 - txtwidth) / 2, 1070), name, fill="black", font=font)
+
+    txtwidth = drawer.textsize(totem, font=font)[0]
+    drawer.text(((1600 - txtwidth) / 2, 1560), totem, fill="black", font=font)
 
     # функция которая возвращает изображение, которое потом можно отправить сообщением
     my_stringIObytes = BytesIO()  # объект, который хранит данные изображения
