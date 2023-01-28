@@ -116,7 +116,9 @@ class CallContext:
         self.database = database
         self.current_route = current_route
         self.base_route = base_route
-        self.splitted_message = list(map(lambda el: str(el).lower(), self.text.split()))
+        self.splitted_message = []
+        if self.text is not None:
+            self.splitted_message = list(map(lambda el: str(el).lower(), self.text.split()))
         self.logger = logger
         self.totem = Totem(self.message_author)
 
