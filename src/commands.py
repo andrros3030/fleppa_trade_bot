@@ -161,7 +161,7 @@ commands = [
     Command(
         function=get_diploma,
         alias=['diploma', "диплом", "хочу диплом"],
-        desc='получить диплом хомяка'
+        desc='получить персональный диплом'
     ),
     Command(
         function=currency_graph,
