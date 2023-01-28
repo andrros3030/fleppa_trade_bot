@@ -112,7 +112,7 @@ def get_diploma(cc: CallContext):
         lastname = " " + lastname
     cc.bot.send_photo(cc.chat_id, photo=add_fleppa_wm(diploma(cc.user_data.first_name + lastname, cc.totem.totem),
                                                       x=397, y=1584),
-                      caption=f'Похвастайся друзьям дипломом и узнай кто они на бирже')
+                      caption='Похвастайся друзьям дипломом и узнай кто они на бирже')
 
 
 def currency_graph(cc: CallContext):
