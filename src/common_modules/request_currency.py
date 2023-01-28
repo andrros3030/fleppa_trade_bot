@@ -15,6 +15,7 @@ def currency_info(currency_ticker):
             response_currency = requests.get(url_today)
             currency_data_today = response_currency.json()['trades']['data'][0][-1]
             today = response_currency.json()['trades']['data'][0][-4]
+            time = response_currency.json()['trades']['data'][0][-2]
 
         except Exception:
             raise Exception(f"Can't get data with this URL: {url_today}")
@@ -47,8 +48,9 @@ def currency_info(currency_ticker):
         else:
             currency_content = f'{currency}: {currency_data_today} ({currency_change} % ⚪)'
 
-        result.update({f'{currency.upper()}': {'value': currency_data_today, 'change': f'{currency_change}',
-                                               'full_info': f'{currency_content}'}, 'trade_day': f'{today}',
-                       'trade_date_before': f'{last_trade_day.strftime("%m-%d-%Y")}'})
+        result.update({f"{currency.upper()}": {'value': currency_data_today, 'change': f'{currency_change}',
+                                               'full_info': f'{currency_content}'},
+                       'trade_day': f'{datetime.strptime(today, "%Y-%m-%d").strftime("%d-%m")}',
+                       'trade_date_before': f'{last_trade_day.strftime("%d-%m")}', 'request_time': f'{time}'})
 
     return result
