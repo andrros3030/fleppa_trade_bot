@@ -3,7 +3,7 @@
 """
 from src.base_modules.routes import DEFAULT_ROUTE
 from src.features.public_func import feedback, reply, say_wellcome, currency, currency_graph, get_diploma, get_totem
-from src.features.support_funcs import set_admin, exec_sql, get_environment, make_link, simulate_crash, make_request
+from src.features.support_funcs import set_admin, exec_sql, get_environment, make_link, simulate_crash, make_request, stats
 from src.context import CallContext
 
 
@@ -215,6 +215,12 @@ commands = [
         function=make_request,
         alias=['request'],
         desc='отправить запрос',
+        admin_only=True
+    ),
+    Command(
+        function=stats,
+        alias=['stats', 'статистика'],
+        desc='статистика по пользователям',
         admin_only=True
     )
 ]

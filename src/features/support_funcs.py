@@ -50,3 +50,31 @@ def make_request(cc: CallContext):
     _, method, resource_link = map(str, cc.splitted_message)
     res = requests.request(method, resource_link)
     cc.bot.send_message(cc.chat_id, str(res.status_code) + ': ' + str(res.headers) + '\n' + str(res.reason))
+
+
+def stats(cc: CallContext):
+    query_total_users = 'select count(*) from t_users'
+    query_daily_users = 'select count(*) from t_users where current_date - cast(ts_reg as date) <= 1;'
+    query_weekly_users = 'select count(*) from t_users where current_date - cast(ts_reg as date) <= 7;'
+    query_monthly_users = 'select count(*) from t_users where current_date - cast(ts_reg as date) <= 30;'
+    query_total_messages = 'select count(*) from t_messages'
+    query_daily_messages = 'select count(*) from t_messages where current_date - cast(ts_saved as date) <= 1;'
+    query_weekly_messages = 'select count(*) from t_messages where current_date - cast(ts_saved as date) <= 7;'
+    query_monthly_messages = 'select count(*) from t_messages where current_date - cast(ts_saved as date) <= 30;'
+    query_total_fb = 'select count(*) from t_feedback'
+    query_daily_fb = 'select count(*) from t_feedback where current_date - cast(ts_requested as date) <= 1;'
+    query_weekly_fb = 'select count(*) from t_feedback where current_date - cast(ts_requested as date) <= 7;'
+    query_monthly_fb = 'select count(*) from t_feedback where current_date - cast(ts_requested as date) <= 30;'
+    users_info = f'Пользователей: {cc.database.unsafe_exec(query_total_users)[0][0]} ' \
+                 f'(+{cc.database.unsafe_exec(query_daily_users)[0][0]} за день/ ' \
+                 f'+{cc.database.unsafe_exec(query_weekly_users)[0][0]} за неделю/ ' \
+                 f'+{cc.database.unsafe_exec(query_monthly_users)[0][0]} за месяц).\n'
+    messages_info = f'Сообщений: {cc.database.unsafe_exec(query_total_messages)[0][0]} ' \
+                    f'(+{cc.database.unsafe_exec(query_daily_messages)[0][0]} за день/ ' \
+                    f'+{cc.database.unsafe_exec(query_weekly_messages)[0][0]} за неделю/ ' \
+                    f'+{cc.database.unsafe_exec(query_monthly_messages)[0][0]} за месяц).\n'
+    fb_info = f'Количество фидбэка: {cc.database.unsafe_exec(query_total_fb)[0][0]} ' \
+              f'(+{cc.database.unsafe_exec(query_daily_fb)[0][0]} за день/ ' \
+              f'+{cc.database.unsafe_exec(query_weekly_fb)[0][0]} за неделю/ ' \
+              f'+{cc.database.unsafe_exec(query_monthly_fb)[0][0]} за месяц).\n'
+    return cc.bot.send_message(cc.chat_id, users_info + messages_info + fb_info)
