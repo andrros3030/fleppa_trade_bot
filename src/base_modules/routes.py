@@ -20,9 +20,9 @@ class ParsedRoute:
         """
         split_by_question = list(unparsed_route.split('?'))
         split_len = len(split_by_question)
-        if split_len == 0:
-            self.route = DEFAULT_ROUTE
-        elif split_len == 1:
+        self.route = DEFAULT_ROUTE
+        self.args = dict()
+        if split_len == 1:
             self.route = unparsed_route
         elif split_len == 2:
             self.route = split_by_question[0]

@@ -53,15 +53,20 @@ def absolutely_all_handler(message):
     message_author = message.from_user.id
     current_route = database.get_current_route(message_author)
     is_admin = database.is_admin(message_author) or message_author in global_context.SUDO_USERS
-    lower_message = message.text.lower()
-    first_word = lower_message.split()[0]
-    if first_word[0] == '/':
-        first_word = first_word[1:]
+    has_text = False
+    lower_message = None
+    first_word = None
+    if message.text is not None:
+        lower_message = message.text.lower()
+        first_word = lower_message.split()[0]
+        if first_word[0] == '/':
+            first_word = first_word[1:]
+        has_text = True
     for cmd in commands:
         if cmd.public or is_admin:
             # TODO: сделать предсказумую логику для взаимодействия с командами по путям
             # возможно придется написать обработчик посложнее для проверки сигнатуры команды
-            if first_word in cmd.commands or lower_message in cmd.commands or \
+            if (has_text and (first_word in cmd.commands or lower_message in cmd.commands)) or \
                     (current_route.route == cmd.route and cmd.route != DEFAULT_ROUTE):
                 return cmd.run(
                     message=message,
