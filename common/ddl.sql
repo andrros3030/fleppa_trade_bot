@@ -1,50 +1,3 @@
--- TODO: нужно очень сильно подумать о том, как будет работать навигация
--- в первую очередь функционал должен исходить из потребности
--- закодировать действие комманды в SQL фактически не представляется возможным
--- однако и смысла раздувать код и в SQL и в Python
--- возможно есть способ описать навигацию в одном Python, а в SQL записывать результат навигации?
--- TODO: описать типовые кейсы и данные, которые нужно хранить/изменять
--- до тех пор файл actions.py и архитектура commands.py заблокирована
-
-
--- /*
---  Сущность КОММАНДА:
---  имеет уникальный id,
---  имеет некоторый набор псевдонимов для вызова
---  имеет описание, которое можно вывести пользователю, что делает комманда
---  имеет флаг, отвечающий за ограничение доступа к комманде только админам
--- */
--- create table t_commands(
---     pk_id           serial primary key,
---     v_aliases       varchar(255) not null,
---     v_desc          varchar(400) not null,
---     l_admin_only    bool not null default false,
--- );
-
--- /*
---  Сущность ПУТЬ:
---  должна быть уникальна для каждого пользователя
---  ключевое значение пути - ссылка, отвечающая за шаг, на котором находится пользователь
---  на каждом шаге хранится свой набор аргументов
---  пользователь имеет возможность вернуться на предыдущий шаг и не потерять аргументы пути
--- */
--- create table t_routes(
---     pk_id       serial primary key,
---     fk_prev     integer null references t_routes(pk_id),
---     pv_link     varchar(36) not null,
---     v_args      varchar(255) null
--- );
--- insert into t_routes(pv_link) values ('/');
--- /*
---  Связь ПУТЬ-КОММАНДА
---  одному пути может соответствовать несколько комманд
---  одна и та же комманда может быть доступна из нескольких путей
--- */
--- create table t_path_commands(
---     pk_id           serial primary key,
---     fk_path         integer references t_route(pk_id),
---     fk_command      integer references t_commands(pk_id)
--- );
 /*
  Сущность ССЫЛКА-ПРИВЛЕЧЕНИЯ
  содержит уникальный идентификатор (его используем при старте бота)
@@ -75,6 +28,16 @@ create table t_users(
     ts_reg      timestamp not null default current_timestamp,
     fk_involve  varchar(40) null references t_involve(pk_id) on delete set null
 );
+/*
+ Сущность ФИДБЭК
+ уникальный генерируемый id
+ ссылка на пользователя
+ id сообщения в пользовательском чате
+ id пересланого сообщения
+ есть ли ответ на фидбэк
+ когда был написан фидбэк
+ когда был дан ответ на фидбэк
+*/
 create table t_feedback(
     pk_id           varchar(40) primary key not null,
     fk_user         varchar(40) not null references t_users(pk_id) on delete cascade,
@@ -83,4 +46,12 @@ create table t_feedback(
     l_answered      bool not null default false,
     ts_requested    timestamp not null default current_timestamp,
     ts_answered     timestamp null
+);
+create table t_messages(
+    pk_id                   varchar(40) primary key not null,
+    fk_user                 varchar(40) not null references t_users(pk_id) on delete cascade,
+    v_message_id            varchar(40) not null,
+    v_message_text          varchar(4000) not null,
+    v_message_content_type  varchar(20) not null,
+    ts_saved                timestamp not null default current_timestamp
 );
