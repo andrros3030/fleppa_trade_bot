@@ -7,9 +7,10 @@ import telebot
 from src.context import global_context
 from src.commands import commands
 from src.base_modules.logger import Logger
-from src.base_modules.routes import DEFAULT_ROUTE
+from src.base_modules.routes import DEFAULT_ROUTE, ParsedRoute
 from src.common_modules.data_source import DataSource
 from src.common_modules.execute_decorator import message_execute_decorator
+from src.common_modules.custom_sender import send_long_message
 
 bot = telebot.TeleBot(global_context.BOT_TOKEN)
 logger = Logger(is_poduction=global_context.IS_PRODUCTION)
@@ -27,12 +28,12 @@ def error_handler(message, error):
                                           'если ты расскажешь, какая команда вызвала ошибку с помощью /feedback')
         for admin in global_context.SUDO_USERS:
             try:
-                bot.send_message(admin, error_data)
+                send_long_message(bot, admin, error_data)
             except Exception as e:
                 logger.e(f"FATAL: can't send error message to admin, causing error: {str(e)}"
                          f'\nError to send: {error_data}')
     else:
-        bot.send_message(message.chat.id, error_data)
+        send_long_message(bot, message.chat.id, error_data)
 
 
 msg_executor = message_execute_decorator(logger=logger, on_error=error_handler)
@@ -62,6 +63,8 @@ def absolutely_all_handler(message):
         if first_word[0] == '/':
             first_word = first_word[1:]
         has_text = True
+    logger.i(f"message_author: {message_author} current route: {current_route}; "
+             f"first_word: {first_word}; lower_message: {lower_message}")
     for cmd in commands:
         if cmd.public or is_admin:
             # TODO: сделать предсказумую логику для взаимодействия с командами по путям
@@ -77,3 +80,24 @@ def absolutely_all_handler(message):
                     logger=logger
                 )
     return bot.send_message(chat_id, 'Кажется я не знаю такой команды. Попробуй /help')
+
+
+@bot.callback_query_handler(func=lambda query: True)
+def callback_handler(query):
+    if query.data is not None:
+        base_func_route = ParsedRoute(query.data)
+        query_author = query.from_user.id
+        is_admin = database.is_admin(query_author) or query_author in global_context.SUDO_USERS
+        current_route = database.get_current_route(query_author)
+        logger.i(f'query_author: {query_author} base_func_route: {base_func_route}')
+        for cmd in commands:
+            if cmd.public or is_admin:
+                if base_func_route.route == cmd.route:
+                    return cmd.run(
+                        query=query,
+                        bot=bot,
+                        database=database,
+                        current_route=current_route,
+                        is_admin=is_admin,
+                        logger=logger
+                    )

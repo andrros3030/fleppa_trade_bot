@@ -1,8 +1,18 @@
 """
 В этом файле описана логика работы с путями, которые мы храним для каждого пользователя
++ константные пути для команд
 NO PROJECT IMPORTS IN THIS FILE
 """
-DEFAULT_ROUTE = '/'  # Корневое значение, когда пользователь не зашёл ни в какуб команду
+DEFAULT_ROUTE = '/'  # Корневое значение, когда пользователь не зашёл ни в какую команду
+START_ROUTE = '/start'
+MENU_ROUTE = '/menu'
+HELP_ROUTE = '/help'
+CURRENCY_ROUTE = '/currency'
+CURRENCY_GRAPH_ROUTE = '/currency_graph'
+TOTEM_ROUTE = '/totem'
+DIPLOMA_ROUTE = '/diploma'
+FEEDBACK_ROUTE = '/feedback'
+# TODO: map of admin commands
 
 
 class ParsedRoute:
@@ -34,7 +44,10 @@ class ParsedRoute:
             raise Exception(f'Found more than one argument delimiter ("?") in route: {unparsed_route}')
 
     def __str__(self):
-        res = f'{self.route}'
-        if self.args is None:
+        res = self.route
+        if self.args is None or len(self.args) == 0:
             return res
-        return res + '?' + '&&'.join(map(lambda x, y: f'{x}={y}', self.args.items()))
+        return res + '?' + '&&'.join(map(lambda x: f'{x}={self.args[x]}', self.args.keys()))
+
+    def __eq__(self, other: str):
+        return self.route == other

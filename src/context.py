@@ -103,15 +103,22 @@ class CallContext:
     """
     bot: telebot.TeleBot
     __message: telebot.types.Message
+    __query: telebot.types.CallbackQuery
     current_route: ParsedRoute
     database: DataSource
     logger: Logger
+    reply_markup: telebot.types.InlineKeyboardMarkup
 
     # TODO: нужно ли прокидывать логер через контекст?
     def __init__(self, bot: telebot.TeleBot, database: DataSource,
-                 message: telebot.types.Message, is_admin, current_route: ParsedRoute, base_route, logger: Logger):
+                 is_admin, current_route: ParsedRoute, base_route, logger: Logger,
+                 reply_markup: telebot.types.InlineKeyboardMarkup,
+                 message: telebot.types.Message = None, query: telebot.types.CallbackQuery = None
+                 ):
+        self.reply_markup = reply_markup
         self.is_admin = is_admin
         self.__message = message
+        self.__query = query
         self.bot = bot
         self.database = database
         self.current_route = current_route
@@ -144,10 +151,14 @@ class CallContext:
 
     @property
     def chat_id(self) -> int:
+        if self.__message is None:
+            return self.__query.message.chat.id
         return self.__message.chat.id
 
     @property
     def user_data(self) -> telebot.types.User:
+        if self.__message is None:
+            return self.__query.from_user
         return self.__message.from_user
 
     @property
@@ -156,10 +167,14 @@ class CallContext:
 
     @property
     def text(self) -> str or None:
+        if self.__message is None:
+            return None
         return self.__message.text
 
     @property
     def reply_data(self) -> telebot.types.Message or None:
+        if type(self.__message) is not telebot.types.Message:
+            return None
         return self.__message.reply_to_message
 
     def __str__(self):
