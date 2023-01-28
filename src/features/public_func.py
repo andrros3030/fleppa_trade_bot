@@ -97,7 +97,7 @@ def say_wellcome(cc: CallContext):
 def currency(cc: CallContext):
     currency_tickers = ['USD', 'EUR', 'CNY']
     info = currency_info(currency_tickers)
-    result = [f'Курсы от {info["trade_day"]} (изменение к закрытию {info["trade_date_before"]})', '']
+    result = [f'Курсы от {info["trade_day"]} {info["request_time"]} (изменение к закрытию {info["trade_date_before"]})', '']
     for i in currency_tickers:
         result.append(info[i]['full_info'])
 
