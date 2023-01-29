@@ -1,5 +1,6 @@
-from src.context import CallContext
+from src.context import CallContext, global_context
 from telebot.apihelper import ApiTelegramException
+from src.common_modules.markups import back_transition, markup_transitions
 
 
 def reply(cc: CallContext):
@@ -19,8 +20,8 @@ def reply(cc: CallContext):
                                         f"@{str(feedback_author.username)}, id='{feedback_author.id}', "
                                         f"message_id={cc.reply_data.message_id}")
     else:
-        reply_chat_id = cc.current_route.args['chat_id']
-        reply_forwarded = cc.current_route.args['message_id']
+        reply_chat_id = cc.current_route.get_arg('chat_id')
+        reply_forwarded = cc.current_route.get_arg('message_id')
         if reply_chat_id is None or reply_forwarded is None:
             return cc.bot.send_message(cc.chat_id, f'Не удалось ответить на сообщение с пустым chat_id или message_id: '
                                                    f'{str(cc.current_route)}')
@@ -64,7 +65,7 @@ def send_to_public(cc: CallContext):
         # TODO: ask for message to send for everyone
         pass
     else:
-        if cc.current_route.args is None or len(cc.current_route.args) == 0:
+        if True:  # cc.current_route.args is None or len(cc.current_route.args) == 0:
             # TODO: save message and ask for query
             cc.bot.send_message(cc.chat_id, "Введи блок where (и далее) для команды отбора пользователей из t_users "
                                             "(например: where mod(pk_id, 1) = 1 limit 100 "
@@ -74,3 +75,30 @@ def send_to_public(cc: CallContext):
         else:
             # TODO: count affecting users in query, save query and ask for confirmation
             pass
+
+
+def feedback(cc: CallContext):
+    if cc.current_route != cc.base_route:
+        cc.logger.i(f'feedback for {cc.message_author} started')
+        if cc.database.is_banned(cc.message_author):
+            cc.bot.send_message(cc.chat_id, 'Отправка фидбэка недоступна')
+            return
+        cc.database.set_route(cc.message_author, route=cc.base_route)
+        cc.bot.send_message(cc.chat_id, 'Пожалуйста, отправьте свой фид-бэк о работе бота. '
+                                        'Вы можете добавить фото или видео, админы посмотрят их и вернутся в чат',
+                            reply_markup=markup_transitions(
+                                [back_transition]
+                            ))
+    else:
+        for feedback_chat in global_context.FEEDBACK_CHAT_ID:
+            res = cc.bot.forward_message(feedback_chat, cc.chat_id, cc.message_id)
+            cc.database.save_feedback_origin(
+                user_id=cc.message_author,
+                origin_message_id=cc.message_id,
+                forwarded_message_id=res.message_id
+            )
+        cc.bot.send_message(cc.chat_id, reply_to_message_id=cc.message_id, text='Фид-бэк отправлен админам, спасибо',
+                            reply_markup=markup_transitions(
+                                [back_transition], drop_this=False
+                            ))
+        cc.database.set_route(cc.message_author)

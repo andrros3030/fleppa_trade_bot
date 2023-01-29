@@ -7,7 +7,7 @@ import telebot
 from src.context import global_context
 from src.commands import commands
 from src.base_modules.logger import Logger
-from src.base_modules.routes import DEFAULT_ROUTE, ParsedRoute
+from src.base_modules.routes import DEFAULT_ROUTE, ParsedRoute, DROP_PREV_ARG
 from src.common_modules.data_source import DataSource
 from src.common_modules.execute_decorator import message_execute_decorator
 from src.common_modules.custom_sender import send_long_message
@@ -28,12 +28,12 @@ def error_handler(message, error):
                                           'если ты расскажешь, какая команда вызвала ошибку с помощью /feedback')
         for admin in global_context.SUDO_USERS:
             try:
-                send_long_message(bot, admin, error_data)
+                send_long_message(bot, admin, error_data, logger)
             except Exception as e:
                 logger.e(f"FATAL: can't send error message to admin, causing error: {str(e)}"
                          f'\nError to send: {error_data}')
     else:
-        send_long_message(bot, message.chat.id, error_data)
+        send_long_message(bot, message.chat.id, error_data, logger)
 
 
 msg_executor = message_execute_decorator(logger=logger, on_error=error_handler)
@@ -42,7 +42,7 @@ msg_executor = message_execute_decorator(logger=logger, on_error=error_handler)
 @bot.message_handler(func=lambda message: True, content_types=['audio', 'photo', 'voice', 'video', 'document',
                                                                'text', 'location', 'contact', 'sticker'])
 @msg_executor
-def absolutely_all_handler(message):
+def absolutely_all_handler(message: telebot.types.Message):
     """
     Агрегатор всех сообщений. Подбирает доступную команду пользователю для заданного сообщения и текущего пути.
 
@@ -65,12 +65,10 @@ def absolutely_all_handler(message):
         has_text = True
     logger.i(f"message_author: {message_author} current route: {current_route}; "
              f"first_word: {first_word}; lower_message: {lower_message}")
+    matched_by_name = None
     for cmd in commands:
         if cmd.public or is_admin:
-            # TODO: сделать предсказумую логику для взаимодействия с командами по путям
-            # возможно придется написать обработчик посложнее для проверки сигнатуры команды
-            if (has_text and (first_word in cmd.commands or lower_message in cmd.commands)) or \
-                    (current_route.route == cmd.route and cmd.route != DEFAULT_ROUTE):
+            if current_route.route == cmd.route and cmd.route != DEFAULT_ROUTE:
                 return cmd.run(
                     message=message,
                     bot=bot,
@@ -79,21 +77,36 @@ def absolutely_all_handler(message):
                     is_admin=is_admin,
                     logger=logger
                 )
+            if has_text and (first_word in cmd.commands or lower_message in cmd.commands):
+                matched_by_name = cmd
+    if matched_by_name is not None:
+        # Эта точка возникает в случае, если не удалось подобрать пользователю команду по заданному роуту.
+        # Кажется, это может быть только в админских командах без роута?
+        return matched_by_name.run(
+            message=message,
+            bot=bot,
+            database=database,
+            current_route=current_route,
+            is_admin=is_admin,
+            logger=logger
+        )
     return bot.send_message(chat_id, 'Кажется я не знаю такой команды. Попробуй /help')
 
 
 @bot.callback_query_handler(func=lambda query: True)
-def callback_handler(query):
+@msg_executor
+def callback_handler(query: telebot.types.CallbackQuery):
     if query.data is not None:
         base_func_route = ParsedRoute(query.data)
         query_author = query.from_user.id
         is_admin = database.is_admin(query_author) or query_author in global_context.SUDO_USERS
         current_route = database.get_current_route(query_author)
-        logger.i(f'query_author: {query_author} base_func_route: {base_func_route}')
+        logger.i(f'query_author: {query_author} called_route: {base_func_route} current_route: {current_route}')
+        logger.i(f'results of parsing route: {base_func_route.route}')
         for cmd in commands:
             if cmd.public or is_admin:
                 if base_func_route.route == cmd.route:
-                    return cmd.run(
+                    cmd.run(
                         query=query,
                         bot=bot,
                         database=database,
@@ -101,3 +114,10 @@ def callback_handler(query):
                         is_admin=is_admin,
                         logger=logger
                     )
+        # очистка кнопок под сообщением, на которое нажали
+        bot.edit_message_reply_markup(chat_id=query.message.chat.id, message_id=query.message.id)
+        # удаление сообщения, если его не нужно сохранять
+        should_drop = base_func_route.get_arg(DROP_PREV_ARG)
+        if (should_drop is not None) and str(should_drop).lower() == 'true':
+            logger.i('Deleting callback message')
+            bot.delete_message(chat_id=query.message.chat.id, message_id=query.message.id)

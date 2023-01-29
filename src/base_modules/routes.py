@@ -12,6 +12,10 @@ CURRENCY_GRAPH_ROUTE = '/currency_graph'
 TOTEM_ROUTE = '/totem'
 DIPLOMA_ROUTE = '/diploma'
 FEEDBACK_ROUTE = '/feedback'
+DROP_PREV_ARG = 'drop-prev'
+DATA_ARG = 'text'  # Вся жизнь это симуляция, бот тебя выдумал, кнопки это то же самое что и текст
+
+
 # TODO: map of admin commands
 
 
@@ -24,6 +28,13 @@ class ParsedRoute:
 
     args - словарь с ключами и значениями из пути, и ключ и значение - строка
     """
+    @classmethod
+    def serialize(cls, route: str, args: dict) -> str:
+        res = route
+        if args is None or len(args) == 0:
+            return res
+        return res + '?' + '&&'.join(map(lambda x: f'{x}={args[x]}', args.keys()))
+
     def __init__(self, unparsed_route: str):
         """
         :param unparsed_route: строка вида '/route?arg1=val1&&arg2=val2'
@@ -31,23 +42,30 @@ class ParsedRoute:
         split_by_question = list(unparsed_route.split('?'))
         split_len = len(split_by_question)
         self.route = DEFAULT_ROUTE
-        self.args = dict()
+        self._args = dict()
         if split_len == 1:
             self.route = unparsed_route
         elif split_len == 2:
             self.route = split_by_question[0]
-            self.args = {argument.split('=')[0]: argument.split('=')[1]
-                         for argument in split_by_question[1].split('&&')
-                         }
+            self._args = {argument.split('=')[0]: argument.split('=')[1]
+                          for argument in split_by_question[1].split('&&')
+                          }
         else:
             # TODO: что в такой ситуации делать?
             raise Exception(f'Found more than one argument delimiter ("?") in route: {unparsed_route}')
 
     def __str__(self):
-        res = self.route
-        if self.args is None or len(self.args) == 0:
-            return res
-        return res + '?' + '&&'.join(map(lambda x: f'{x}={self.args[x]}', self.args.keys()))
+        return self.serialize(self.route, self._args)
 
     def __eq__(self, other: str):
         return self.route == other
+
+    def get_arg(self, key):
+        if self._args is None or key not in self._args:
+            return None
+        return self._args[key]
+
+    def set_arg(self, key, value):
+        if self._args is None:
+            self._args = {key: value}
+        self._args[key] = value

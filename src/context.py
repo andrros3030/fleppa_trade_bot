@@ -6,7 +6,7 @@ ONLY BASE AND COMMON MODULES ALLOWED TO BE IMPORTED
 import os
 import telebot.types
 from src.base_modules.db_auth_context import DBAuthContext
-from src.base_modules.routes import ParsedRoute
+from src.base_modules.routes import ParsedRoute, DATA_ARG
 from src.base_modules.logger import Logger
 from src.base_modules.totem import Totem
 from src.common_modules.data_source import DataSource
@@ -107,27 +107,31 @@ class CallContext:
     current_route: ParsedRoute
     database: DataSource
     logger: Logger
-    reply_markup: telebot.types.InlineKeyboardMarkup
 
     # TODO: нужно ли прокидывать логер через контекст?
     def __init__(self, bot: telebot.TeleBot, database: DataSource,
                  is_admin, current_route: ParsedRoute, base_route, logger: Logger,
-                 reply_markup: telebot.types.InlineKeyboardMarkup,
                  message: telebot.types.Message = None, query: telebot.types.CallbackQuery = None
                  ):
-        self.reply_markup = reply_markup
+        self.logger = logger
+        self.bot = bot
+        self.database = database
         self.is_admin = is_admin
         self.__message = message
         self.__query = query
-        self.bot = bot
-        self.database = database
         self.current_route = current_route
         self.base_route = base_route
         self.splitted_message = []
+        # Инициализация полей со сложной логикой
         if self.text is not None:
             self.splitted_message = list(map(lambda el: str(el).lower(), self.text.split()))
-        self.logger = logger
         self.totem = Totem(self.message_author)
+
+    @property
+    def forced_route(self) -> ParsedRoute:
+        if self.__query is None:
+            return self.current_route
+        return ParsedRoute(self.__query.data)
 
     @property
     def caption(self) -> str or None:
@@ -168,7 +172,8 @@ class CallContext:
     @property
     def text(self) -> str or None:
         if self.__message is None:
-            return None
+            parsed_data = ParsedRoute(self.__query.data)
+            return parsed_data.get_arg(DATA_ARG)
         return self.__message.text
 
     @property
@@ -176,6 +181,14 @@ class CallContext:
         if type(self.__message) is not telebot.types.Message:
             return None
         return self.__message.reply_to_message
+
+    @property
+    def trigger_by_command(self) -> bool:
+        return self.current_route != self.base_route
+
+    @property
+    def triggered_without_param(self):
+        return self.text is None or self.text == self.base_route
 
     def __str__(self):
         return str(self.__dict__)

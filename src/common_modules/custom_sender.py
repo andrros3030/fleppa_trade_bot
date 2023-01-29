@@ -1,7 +1,9 @@
+from src.base_modules.logger import Logger
 from telebot.apihelper import ApiTelegramException
+import telebot
 
 
-def try_to_send(bot, chat_id, message_text, logger):
+def try_to_send(bot: telebot.TeleBot, chat_id, message_text, logger: Logger):
     """
     Функцию нужно использовать всегда, когда пользователь мог забанить бота.
     Например, если бот отвечает на команду не сразу или если это общая рассылка
@@ -24,7 +26,7 @@ def try_to_send(bot, chat_id, message_text, logger):
         return False
 
 
-def send_long_message(bot, chat_id, message_text, logger):
+def send_long_message(bot: telebot.TeleBot, chat_id, message_text, logger: Logger):
     if len(message_text) > 4095:
         for x in range(0, len(message_text), 4095):
             try_to_send(bot, chat_id, message_text[x:x + 4095], logger)
