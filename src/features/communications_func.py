@@ -1,6 +1,7 @@
 from src.context import CallContext, global_context
 from telebot.apihelper import ApiTelegramException
 from src.common_modules.markups import back_transition, markup_transitions
+from src.common_modules.custom_sender import try_to_send
 
 
 def reply(cc: CallContext):
@@ -60,24 +61,57 @@ def reply(cc: CallContext):
 
 
 def send_to_public(cc: CallContext):
-    print(cc.base_trigger)
-    print(cc.triggered_without_param)
-    # TODO: send to all (or to group) function with sql and confirmation + users count
-    if cc.base_trigger and cc.triggered_without_param:
-        print(1)
-        # TODO: ask for message to send for everyone
+    command_text = cc.text.upper()
+    if command_text == 'CANCEL':
+        cc.database.set_route(user_id=cc.message_author)
+        return cc.bot.send_message(cc.chat_id, "Вышел из команды")
+    if cc.base_trigger:
         cc.database.set_route(user_id=cc.message_author, route=cc.base_route)
+        return cc.bot.send_message(cc.chat_id, 'Введи сообщение для рассылки')
     else:
-        print(2)
-        # if True:  # cc.current_route.args is None or len(cc.current_route.args) == 0:
-        #     # TODO: save message and ask for query
-        #     cc.bot.send_message(cc.chat_id, "Введи блок where (и далее) для команды отбора пользователей из t_users "
-        #                                     "(например: where mod(pk_id, 1) = 1 limit 100 "
-        #                                     "-- вернет половину пользователей или 100, смотря чего будет меньше)")
-        #     pass
-        # else:
-        #     # TODO: count affecting users in query, save query and ask for confirmation
-        #     pass
+        if cc.current_route.get_arg('text') is None:
+            cc.current_route.set_arg('text', cc.text)
+            res = cc.database.set_route(user_id=cc.message_author, route=str(cc.current_route))
+            if res:
+                return cc.bot.send_message(cc.chat_id, "Введи блок where (и далее) "
+                                                       "для команды отбора пользователей из t_users "
+                                                       "(например: where mod(pk_id, 1) = 1 limit 100 "
+                                                       "-- вернет половину (нет) пользователей или 100, "
+                                                       "смотря чего будет меньше)")
+            else:
+                return cc.bot.send_message(cc.chat_id, "Кажется, не удалось записать такое сообщение")
+        else:
+            if cc.current_route.get_arg('query') is None:
+                cc.current_route.set_arg('query', cc.text)
+                cc.database.set_route(user_id=cc.message_author, route=str(cc.current_route))
+                result = cc.database.unsafe_exec("SELECT COUNT(*) FROM T_USERS " + str(cc.text))
+                cc.bot.send_message(cc.chat_id, f"Проверьте сообщение и получателей [test] "
+                                                f"и подтвердите [confirm] отправку следующего сообщения "
+                                                f"(рассылка должна затронуть {result[0][0]} пользователей):")
+                return cc.bot.send_message(cc.chat_id, cc.current_route.get_arg('text'))
+            else:
+                recipients = cc.database.unsafe_exec("SELECT PK_ID FROM T_USERS "
+                                                     + str(cc.current_route.get_arg('query')))
+                recipients_count = len(recipients)
+                if command_text == 'TEST':
+                    cc.bot.send_message(cc.chat_id, cc.current_route.get_arg('text'))
+                    cc.bot.send_message(cc.chat_id, f"Рассылка будет отправлена {recipients_count} пользователям:")
+                    cc.bot.send_message(cc.chat_id, ", ".join([el[0] for el in recipients]))
+                if command_text == 'CONFIRM':
+                    counting = 0
+                    bad = 0
+                    info_message = cc.bot.send_message(cc.chat_id, f"Приступаю к рассылке").message_id
+                    for el in recipients:
+                        res = try_to_send(bot=cc.bot, logger=cc.logger, chat_id=el[0],
+                                          message_text=cc.current_route.get_arg('text'))
+                        if res:
+                            counting += 1
+                        else:
+                            bad += 1
+                        cc.bot.edit_message_text(chat_id=cc.chat_id, message_id=info_message,
+                                                 text=f"Отправил {counting} ({100*counting/recipients_count}%)\n"
+                                                      f"Ошибок {bad} ({100*bad/recipients_count}%)")
+                    cc.database.set_route(user_id=cc.message_author)
 
 
 def feedback(cc: CallContext):

@@ -3,6 +3,9 @@
 + константные пути для команд
 NO PROJECT IMPORTS IN THIS FILE
 """
+from urllib.parse import urlparse, parse_qsl
+
+
 DEFAULT_ROUTE = '/'  # Корневое значение, когда пользователь не зашёл ни в какую команду
 START_ROUTE = '/start'
 MENU_ROUTE = '/menu'
@@ -34,26 +37,15 @@ class ParsedRoute:
         res = route
         if args is None or len(args) == 0:
             return res
-        return res + '?' + '&&'.join(map(lambda x: f'{x}={args[x]}', args.keys()))
+        return res + '?' + '&'.join(map(lambda x: '%s=%s' % (x, args[x]), args.keys()))
 
     def __init__(self, unparsed_route: str):
         """
-        :param unparsed_route: строка вида '/route?arg1=val1&&arg2=val2'
+        :param unparsed_route: строка вида '/route?arg1=val1&arg2=val2'
         """
-        split_by_question = list(unparsed_route.split('?'))
-        split_len = len(split_by_question)
-        self.route = DEFAULT_ROUTE
-        self._args = dict()
-        if split_len == 1:
-            self.route = unparsed_route
-        elif split_len == 2:
-            self.route = split_by_question[0]
-            self._args = {argument.split('=')[0]: argument.split('=')[1]
-                          for argument in split_by_question[1].split('&&')
-                          }
-        else:
-            # TODO: что в такой ситуации делать?
-            raise Exception(f'Found more than one argument delimiter ("?") in route: {unparsed_route}')
+        parse_result = urlparse(unparsed_route)
+        self.route = parse_result.path
+        self._args = dict(parse_qsl(parse_result.query))  # функция спокойно парсит всё, кроме &
 
     def __str__(self):
         return self.serialize(self.route, self._args)
