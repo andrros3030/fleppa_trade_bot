@@ -4,6 +4,8 @@ NO PROJECT IMPORTS EXCEPT BASE_MODULES
 """
 import psycopg2
 import uuid
+
+from src.base_modules.constants import START_MESSAGE
 from src.base_modules.logger import Logger
 from src.base_modules.routes import DEFAULT_ROUTE, ParsedRoute
 from src.base_modules.db_auth_context import DBAuthContext
@@ -208,9 +210,7 @@ class DataSource:
         return link_id
 
     def get_start_message(self, start_link: str = None) -> str:
-        msg = 'Здарова, скоро тут будет супер трейд стратегия от Шлеппы, ' \
-              'а пока - держи мой пульс ' \
-              'https://www.tinkoff.ru/invest/social/profile/fleppa_war_crimes_fa?utm_source=share'
+        msg = START_MESSAGE
         self.logger.v('Trying to get start message for link: ' + str(start_link))
         if start_link is not None:
             try:
@@ -228,6 +228,18 @@ class DataSource:
                 self.__error_handler(e)
         self.logger.v('Returning default message')
         return msg
+
+    def save_message(self, user_id, message_id, message_text, message_content_type):
+        query = "INSERT INTO t_messages (pk_id, fk_user, v_message_id, v_message_text, v_message_content_type) " \
+                "VALUES (%s, %s, %s, %s, %s)"
+        return self.__make_query(query,
+                                 params=(str(uuid.uuid4()), user_id, message_id, message_text, message_content_type))
+
+    def save_callback(self, user_id, message_id, buttons, callback_data):
+        query = "INSERT INTO t_callbacks (pk_id, fk_user, v_message_id, v_buttons, v_callback_data) " \
+                "VALUES (%s, %s, %s, %s, %s)"
+        return self.__make_query(query,
+                                 params=(str(uuid.uuid4()), user_id, message_id, buttons, callback_data))
 
     def __exit__(self, exc_type, exc_value, traceback):
         self.conn.close()

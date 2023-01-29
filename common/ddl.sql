@@ -24,7 +24,7 @@ create table t_users(
     pk_id       varchar(40) primary key not null,
     l_admin     bool not null default false,
     l_banned    bool not null default false,
-    v_position  varchar(200) not null default '/',
+    v_position  varchar(4000) not null default '/',
     ts_reg      timestamp not null default current_timestamp,
     fk_involve  varchar(40) null references t_involve(pk_id) on delete set null
 );
@@ -47,11 +47,37 @@ create table t_feedback(
     ts_requested    timestamp not null default current_timestamp,
     ts_answered     timestamp null
 );
+/*
+ Таблица СООБЩЕНИЯ
+ уникальный id (uuid)
+ ссылка на пользователя
+ id сообщения в диалоге
+ текст сообщения
+ тип контента сообщения
+ дата получения сообщения
+*/
 create table t_messages(
     pk_id                   varchar(40) primary key not null,
     fk_user                 varchar(40) not null references t_users(pk_id) on delete cascade,
     v_message_id            varchar(40) not null,
-    v_message_text          varchar(4000) not null,
+    v_message_text          varchar(4100) null,
     v_message_content_type  varchar(20) not null,
     ts_saved                timestamp not null default current_timestamp
 );
+/*
+ Таблица КОЛБЕКИ
+ уникальный id (uuid)
+ ссылка на пользователя
+ id сообщения с кнопкой в диалоге (по идее может быть ссылкой на t_messages)
+ текст кнопки
+ данные, которые несла кнопка
+ дата получения сообщения
+*/
+create table t_callbacks(
+    pk_id                   varchar(40) primary key not null,
+    fk_user                 varchar(40) not null references t_users(pk_id) on delete cascade,
+    v_message_id            varchar(40) not null,
+    v_buttons               varchar(4000) not null,
+    v_callback_data         varchar(4000) not null,
+    ts_saved                timestamp not null default current_timestamp
+)

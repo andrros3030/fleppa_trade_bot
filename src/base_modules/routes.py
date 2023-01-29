@@ -1,8 +1,27 @@
 """
 В этом файле описана логика работы с путями, которые мы храним для каждого пользователя
++ константные пути для команд
 NO PROJECT IMPORTS IN THIS FILE
 """
-DEFAULT_ROUTE = '/'  # Корневое значение, когда пользователь не зашёл ни в какуб команду
+from typing import List
+from urllib.parse import urlparse, urlencode, parse_qs
+
+
+DEFAULT_ROUTE = '/'  # Корневое значение, когда пользователь не зашёл ни в какую команду
+START_ROUTE = '/start'
+MENU_ROUTE = '/menu'
+HELP_ROUTE = '/help'
+CURRENCY_ROUTE = '/currency'
+CURRENCY_GRAPH_ROUTE = '/currency_graph'
+TOTEM_ROUTE = '/totem'
+DIPLOMA_ROUTE = '/diploma'
+FEEDBACK_ROUTE = '/feedback'
+SEND_ROUTE = '/send'
+DROP_PREV_ARG = 'drop-prev'
+DATA_ARG = 'text'  # Вся жизнь это симуляция, бот тебя выдумал, кнопки это то же самое что и текст
+
+
+# TODO: map of admin commands
 
 
 class ParsedRoute:
@@ -14,27 +33,38 @@ class ParsedRoute:
 
     args - словарь с ключами и значениями из пути, и ключ и значение - строка
     """
+    @classmethod
+    def serialize(cls, route: str, args: dict) -> str:
+        return route + '?' + urlencode(query=args, doseq=True)
+        # res = route
+        # if args is None or len(args) == 0:
+        #     return res
+        # return res + '?' + '&'.join(map(lambda x: '%s=%s' % (x, args[x]), args.keys()))
+
     def __init__(self, unparsed_route: str):
         """
-        :param unparsed_route: строка вида '/route?arg1=val1&&arg2=val2'
+        :param unparsed_route: строка вида '/route?arg1=val1&arg2=val2'
         """
-        split_by_question = list(unparsed_route.split('?'))
-        split_len = len(split_by_question)
-        self.route = DEFAULT_ROUTE
-        self.args = dict()
-        if split_len == 1:
-            self.route = unparsed_route
-        elif split_len == 2:
-            self.route = split_by_question[0]
-            self.args = {argument.split('=')[0]: argument.split('=')[1]
-                         for argument in split_by_question[1].split('&&')
-                         }
-        else:
-            # TODO: что в такой ситуации делать?
-            raise Exception(f'Found more than one argument delimiter ("?") in route: {unparsed_route}')
+        parse_result = urlparse(unparsed_route)
+        self.route = parse_result.path
+        self._args = dict(parse_qs(parse_result.query))  # функция спокойно парсит всё, кроме &
 
     def __str__(self):
-        res = f'{self.route}'
-        if self.args is None:
-            return res
-        return res + '?' + '&&'.join(map(lambda x, y: f'{x}={y}', self.args.items()))
+        return self.serialize(self.route, self._args)
+
+    def __eq__(self, other: str):
+        return self.route == other
+
+    def get_arg(self, key) -> List[str] or None:
+        """
+        :param key: ключ параметра
+        :return: СПИСОК параметров
+        """
+        if self._args is None or key not in self._args:
+            return None
+        return self._args[key]
+
+    def set_arg(self, key, value):
+        if self._args is None:
+            self._args = {key: value}
+        self._args[key] = value

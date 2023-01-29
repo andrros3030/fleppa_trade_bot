@@ -1,12 +1,16 @@
 """
 Это - прокси файл, для хранения существующих команд в боте
 """
-from src.base_modules.routes import DEFAULT_ROUTE
-from src.features.public_func import feedback, reply, say_wellcome, currency, currency_graph, get_diploma, get_totem
-from src.features.support_funcs import set_admin, exec_sql, get_environment, make_link, simulate_crash, make_request
+import src.base_modules.routes as routing
+import src.features.currency_func as tickers
+import src.features.personal_func as personal
+import src.features.support_funcs as support
+import src.features.communications_func as pr
+import src.features.common_func as common
 from src.context import CallContext
 
 
+# TODO: кажется, на примере reply_markup и base_route/route -- есть boiler plate
 class Command:
     """
     Структура данных "Команда", которая хранит все сведения о команде:
@@ -21,7 +25,7 @@ class Command:
     _accept_photo: bool
     _accept_sticker: bool
 
-    def __init__(self, alias: list, desc: str, route=DEFAULT_ROUTE, admin_only=False, function=None,
+    def __init__(self, alias: list, desc: str, route=routing.DEFAULT_ROUTE, admin_only=False, function=None,
                  accept_text=True, accept_photo=False, accept_sticker=False):
         """
         :param alias: набор слов, каждое из которых находясь на первом месте вызовет функцию
@@ -88,11 +92,13 @@ class Command:
             return self._desc
         return f'[ADMIN] {self._desc}'
 
-    def run(self, message, bot, database, current_route, is_admin, logger):
+    def run(self, bot, database, current_route, is_admin, logger, message=None, query=None):
         """
         Функция для запуска реальной функции команды (должна иметь cc: CallContext в сигнатуре)
 
         :param message: тригерное сообщение
+
+        :param query: тригерное событие (не сообщение)
 
         :param bot: объект бота, в который будут отправляться сообщения
 
@@ -107,13 +113,14 @@ class Command:
         """
         return self._function(
             cc=CallContext(
+                query=query,
                 message=message,
                 bot=bot,
                 database=database,
                 current_route=current_route,
                 base_route=self._route,
                 is_admin=is_admin,
-                logger=logger
+                logger=logger,
             )
         )
 
@@ -137,84 +144,126 @@ def generate_help(cc: CallContext):
 # TODO: кажется у пользователя не должно быть возможности запускать корневые функции,
 # когда он находится в контексте другой функции [/feedback, /reply и др]
 # в таком случае route будет вторым тригером для запуска функции, но не ясно, как показать, какие есть подкоманды
+# region public commands
+# TODO: enforce route for user commands || use codgen for this?
+help_command = Command(
+    function=generate_help,
+    alias=['help', "помощь", "команды", "доступные команды"],
+    desc='список всех команд',
+    route=routing.HELP_ROUTE
+)
+currency_command = Command(
+    function=tickers.currency,
+    alias=['currency', "курс", "курсы", "курсы валют", "курс валюты"],
+    desc='вывести курсы валют и динамику их изменения',
+    route=routing.CURRENCY_ROUTE
+)
+totem_command = Command(
+    function=personal.get_totem,
+    alias=['totem', "тотем", "кто я"],
+    desc='узнать свой тотем биржи',
+    route=routing.TOTEM_ROUTE
+)
+diploma_command = Command(
+    function=personal.get_diploma,
+    alias=['diploma', "диплом", "хочу диплом"],
+    desc='получить персональный диплом',
+    route=routing.DIPLOMA_ROUTE
+)
+currency_graph_command = Command(
+    function=tickers.currency_graph,
+    alias=['currency_graph', "график", "график валют"],
+    desc='вывести график курсов валют',
+    route=routing.CURRENCY_GRAPH_ROUTE
+)
+feedback_command = Command(
+    function=pr.feedback,
+    alias=['feedback', "отзыв", "фидбэк", "написать отзыв", "админ"],
+    desc='оставить отзыв о работе бота или предложить функциональность',
+    route=routing.FEEDBACK_ROUTE
+)
+welcome_command = Command(
+    function=common.say_welcome,
+    alias=['start', "начать"],
+    desc='вывести приветственное сообщение',
+    route=routing.START_ROUTE
+)
+menu_command = Command(
+    function=common.menu,
+    alias=['menu', 'меню', 'домой', 'назад'],
+    desc='меню бота',
+    route=routing.MENU_ROUTE
+)
+# endregion
+# region admin commands
+crash_command = Command(
+    function=support.simulate_crash,
+    alias=['crash'],
+    desc='крашнуться',
+    admin_only=True
+)
+reply_command = Command(
+    function=pr.reply,
+    alias=['reply'],
+    desc='ответить на фидбэк',
+    admin_only=True,
+    route='/reply'
+)
+env_command = Command(
+    function=support.get_environment,
+    alias=['env', 'prod', 'environment', 'среда'],
+    desc='вывести тип окружения',
+    admin_only=True,
+)
+sql_command = Command(
+    function=support.exec_sql,
+    alias=['sql', 'db'],
+    desc='взаимодействие с базой данных',
+    admin_only=True,
+)
+set_admin_command = Command(
+    function=support.set_admin,
+    alias=['set_admin', 'make_admin', 'do_admin'],
+    desc='сделать пользователя админом',
+    admin_only=True,
+)
+make_link_command = Command(
+    function=support.make_link,
+    alias=['make_link', 'getlink', 'ссылка', 'start_link'],
+    desc='создать ссылку на бота',
+    admin_only=True
+)
+request_command = Command(
+    function=support.make_request,
+    alias=['request'],
+    desc='отправить запрос',
+    admin_only=True
+)
+send_command = Command(
+    function=pr.send_to_public,
+    alias=['send', 'рассылка'],
+    desc='сделать расслыку',
+    admin_only=True,
+    route=routing.SEND_ROUTE
+)
+# endregion
 commands = [
-    Command(
-        function=generate_help,
-        alias=['help', "помощь", "команды", "доступные команды"],
-        desc='что умеет этот бот'
-    ),
-    Command(
-        function=say_wellcome,
-        alias=['start', "начать"],
-        desc='вывести приветственное сообщение',
-    ),
-    Command(
-        function=currency,
-        alias=['currency', "курс валюты"],
-        desc='вывести курсы валют и динамику их изменения'
-    ),
-    Command(
-        function=get_totem,
-        alias=['totem', "тотем", "кто я"],
-        desc='узнать свой тотем биржи'
-    ),
-    Command(
-        function=get_diploma,
-        alias=['diploma', "диплом", "хочу диплом"],
-        desc='получить персональный диплом'
-    ),
-    Command(
-        function=currency_graph,
-        alias=['currency_graph', "график", "график валют"],
-        desc='вывести график курсов валют'
-    ),
-    Command(
-        function=feedback,
-        alias=['feedback', "отзыв", "фидбэк", "написать отзыв", "админ"],
-        desc='оставить отзыв о работе бота или предложить функциональность',
-        route='/feedback'
-    ),
-    Command(
-        function=simulate_crash,
-        alias=['crash'],
-        desc='крашнуться',
-        admin_only=True
-    ),
-    Command(
-        function=reply,
-        alias=['reply'],
-        desc='ответить на фидбэк',
-        admin_only=True,
-        route='/reply'
-    ),
-    Command(
-        function=get_environment,
-        alias=['env', 'prod', 'environment', 'среда'],
-        desc='вывести тип окружения',
-        admin_only=True,
-    ),
-    Command(
-        function=exec_sql,
-        alias=['sql', 'db'],
-        desc='взаимодействие с базой данных',
-        admin_only=True,
-    ),
-    Command(
-        function=set_admin,
-        alias=['set_admin', 'make_admin', 'do_admin'],
-        desc='сделать пользователя админом',
-        admin_only=True,
-    ),
-    Command(
-        function=make_link,
-        alias=['make_link', 'getlink', 'ссылка', 'start_link'],
-        desc='создать ссылку на бота',
-        admin_only=True
-    ),
-    Command(
-        function=make_request,
-        alias=['request'],
-        desc='отправить запрос',
-        admin_only=True
-    )
+    # public commands >
+    menu_command,
+    help_command,
+    welcome_command,
+    currency_command,
+    currency_graph_command,
+    totem_command,
+    diploma_command,
+    feedback_command,
+    # admin commands >
+    crash_command,
+    reply_command,
+    env_command,
+    sql_command,
+    set_admin_command,
+    make_link_command,
+    request_command,
+    send_command
 ]

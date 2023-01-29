@@ -1,0 +1,39 @@
+{
+  "id": "1886065890391198265",
+  "from": {
+    "id": 439133935,
+    "is_bot": false,
+    "first_name": "Андрей",
+    "username": "Mrghallo",
+    "language_code": "ru"
+  },
+  "message": {
+    "message_id": 1314,
+    "from": {
+      "id": 5814306355,
+      "is_bot": true,
+      "first_name": "Fleppa TEST bot #1",
+      "username": "fleppa_test_bot"
+    },
+    "chat": {
+      "id": 439133935,
+      "first_name": "Андрей",
+      "username": "Mrghallo",
+      "type": "private"
+    },
+    "date": 1674906235,
+    "text": "Курсы от 2023-01-27 (изменение к закрытию 01-26-2023)\n\nUSD: 69.4563 (0.23 % \U0001f7e2)\nEUR: 75.3471 (-0.22 % 🔴)\nCNY: 10.2636 (-0.14 % 🔴)",
+    "reply_markup": {
+      "inline_keyboard": [
+        [
+          {
+            "text": "Построить график",
+            "callback_data": "/currency_graph?currencies=USD;EUR;CNY"
+          }
+        ]
+      ]
+    }
+  },
+  "chat_instance": "2799223444349472603",
+  "data": "/currency_graph?currencies=USD;EUR;CNY"
+}
