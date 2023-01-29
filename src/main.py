@@ -71,6 +71,8 @@ def absolutely_all_handler(message: telebot.types.Message):
         if first_word[0] == '/':
             first_word = first_word[1:]
         has_text = True
+    database.save_message(user_id=message_author, message_id=message.id, message_text=message.text,
+                          message_content_type=message.content_type)
     logger.i(f"message_author: {message_author} current route: {current_route}; "
              f"first_word: {first_word}; lower_message: {lower_message}")
     matched_by_name = None
@@ -109,6 +111,8 @@ def callback_handler(query: telebot.types.CallbackQuery):
         query_author = query.from_user.id
         is_admin = database.is_admin(query_author) or query_author in global_context.SUDO_USERS
         current_route = database.get_current_route(query_author)
+        database.save_callback(user_id=query_author, message_id=query.message.id, callback_data=query.data,
+                               buttons=query.message.reply_markup.to_json())
         logger.i(f'query_author: {query_author} called_route: {base_func_route} current_route: {current_route}')
         logger.i(f'results of parsing route: {base_func_route.route}')
         for cmd in commands:

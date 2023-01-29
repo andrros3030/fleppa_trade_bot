@@ -229,5 +229,17 @@ class DataSource:
         self.logger.v('Returning default message')
         return msg
 
+    def save_message(self, user_id, message_id, message_text, message_content_type):
+        query = "INSERT INTO t_messages (pk_id, fk_user, v_message_id, v_message_text, v_message_content_type) " \
+                "VALUES (%s, %s, %s, %s, %s)"
+        return self.__make_query(query,
+                                 params=(str(uuid.uuid4()), user_id, message_id, message_text, message_content_type))
+
+    def save_callback(self, user_id, message_id, buttons, callback_data):
+        query = "INSERT INTO t_callbacks (pk_id, fk_user, v_message_id, v_buttons, v_callback_data) " \
+                "VALUES (%s, %s, %s, %s, %s)"
+        return self.__make_query(query,
+                                 params=(str(uuid.uuid4()), user_id, message_id, buttons, callback_data))
+
     def __exit__(self, exc_type, exc_value, traceback):
         self.conn.close()

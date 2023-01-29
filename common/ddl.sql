@@ -60,7 +60,7 @@ create table t_messages(
     pk_id                   varchar(40) primary key not null,
     fk_user                 varchar(40) not null references t_users(pk_id) on delete cascade,
     v_message_id            varchar(40) not null,
-    v_message_text          varchar(4000) not null,
+    v_message_text          varchar(4100) null,
     v_message_content_type  varchar(20) not null,
     ts_saved                timestamp not null default current_timestamp
 );
@@ -77,7 +77,7 @@ create table t_callbacks(
     pk_id                   varchar(40) primary key not null,
     fk_user                 varchar(40) not null references t_users(pk_id) on delete cascade,
     v_message_id            varchar(40) not null,
-    v_button_text           varchar(40) not null,
+    v_buttons               varchar(4000) not null,
     v_callback_data         varchar(4000) not null,
     ts_saved                timestamp not null default current_timestamp
 )
