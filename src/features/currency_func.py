@@ -32,7 +32,7 @@ def match_many_tickers(user_query):
 
 
 def currency(cc: CallContext):
-    if cc.trigger_by_command and cc.triggered_without_param:
+    if cc.base_trigger:
         cc.database.set_route(user_id=cc.message_author, route=cc.base_route)
         cc.bot.send_message(cc.chat_id, text="Выбери нужную валюту",
                             reply_markup=markup_transitions(currency_options(is_graph=False)))
@@ -57,7 +57,7 @@ def currency(cc: CallContext):
 
 
 def currency_graph(cc: CallContext):
-    if cc.trigger_by_command and cc.triggered_without_param:
+    if cc.base_trigger:
         cc.database.set_route(user_id=cc.message_author, route=cc.base_route)
         cc.bot.send_message(cc.chat_id, text="Выбери нужную валюту",
                             reply_markup=markup_transitions(currency_options(is_graph=True)))

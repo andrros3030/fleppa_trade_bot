@@ -12,6 +12,7 @@ CURRENCY_GRAPH_ROUTE = '/currency_graph'
 TOTEM_ROUTE = '/totem'
 DIPLOMA_ROUTE = '/diploma'
 FEEDBACK_ROUTE = '/feedback'
+SEND_ROUTE = '/send'
 DROP_PREV_ARG = 'drop-prev'
 DATA_ARG = 'text'  # Вся жизнь это симуляция, бот тебя выдумал, кнопки это то же самое что и текст
 

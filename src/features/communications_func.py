@@ -60,21 +60,24 @@ def reply(cc: CallContext):
 
 
 def send_to_public(cc: CallContext):
+    print(cc.base_trigger)
+    print(cc.triggered_without_param)
     # TODO: send to all (or to group) function with sql and confirmation + users count
-    if cc.current_route.route != cc.base_route:
+    if cc.base_trigger and cc.triggered_without_param:
+        print(1)
         # TODO: ask for message to send for everyone
-        pass
+        cc.database.set_route(user_id=cc.message_author, route=cc.base_route)
     else:
-        if True:  # cc.current_route.args is None or len(cc.current_route.args) == 0:
-            # TODO: save message and ask for query
-            cc.bot.send_message(cc.chat_id, "Введи блок where (и далее) для команды отбора пользователей из t_users "
-                                            "(например: where mod(pk_id, 1) = 1 limit 100 "
-                                            "-- вернет половину пользователей или 100, смотря чего будет меньше)")
-            cc.database.set_route(user_id=cc.message_author, route=cc.base_route)
-            pass
-        else:
-            # TODO: count affecting users in query, save query and ask for confirmation
-            pass
+        print(2)
+        # if True:  # cc.current_route.args is None or len(cc.current_route.args) == 0:
+        #     # TODO: save message and ask for query
+        #     cc.bot.send_message(cc.chat_id, "Введи блок where (и далее) для команды отбора пользователей из t_users "
+        #                                     "(например: where mod(pk_id, 1) = 1 limit 100 "
+        #                                     "-- вернет половину пользователей или 100, смотря чего будет меньше)")
+        #     pass
+        # else:
+        #     # TODO: count affecting users in query, save query and ask for confirmation
+        #     pass
 
 
 def feedback(cc: CallContext):

@@ -124,14 +124,8 @@ class CallContext:
         self.splitted_message = []
         # Инициализация полей со сложной логикой
         if self.text is not None:
-            self.splitted_message = list(map(lambda el: str(el).lower(), self.text.split()))
+            self.splitted_message = list(map(lambda el: el, self.text.split()))
         self.totem = Totem(self.message_author)
-
-    @property
-    def forced_route(self) -> ParsedRoute:
-        if self.__query is None:
-            return self.current_route
-        return ParsedRoute(self.__query.data)
 
     @property
     def caption(self) -> str or None:
@@ -183,12 +177,13 @@ class CallContext:
         return self.__message.reply_to_message
 
     @property
-    def trigger_by_command(self) -> bool:
-        return self.current_route != self.base_route
-
-    @property
-    def triggered_without_param(self):
-        return self.text is None or self.text == self.base_route
+    def base_trigger(self) -> bool:
+        """
+        Был ли вызван первый этап команды или уже есть параметры вызова
+        Если текст пустой (признак вызова из inline без стандартного текстового параметра)
+        или если сообщение не пустое (вызов текстом) и путь пользователя не совпадает с базовым путём команды
+        """
+        return (self.__message is not None and self.current_route != self.base_route) or self.text is None
 
     def __str__(self):
         return str(self.__dict__)

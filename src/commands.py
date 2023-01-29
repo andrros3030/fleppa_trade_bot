@@ -154,7 +154,7 @@ help_command = Command(
 )
 currency_command = Command(
     function=tickers.currency,
-    alias=['currency', "курс валюты"],
+    alias=['currency', "курс", "курсы", "курсы валют", "курс валюты"],
     desc='вывести курсы валют и динамику их изменения',
     route=routing.CURRENCY_ROUTE
 )
@@ -239,6 +239,13 @@ request_command = Command(
     desc='отправить запрос',
     admin_only=True
 )
+send_command = Command(
+    function=pr.send_to_public,
+    alias=['send', 'рассылка'],
+    desc='сделать расслыку',
+    admin_only=True,
+    route=routing.SEND_ROUTE
+)
 # endregion
 commands = [
     # public commands >
@@ -257,5 +264,6 @@ commands = [
     sql_command,
     set_admin_command,
     make_link_command,
-    request_command
+    request_command,
+    send_command
 ]
