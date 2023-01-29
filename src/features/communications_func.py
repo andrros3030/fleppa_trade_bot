@@ -26,6 +26,8 @@ def reply(cc: CallContext):
         if reply_chat_id is None or reply_forwarded is None:
             return cc.bot.send_message(cc.chat_id, f'Не удалось ответить на сообщение с пустым chat_id или message_id: '
                                                    f'{str(cc.current_route)}')
+        reply_chat_id = reply_chat_id[0]
+        reply_forwarded = reply_forwarded[0]
         reply_id = cc.database.get_feedback_origin(
             forwarded_message_id=reply_forwarded,
             author_id=reply_chat_id
@@ -88,22 +90,22 @@ def send_to_public(cc: CallContext):
                 cc.bot.send_message(cc.chat_id, f"Проверьте сообщение и получателей [test] "
                                                 f"и подтвердите [confirm] отправку следующего сообщения "
                                                 f"(рассылка должна затронуть {result[0][0]} пользователей):")
-                return cc.bot.send_message(cc.chat_id, cc.current_route.get_arg('text'))
+                return cc.bot.send_message(cc.chat_id, cc.current_route.get_arg('text')[0])
             else:
                 recipients = cc.database.unsafe_exec("SELECT PK_ID FROM T_USERS "
-                                                     + str(cc.current_route.get_arg('query')))
+                                                     + str(cc.current_route.get_arg('query')[0]))
                 recipients_count = len(recipients)
                 if command_text == 'TEST':
-                    cc.bot.send_message(cc.chat_id, cc.current_route.get_arg('text'))
+                    cc.bot.send_message(cc.chat_id, cc.current_route.get_arg('text')[0])
                     cc.bot.send_message(cc.chat_id, f"Рассылка будет отправлена {recipients_count} пользователям:")
                     cc.bot.send_message(cc.chat_id, ", ".join([el[0] for el in recipients]))
                 if command_text == 'CONFIRM':
                     counting = 0
                     bad = 0
-                    info_message = cc.bot.send_message(cc.chat_id, f"Приступаю к рассылке").message_id
+                    info_message = cc.bot.send_message(cc.chat_id, "Приступаю к рассылке").message_id
                     for el in recipients:
                         res = try_to_send(bot=cc.bot, logger=cc.logger, chat_id=el[0],
-                                          message_text=cc.current_route.get_arg('text'))
+                                          message_text=cc.current_route.get_arg('text')[0])
                         if res:
                             counting += 1
                         else:

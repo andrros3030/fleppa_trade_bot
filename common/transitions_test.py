@@ -14,13 +14,13 @@ def test_base():
     parsing2 = ParsedRoute(trans2.callback_data)
     print(parsing1.route, parsing1)
     print(parsing2.route, parsing2)
-    assert parsing2.get_arg('currency') == 'USD'
+    assert parsing2.get_arg('currency')[0] == 'USD'
     assert parsing2.get_arg(DROP_PREV_ARG)
     print('everything ok')
 
 
 def test_currencies():
-    trans1 = markup_transitions(currency_options()).keyboard[0][0]
+    trans1 = markup_transitions(currency_options(is_graph=False)).keyboard[0][0]
     print(trans1)
     parsing1 = ParsedRoute(trans1.callback_data)
     print(parsing1.route, parsing1)

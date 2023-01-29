@@ -1,5 +1,6 @@
-from src.context import CallContext
+from src.base_modules.constants import MENU_MESSAGE
 from src.common_modules.markups import menu_transitions, markup_transitions, back_transition
+from src.context import CallContext
 
 
 def menu(cc: CallContext):
@@ -7,7 +8,7 @@ def menu(cc: CallContext):
         # Если пользователь не находится в корневой позиции - возвращаем его в корень.
         # Это нужно, если пользователь выходит из команд с помощью кнопок "назад"
         cc.database.set_route(cc.message_author)
-    return cc.bot.send_message(cc.chat_id, "Какой-то текст для менюшки",
+    return cc.bot.send_message(cc.chat_id, MENU_MESSAGE,
                                reply_markup=markup_transitions(menu_transitions)
                                )
 

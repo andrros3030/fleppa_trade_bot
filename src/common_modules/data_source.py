@@ -4,6 +4,8 @@ NO PROJECT IMPORTS EXCEPT BASE_MODULES
 """
 import psycopg2
 import uuid
+
+from src.base_modules.constants import START_MESSAGE
 from src.base_modules.logger import Logger
 from src.base_modules.routes import DEFAULT_ROUTE, ParsedRoute
 from src.base_modules.db_auth_context import DBAuthContext
@@ -208,9 +210,7 @@ class DataSource:
         return link_id
 
     def get_start_message(self, start_link: str = None) -> str:
-        msg = 'Здарова, скоро тут будет супер трейд стратегия от Шлеппы, ' \
-              'а пока - держи мой пульс ' \
-              'https://www.tinkoff.ru/invest/social/profile/fleppa_war_crimes_fa?utm_source=share'
+        msg = START_MESSAGE
         self.logger.v('Trying to get start message for link: ' + str(start_link))
         if start_link is not None:
             try:

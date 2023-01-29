@@ -42,7 +42,7 @@ def currency_options(is_graph: bool, currencies: List[str] or None = None) -> Li
     result.append(MarkupRoute(
         text="Отобразить все",
         route=ParsedRoute(ParsedRoute.serialize(CURRENCY_GRAPH_ROUTE if is_graph else CURRENCY_ROUTE,
-                                                {DATA_ARG: ";".join(currencies)}))  # TODO: кажется костыль
+                                                {DATA_ARG: currencies}))  # TODO: кажется костыль
     ))
     result.append(back_transition)
     return result
@@ -52,15 +52,19 @@ def currency_graph_transition(currencies: List[str] or None) -> MarkupRoute:
     return MarkupRoute(
         text="Пострить график",
         route=ParsedRoute(ParsedRoute.serialize(CURRENCY_GRAPH_ROUTE,
-                                                {DATA_ARG: ';'.join(currencies)}))  # TODO: кажется костыль
+                                                {DATA_ARG: currencies}))  # TODO: кажется костыль
     )
+
+
+def back_transition_markup(drop_this=True) -> InlineKeyboardMarkup:
+    return markup_transitions([back_transition], drop_this=drop_this)
 
 
 back_transition = MarkupRoute(ParsedRoute(MENU_ROUTE), text='Назад к меню')
 diploma_transition = MarkupRoute(ParsedRoute(DIPLOMA_ROUTE), text='Получить диплом')
 menu_transitions = [
-    MarkupRoute(ParsedRoute(CURRENCY_ROUTE),    text='Курсы валют'),
-    MarkupRoute(ParsedRoute(TOTEM_ROUTE),       text='Кто я на бирже'),
-    MarkupRoute(ParsedRoute(FEEDBACK_ROUTE),    text='Оставить отзыв'),
+    MarkupRoute(ParsedRoute(CURRENCY_ROUTE), text='Курсы валют'),
+    MarkupRoute(ParsedRoute(TOTEM_ROUTE), text='Кто я на бирже'),
+    MarkupRoute(ParsedRoute(FEEDBACK_ROUTE), text='Оставить отзыв'),
 ]
 # TODO: сократить markup_transitions([back_transition]) до only_back

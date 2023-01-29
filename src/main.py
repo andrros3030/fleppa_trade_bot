@@ -4,6 +4,7 @@ DO NOT IMPORT FEATURES HERE
 """
 import telebot
 
+from src.common_modules.markups import back_transition_markup
 from src.context import global_context
 from src.commands import commands
 from src.base_modules.logger import Logger
@@ -22,10 +23,16 @@ def error_handler(message, error):
                  f'\nUser: {str(message.from_user.id)}' \
                  f'\nJSON: {str(message)}'
     logger.w(error_data)
+    chat_id = None
+    if type(message) is telebot.types.Message:
+        chat_id = message.chat.id
+    elif type(message) is telebot.types.CallbackQuery:
+        chat_id = message.message.chat.id
     if global_context.IS_PRODUCTION:
-        bot.send_message(message.chat.id, 'Необработанное исключение в работе бота. '
-                                          'Админы уже получили информацию об ошибке, но мы будем очень признательны, '
-                                          'если ты расскажешь, какая команда вызвала ошибку с помощью /feedback')
+        bot.send_message(chat_id, 'Необработанное исключение в работе бота. '
+                                  'Админы уже получили информацию об ошибке, но мы будем очень признательны, '
+                                  'если ты расскажешь, какая команда вызвала ошибку с помощью /feedback',
+                         reply_markup=back_transition_markup(drop_this=False))
         for admin in global_context.SUDO_USERS:
             try:
                 send_long_message(bot, admin, error_data, logger)
@@ -33,7 +40,8 @@ def error_handler(message, error):
                 logger.e(f"FATAL: can't send error message to admin, causing error: {str(e)}"
                          f'\nError to send: {error_data}')
     else:
-        send_long_message(bot, message.chat.id, error_data, logger)
+        send_long_message(bot, chat_id, error_data, logger)
+        bot.send_message(chat_id, 'Вернуться в меню', reply_markup=back_transition_markup())
 
 
 msg_executor = message_execute_decorator(logger=logger, on_error=error_handler)
@@ -118,6 +126,6 @@ def callback_handler(query: telebot.types.CallbackQuery):
         bot.edit_message_reply_markup(chat_id=query.message.chat.id, message_id=query.message.id)
         # удаление сообщения, если его не нужно сохранять
         should_drop = base_func_route.get_arg(DROP_PREV_ARG)
-        if (should_drop is not None) and str(should_drop).lower() == 'true':
+        if (should_drop is not None) and str(should_drop[0]).lower() == 'true':
             logger.i('Deleting callback message')
             bot.delete_message(chat_id=query.message.chat.id, message_id=query.message.id)

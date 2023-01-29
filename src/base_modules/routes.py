@@ -3,7 +3,8 @@
 + константные пути для команд
 NO PROJECT IMPORTS IN THIS FILE
 """
-from urllib.parse import urlparse, parse_qsl
+from typing import List
+from urllib.parse import urlparse, urlencode, parse_qs
 
 
 DEFAULT_ROUTE = '/'  # Корневое значение, когда пользователь не зашёл ни в какую команду
@@ -34,10 +35,11 @@ class ParsedRoute:
     """
     @classmethod
     def serialize(cls, route: str, args: dict) -> str:
-        res = route
-        if args is None or len(args) == 0:
-            return res
-        return res + '?' + '&'.join(map(lambda x: '%s=%s' % (x, args[x]), args.keys()))
+        return route + '?' + urlencode(query=args, doseq=True)
+        # res = route
+        # if args is None or len(args) == 0:
+        #     return res
+        # return res + '?' + '&'.join(map(lambda x: '%s=%s' % (x, args[x]), args.keys()))
 
     def __init__(self, unparsed_route: str):
         """
@@ -45,7 +47,7 @@ class ParsedRoute:
         """
         parse_result = urlparse(unparsed_route)
         self.route = parse_result.path
-        self._args = dict(parse_qsl(parse_result.query))  # функция спокойно парсит всё, кроме &
+        self._args = dict(parse_qs(parse_result.query))  # функция спокойно парсит всё, кроме &
 
     def __str__(self):
         return self.serialize(self.route, self._args)
@@ -53,7 +55,11 @@ class ParsedRoute:
     def __eq__(self, other: str):
         return self.route == other
 
-    def get_arg(self, key):
+    def get_arg(self, key) -> List[str] or None:
+        """
+        :param key: ключ параметра
+        :return: СПИСОК параметров
+        """
         if self._args is None or key not in self._args:
             return None
         return self._args[key]

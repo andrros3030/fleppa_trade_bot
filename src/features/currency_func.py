@@ -27,7 +27,9 @@ def match_ticker(user_query):
 
 
 def match_many_tickers(user_query):
-    tickers = str(user_query).split(';')
+    tickers = user_query
+    if type(user_query) not in [list, set, dict]:
+        tickers = str(user_query).split()
     return set(match_ticker(el) for el in tickers)
 
 

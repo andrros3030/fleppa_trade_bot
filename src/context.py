@@ -123,7 +123,8 @@ class CallContext:
         self.base_route = base_route
         self.splitted_message = []
         # Инициализация полей со сложной логикой
-        if self.text is not None:
+        # TODO: отказаться от поля при переписывании support functions
+        if self.text is not None and self.__message is not None:
             self.splitted_message = list(map(lambda el: el, self.text.split()))
         self.totem = Totem(self.message_author)
 
