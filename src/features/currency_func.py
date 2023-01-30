@@ -58,7 +58,7 @@ def currency(cc: CallContext):
                 else:
                     raise Exception('empty info list')
             except Exception as e:
-                cc.logger.e(f"Exception while getting info for: {_currency}" + str(e))
+                cc.logger.e(f"Exception while getting info for: {_currency}\n" + str(e))
                 request_results.append(f"Не удалось определить валюту: '{_currency}'. "
                                        f"Мне знакомы: {', '.join(AVAILABLE_CURRENCY.keys())}")
 
