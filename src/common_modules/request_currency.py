@@ -6,28 +6,27 @@ import requests
 
 
 def currency_info(currency: str):
-    url_today = f'https://iss.moex.com/iss/engines/currency/markets/index/securities/{currency}' \
-                f'FIX/trades.json?reversed=1&limit=1'
+    url_today = f'http://iss.moex.com/iss/engines/currency/markets/index/securities/{currency}' \
+                f'FIX/trades.json'
     try:
-        response_currency = requests.get(url_today)
+        response_currency = requests.get(url_today, params={'reversed': True, 'limit': 1})
         currency_data_today = response_currency.json()['trades']['data'][0][-1]
         today = response_currency.json()['trades']['data'][0][-4]
         time = response_currency.json()['trades']['data'][0][-2]
 
-    except Exception:
-        raise Exception(f"Can't get data with this URL: {url_today}")
+    except Exception as e:
+        raise Exception(f"Can't get data with this URL: {url_today}. Causing error: {str(e)}")
 
     currency_value = []
     last_trade_day = datetime.strptime(today, '%Y-%m-%d') - timedelta(days=1)
+    url_last_trade_date = "http://iss.moex.com/iss/history/engines/currency/markets/index/securities.json"
     while len(currency_value) == 0:
-        url_last_trade_date = f"https://iss.moex.com/iss/history/engines/currency/markets" \
-                              f"/index/securities.json?date={last_trade_day}"
         try:
-            response_currency = requests.get(url_last_trade_date)
+            response_currency = requests.get(url_last_trade_date, params={"date": last_trade_day})
             currency_columns = response_currency.json()['history']['columns']
             currency_value = response_currency.json()['history']['data']
-        except Exception:
-            raise Exception(f"Can't get data with this URL: {url_last_trade_date}")
+        except Exception as e:
+            raise Exception(f"Can't get data with this URL: {url_last_trade_date}. Causing error: {str(e)}")
 
         if len(currency_value) == 0:
             last_trade_day -= timedelta(days=1)
