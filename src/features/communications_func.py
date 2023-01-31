@@ -74,7 +74,7 @@ def send_to_public(cc: CallContext):
     else:
         if cc.current_route.get_arg('text') is None:
             cc.current_route.set_arg('text', cc.text)
-            res = cc.focus(str(cc.current_route))
+            res = cc.focus(cc.current_route)
             if res:
                 return cc.bot.send_message(cc.chat_id, "Введи блок where (и далее) "
                                                        "для команды отбора пользователей из t_users "
@@ -85,9 +85,12 @@ def send_to_public(cc: CallContext):
                 return cc.bot.send_message(cc.chat_id, "Кажется, не удалось записать такое сообщение")
         else:
             if cc.current_route.get_arg('query') is None:
-                cc.current_route.set_arg('query', cc.text)
-                cc.focus(str(cc.current_route))
                 result = cc.database.unsafe_exec("SELECT COUNT(*) FROM T_USERS " + str(cc.text))
+                if result is None:
+                    return cc.bot.send_message(cc.chat_id, 'Ошибка в запросе или рассылка затронет 0 пользователей. '
+                                                           'Перепиши запрос')
+                cc.current_route.set_arg('query', cc.text)
+                cc.focus(cc.current_route)
                 cc.bot.send_message(cc.chat_id, f"Проверьте сообщение и получателей [test] "
                                                 f"и подтвердите [confirm] отправку следующего сообщения "
                                                 f"(рассылка должна затронуть {result[0][0]} пользователей):")
@@ -100,7 +103,7 @@ def send_to_public(cc: CallContext):
                     cc.bot.send_message(cc.chat_id, cc.current_route.get_arg('text')[0])
                     cc.bot.send_message(cc.chat_id, f"Рассылка будет отправлена {recipients_count} пользователям:")
                     cc.bot.send_message(cc.chat_id, ", ".join([el[0] for el in recipients]))
-                if command_text == 'confirm':
+                elif command_text == 'confirm':
                     counting = 0
                     bad = 0
                     info_message = cc.bot.send_message(cc.chat_id, "Приступаю к рассылке").message_id
@@ -112,9 +115,11 @@ def send_to_public(cc: CallContext):
                         else:
                             bad += 1
                         cc.bot.edit_message_text(chat_id=cc.chat_id, message_id=info_message,
-                                                 text=f"Отправил {counting} ({100*counting/recipients_count}%)\n"
-                                                      f"Ошибок {bad} ({100*bad/recipients_count}%)")
+                                                 text=f"Отправил {counting} ({100 * counting / recipients_count}%)\n"
+                                                      f"Ошибок {bad} ({100 * bad / recipients_count}%)")
                     cc.unfocus()
+                else:
+                    cc.bot.send_message(cc.chat_id, 'Жду команду [test/exit/confirm] для рассылки')
 
 
 def feedback(cc: CallContext):
