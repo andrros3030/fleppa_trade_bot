@@ -4,6 +4,7 @@ from src.common_modules.markups import back_transition, markup_transitions
 from src.common_modules.custom_sender import try_to_send
 
 
+# TODO: переписать функцию в один шаг
 def reply(cc: CallContext):
     if cc.current_route.route != cc.base_route:
         if cc.reply_data is None:
@@ -16,7 +17,7 @@ def reply(cc: CallContext):
                                                    f'(@{cc.bot.get_me().username}) сообщений')
 
         route_params = f'?chat_id={feedback_author.id}&&message_id={cc.reply_data.message_id}'
-        cc.database.set_route(cc.message_author, route=cc.base_route + route_params)
+        cc.focus(cc.base_route + route_params)
         cc.bot.send_message(cc.chat_id, f"Напиши ответ на фид-бэк от пользователя: "
                                         f"@{str(feedback_author.username)}, id='{feedback_author.id}', "
                                         f"message_id={cc.reply_data.message_id}")
@@ -59,21 +60,21 @@ def reply(cc: CallContext):
             if e.description == "Forbidden: bot was blocked by the user" or str(e.error_code) == "403":
                 cc.logger.w(f"User {cc.chat_id} blocked bot")
             cc.bot.send_message(cc.chat_id, f'Не удалось отправить ответ: {e.description}')
-        cc.database.set_route(cc.message_author)
+        cc.unfocus()
 
 
 def send_to_public(cc: CallContext):
-    command_text = cc.text.upper()
-    if command_text == 'CANCEL':
-        cc.database.set_route(user_id=cc.message_author)
+    command_text = cc.text.lower()
+    if command_text == 'exit':
+        cc.unfocus()
         return cc.bot.send_message(cc.chat_id, "Вышел из команды")
     if cc.base_trigger:
-        cc.database.set_route(user_id=cc.message_author, route=cc.base_route)
+        cc.focus()
         return cc.bot.send_message(cc.chat_id, 'Введи сообщение для рассылки')
     else:
         if cc.current_route.get_arg('text') is None:
             cc.current_route.set_arg('text', cc.text)
-            res = cc.database.set_route(user_id=cc.message_author, route=str(cc.current_route))
+            res = cc.focus(str(cc.current_route))
             if res:
                 return cc.bot.send_message(cc.chat_id, "Введи блок where (и далее) "
                                                        "для команды отбора пользователей из t_users "
@@ -85,7 +86,7 @@ def send_to_public(cc: CallContext):
         else:
             if cc.current_route.get_arg('query') is None:
                 cc.current_route.set_arg('query', cc.text)
-                cc.database.set_route(user_id=cc.message_author, route=str(cc.current_route))
+                cc.focus(str(cc.current_route))
                 result = cc.database.unsafe_exec("SELECT COUNT(*) FROM T_USERS " + str(cc.text))
                 cc.bot.send_message(cc.chat_id, f"Проверьте сообщение и получателей [test] "
                                                 f"и подтвердите [confirm] отправку следующего сообщения "
@@ -95,11 +96,11 @@ def send_to_public(cc: CallContext):
                 recipients = cc.database.unsafe_exec("SELECT PK_ID FROM T_USERS "
                                                      + str(cc.current_route.get_arg('query')[0]))
                 recipients_count = len(recipients)
-                if command_text == 'TEST':
+                if command_text == 'test':
                     cc.bot.send_message(cc.chat_id, cc.current_route.get_arg('text')[0])
                     cc.bot.send_message(cc.chat_id, f"Рассылка будет отправлена {recipients_count} пользователям:")
                     cc.bot.send_message(cc.chat_id, ", ".join([el[0] for el in recipients]))
-                if command_text == 'CONFIRM':
+                if command_text == 'confirm':
                     counting = 0
                     bad = 0
                     info_message = cc.bot.send_message(cc.chat_id, "Приступаю к рассылке").message_id
@@ -113,7 +114,7 @@ def send_to_public(cc: CallContext):
                         cc.bot.edit_message_text(chat_id=cc.chat_id, message_id=info_message,
                                                  text=f"Отправил {counting} ({100*counting/recipients_count}%)\n"
                                                       f"Ошибок {bad} ({100*bad/recipients_count}%)")
-                    cc.database.set_route(user_id=cc.message_author)
+                    cc.unfocus()
 
 
 def feedback(cc: CallContext):
@@ -122,7 +123,7 @@ def feedback(cc: CallContext):
         if cc.database.is_banned(cc.message_author):
             cc.bot.send_message(cc.chat_id, 'Отправка фидбэка недоступна')
             return
-        cc.database.set_route(cc.message_author, route=cc.base_route)
+        cc.focus()
         cc.bot.send_message(cc.chat_id, 'Пожалуйста, отправьте свой фид-бэк о работе бота. '
                                         'Вы можете добавить фото или видео, админы посмотрят их и вернутся в чат',
                             reply_markup=markup_transitions(
@@ -140,4 +141,4 @@ def feedback(cc: CallContext):
                             reply_markup=markup_transitions(
                                 [back_transition], drop_this=False
                             ))
-        cc.database.set_route(cc.message_author)
+        cc.unfocus()
