@@ -32,6 +32,7 @@ def exec_sql(cc: CallContext):
         return cc.bot.send_message(cc.chat_id, 'Перешел в режим выполнения SQL. Набери exit, чтобы выйти')
     else:
         query_result = cc.database.unsafe_exec(cc.text)
+        cc.bot.send_message(cc.chat_id, f'Выполняют SQL запрос: {cc.text}; Набери exit чтобы прекратить')
         if type(query_result) is list or type(query_result) is tuple:
             query_result = '\n'.join(map(str, query_result))
         else:

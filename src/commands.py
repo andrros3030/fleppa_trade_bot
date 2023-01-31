@@ -2,6 +2,7 @@
 Это - прокси файл, для хранения существующих команд в боте
 """
 import src.base_modules.routes as routing
+from src.common_modules.markups import markup_transitions, back_transition, MarkupRoute
 import src.features.currency_func as tickers
 import src.features.personal_func as personal
 import src.features.support_funcs as support
@@ -138,6 +139,31 @@ def generate_help(cc: CallContext):
     return cc.bot.send_message(cc.chat_id, res)
 
 
+def show_preview(cc: CallContext):
+    if cc.base_route == '/schedule':
+        text = 'Мы работаем над тем, чтобы бот мог уведомить тебя об изменении твоей любимой котировки. ' \
+               'Планируем два способа — ежедневное или еженедельное уведомление по твоему расписанию или ' \
+               'уведомление об изменении цены. Кажется это полезный функционал, как считаешь?'
+    elif cc.base_route == '/stocks':
+        text = 'Валюта это самый простой способ вкатиться в мир инвестиций.\n' \
+               'Но я ведь не начинающий инвестор! Шлёппа уже большой и скоро будет рассказывать ' \
+               'не только про валюту, но и про все остальные котировки на МосБирже. Сейчас разработчики ' \
+               'как раз ищут способ, как лучше всего обработать эти данные'
+    elif cc.base_route == '/pulse':
+        text = 'У желтенького банка кажется тоже есть открытое API. ' \
+               'Было бы здорово получить диплом за свои заслуги на бирже или ' \
+               'подписаться на изменения акциий из своего портфеля, не правда ли?)\n' \
+               'Расскажи, какой другой функционал ты бы хотел видеть в боте'
+    else:
+        text = 'У нас есть достаточно много идей о графиках. ' \
+               'Среди них — свечные графики, различные временные фреймы, ' \
+               'линии трендов и лого тикеров.\n' \
+               'А ещё, только это секрет, мы готовы презентовать тёмную тему для графиков!)'
+    cc.bot.send_message(cc.chat_id, text=text, reply_markup=markup_transitions([
+        back_transition,
+        MarkupRoute(routing.ParsedRoute(routing.FEEDBACK_ROUTE), text='Предложить свою идею')], drop_this=False))
+
+
 # TODO: тех долг, откзаться от глобальной переменной в пользу DI
 # TODO: ограничение по chat_types=['private']
 # region public commands
@@ -263,6 +289,31 @@ commands = [
     totem_command,
     diploma_command,
     feedback_command,
+    # in progress commands>
+    Command(
+        function=show_preview,
+        desc='[В РАЗРАБОТКЕ] подписаться на изменения',
+        alias=['schedule'],
+        route='/schedule'
+    ),
+    Command(
+        function=show_preview,
+        desc='[В РАЗРАБОТКЕ] информация об акциях',
+        alias=['stocks'],
+        route='/stocks'
+    ),
+    Command(
+        function=show_preview,
+        desc='[В РАЗРАБОТКЕ] подключить аккаунт пульса',
+        alias=['pulse'],
+        route='/pulse'
+    ),
+    Command(
+        function=show_preview,
+        desc='[В РАЗРАБОТКЕ] свечные графики торгов',
+        alias=['candle'],
+        route='/candle'
+    ),
     # admin commands >
     crash_command,
     reply_command,

@@ -67,4 +67,4 @@ menu_transitions = [
     MarkupRoute(ParsedRoute(TOTEM_ROUTE), text='Кто я на бирже'),
     MarkupRoute(ParsedRoute(FEEDBACK_ROUTE), text='Оставить отзыв'),
 ]
-# TODO: сократить markup_transitions([back_transition]) до only_back
+# TODO: оптимизировать работу на вебхуке или переехать на серверную архитектуру

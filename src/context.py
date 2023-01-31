@@ -186,7 +186,7 @@ class CallContext:
         """
         if new_route is None:
             new_route = self.base_route
-        self.database.set_route(user_id=self.message_author, route=str(new_route))
+        return self.database.set_route(user_id=self.message_author, route=str(new_route))
 
     def unfocus(self):
         """
