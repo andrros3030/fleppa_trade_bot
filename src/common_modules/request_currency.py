@@ -9,7 +9,7 @@ def currency_info(currency: str):
     url_today = f'http://iss.moex.com/iss/engines/currency/markets/index/securities/{currency}' \
                 f'FIX/trades.json'
     try:
-        response_currency = requests.get(url_today, params={'reversed': True, 'limit': 1})
+        response_currency = requests.get(url_today, params={'limit': 1, 'reversed': 1})
         currency_data_today = response_currency.json()['trades']['data'][0][-1]
         today = response_currency.json()['trades']['data'][0][-4]
         time = response_currency.json()['trades']['data'][0][-2]
