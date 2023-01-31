@@ -47,7 +47,7 @@ def currency_plot(date_value, currency_value, currency, night_theme=False):
     axes.grid(axis='both', linestyle='--')
     ax.plot(date_value[-1], currency_value[-1], marker='o', color=font_color, lw=0.3)
     axes.annotate(f'{round(currency_value[-1], 1)}', xy=(date_value[-1], currency_value[-1]),
-                  xytext=(date_value[-1]+0.5, currency_value[-1]-currency_value[-1]/100), color=font_color)
+                  xytext=(date_value[-1], currency_value[-1]-currency_value[-1]/100), color=font_color)
     axes.plot(date_value, [currency_value[-1]] * len(date_value), linestyle='--', color=font_color, lw=1)
     fig.savefig(photo, format='jpg', bbox_inches='tight', dpi=300)
     photo.seek(0)
