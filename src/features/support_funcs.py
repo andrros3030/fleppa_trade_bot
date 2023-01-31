@@ -1,6 +1,7 @@
 """
 DO NOT IMPORT BASE_MODULES, OTHER FEATURES OR ROOT MODULES EXCEPT CONTEXT
 """
+from src.common_modules.custom_sender import send_long_message
 from src.context import global_context, CallContext
 import requests
 
@@ -18,7 +19,8 @@ def exec_sql(cc: CallContext):
         query_result = '\n'.join(map(str, query_result))
     else:
         query_result = str(query_result)
-    return cc.bot.send_message(cc.chat_id, query_result)
+    return send_long_message(bot=cc.bot, chat_id=cc.chat_id, logger=cc.logger,
+                             message_text=query_result)
 
 
 def get_environment(cc: CallContext):
@@ -49,4 +51,5 @@ def make_request(cc: CallContext):
         return cc.bot.send_message(cc.chat_id, 'Команда принимает на вход тип запроса и адрес ресурса через пробел')
     _, method, resource_link = map(str, cc.splitted_message)
     res = requests.request(method, resource_link)
-    cc.bot.send_message(cc.chat_id, str(res.status_code) + ': ' + str(res.headers) + '\n' + str(res.reason))
+    return send_long_message(bot=cc.bot, chat_id=cc.chat_id, logger=cc.logger,
+                             message_text=str(res.status_code) + ': ' + str(res.headers) + '\n' + str(res.reason))
