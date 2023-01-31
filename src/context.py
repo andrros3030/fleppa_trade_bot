@@ -108,7 +108,6 @@ class CallContext:
     database: DataSource
     logger: Logger
 
-    # TODO: нужно ли прокидывать логер через контекст?
     def __init__(self, bot: telebot.TeleBot, database: DataSource,
                  is_admin, current_route: ParsedRoute, base_route, logger: Logger,
                  message: telebot.types.Message = None, query: telebot.types.CallbackQuery = None
@@ -121,11 +120,6 @@ class CallContext:
         self.__query = query
         self.current_route = current_route
         self.base_route = base_route
-        self.splitted_message = []
-        # Инициализация полей со сложной логикой
-        # TODO: отказаться от поля при переписывании support functions
-        if self.text is not None and self.__message is not None:
-            self.splitted_message = list(map(lambda el: el, self.text.split()))
         self.totem = Totem(self.message_author)
 
     @property
@@ -192,7 +186,7 @@ class CallContext:
         """
         if new_route is None:
             new_route = self.base_route
-        self.database.set_route(user_id=self.message_author, route=new_route)
+        self.database.set_route(user_id=self.message_author, route=str(new_route))
 
     def unfocus(self):
         """

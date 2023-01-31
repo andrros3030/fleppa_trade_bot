@@ -10,7 +10,6 @@ import src.features.common_func as common
 from src.context import CallContext
 
 
-# TODO: кажется, на примере reply_markup и base_route/route -- есть boiler plate
 class Command:
     """
     Структура данных "Команда", которая хранит все сведения о команде:
@@ -141,9 +140,6 @@ def generate_help(cc: CallContext):
 
 # TODO: тех долг, откзаться от глобальной переменной в пользу DI
 # TODO: ограничение по chat_types=['private']
-# TODO: кажется у пользователя не должно быть возможности запускать корневые функции,
-# когда он находится в контексте другой функции [/feedback, /reply и др]
-# в таком случае route будет вторым тригером для запуска функции, но не ясно, как показать, какие есть подкоманды
 # region public commands
 # TODO: enforce route for user commands || use codgen for this?
 help_command = Command(
@@ -220,24 +216,28 @@ sql_command = Command(
     alias=['sql', 'db'],
     desc='взаимодействие с базой данных',
     admin_only=True,
+    route='/sql'
 )
 set_admin_command = Command(
     function=support.set_admin,
     alias=['set_admin', 'make_admin', 'do_admin'],
     desc='сделать пользователя админом',
     admin_only=True,
+    route='/set_admin'
 )
 make_link_command = Command(
     function=support.make_link,
     alias=['make_link', 'getlink', 'ссылка', 'start_link'],
     desc='создать ссылку на бота',
-    admin_only=True
+    admin_only=True,
+    route='/make_link'
 )
 request_command = Command(
     function=support.make_request,
     alias=['request'],
     desc='отправить запрос',
-    admin_only=True
+    admin_only=True,
+    route='/request'
 )
 send_command = Command(
     function=pr.send_to_public,

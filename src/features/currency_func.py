@@ -35,7 +35,7 @@ def match_many_tickers(user_query):
 
 def currency(cc: CallContext):
     if cc.base_trigger:
-        cc.database.set_route(user_id=cc.message_author, route=cc.base_route)
+        cc.focus()
         cc.bot.send_message(cc.chat_id, text="Выбери нужную валюту",
                             reply_markup=markup_transitions(currency_options(is_graph=False)))
     else:
@@ -68,12 +68,12 @@ def currency(cc: CallContext):
             [back_transition, currency_graph_transition(currency_tickers)], drop_this=False
         )
         cc.bot.send_message(cc.chat_id, '\n'.join(result), reply_markup=markup)
-        cc.database.set_route(cc.message_author)
+        cc.unfocus()
 
 
 def currency_graph(cc: CallContext):
     if cc.base_trigger:
-        cc.database.set_route(user_id=cc.message_author, route=cc.base_route)
+        cc.focus()
         cc.bot.send_message(cc.chat_id, text="Выбери нужную валюту",
                             reply_markup=markup_transitions(currency_options(is_graph=True)))
     else:
@@ -91,4 +91,4 @@ def currency_graph(cc: CallContext):
         cc.bot.send_message(cc.chat_id, 'Если ты знаешь, как сделать этот график лучше — оставь свой отзыв, '
                                         'вызвав команду /feedback',
                             reply_markup=markup_transitions([back_transition], drop_this=False))
-        cc.database.set_route(cc.message_author)
+        cc.unfocus()
