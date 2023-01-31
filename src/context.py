@@ -186,6 +186,20 @@ class CallContext:
         """
         return (self.__message is not None and self.current_route != self.base_route) or self.text is None
 
+    def focus(self, new_route=None):
+        """
+        Захватить ввод этой командой
+        """
+        if new_route is None:
+            new_route = self.base_route
+        self.database.set_route(user_id=self.message_author, route=new_route)
+
+    def unfocus(self):
+        """
+        Отпустить захват ввода с команды
+        """
+        self.database.set_route(self.message_author)
+
     def __str__(self):
         return str(self.__dict__)
 
