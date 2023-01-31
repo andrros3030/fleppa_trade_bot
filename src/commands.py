@@ -246,6 +246,12 @@ send_command = Command(
     admin_only=True,
     route=routing.SEND_ROUTE
 )
+stats_command = Command(
+    function=support.stats,
+    alias=['stats', 'статистика'],
+    desc='статистика по пользователям',
+    admin_only=True
+)
 # endregion
 commands = [
     # public commands >
@@ -265,5 +271,6 @@ commands = [
     set_admin_command,
     make_link_command,
     request_command,
-    send_command
+    send_command,
+    stats_command
 ]
