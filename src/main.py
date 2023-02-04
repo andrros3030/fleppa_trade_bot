@@ -111,25 +111,30 @@ def callback_handler(query: telebot.types.CallbackQuery):
         query_author = query.from_user.id
         is_admin = database.is_admin(query_author) or query_author in global_context.SUDO_USERS
         current_route = database.get_current_route(query_author)
-        database.save_callback(user_id=query_author, message_id=query.message.id, callback_data=query.data,
-                               buttons=query.message.reply_markup.to_json())
-        logger.i(f'query_author: {query_author} called_route: {base_func_route} current_route: {current_route}')
-        logger.i(f'results of parsing route: {base_func_route.route}')
-        for cmd in commands:
-            if cmd.public or is_admin:
-                if base_func_route.route == cmd.route:
-                    cmd.run(
-                        query=query,
-                        bot=bot,
-                        database=database,
-                        current_route=current_route,
-                        is_admin=is_admin,
-                        logger=logger
-                    )
-        # очистка кнопок под сообщением, на которое нажали
-        bot.edit_message_reply_markup(chat_id=query.message.chat.id, message_id=query.message.id)
-        # удаление сообщения, если его не нужно сохранять
-        should_drop = base_func_route.get_arg(DROP_PREV_ARG)
-        if (should_drop is not None) and str(should_drop[0]).lower() == 'true':
-            logger.i('Deleting callback message')
-            bot.delete_message(chat_id=query.message.chat.id, message_id=query.message.id)
+        try:
+            # очистка кнопок под сообщением, на которое нажали
+            bot.edit_message_reply_markup(chat_id=query.message.chat.id, message_id=query.message.id)
+            # удаление сообщения, если его не нужно сохранять
+            should_drop = base_func_route.get_arg(DROP_PREV_ARG)
+            if (should_drop is not None) and str(should_drop[0]).lower() == 'true':
+                logger.i('Deleting callback message')
+                bot.delete_message(chat_id=query.message.chat.id, message_id=query.message.id)
+
+            database.save_callback(user_id=query_author, message_id=query.message.id, callback_data=query.data,
+                                   buttons=query.message.reply_markup.to_json())
+            logger.i(f'query_author: {query_author} called_route: {base_func_route} current_route: {current_route}')
+            logger.i(f'results of parsing route: {base_func_route.route}')
+            for cmd in commands:
+                if cmd.public or is_admin:
+                    if base_func_route.route == cmd.route:
+                        cmd.run(
+                            query=query,
+                            bot=bot,
+                            database=database,
+                            current_route=current_route,
+                            is_admin=is_admin,
+                            logger=logger
+                        )
+        except Exception as e:
+            logger.w(str(e))
+            return
