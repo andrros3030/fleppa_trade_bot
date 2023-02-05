@@ -119,22 +119,22 @@ def callback_handler(query: telebot.types.CallbackQuery):
             if (should_drop is not None) and str(should_drop[0]).lower() == 'true':
                 logger.i('Deleting callback message')
                 bot.delete_message(chat_id=query.message.chat.id, message_id=query.message.id)
-
-            database.save_callback(user_id=query_author, message_id=query.message.id, callback_data=query.data,
-                                   buttons=query.message.reply_markup.to_json())
-            logger.i(f'query_author: {query_author} called_route: {base_func_route} current_route: {current_route}')
-            logger.i(f'results of parsing route: {base_func_route.route}')
-            for cmd in commands:
-                if cmd.public or is_admin:
-                    if base_func_route.route == cmd.route:
-                        cmd.run(
-                            query=query,
-                            bot=bot,
-                            database=database,
-                            current_route=current_route,
-                            is_admin=is_admin,
-                            logger=logger
-                        )
         except Exception as e:
             logger.w(str(e))
             return
+
+        database.save_callback(user_id=query_author, message_id=query.message.id, callback_data=query.data,
+                               buttons=query.message.reply_markup.to_json())
+        logger.i(f'query_author: {query_author} called_route: {base_func_route} current_route: {current_route}')
+        logger.i(f'results of parsing route: {base_func_route.route}')
+        for cmd in commands:
+            if cmd.public or is_admin:
+                if base_func_route.route == cmd.route:
+                    cmd.run(
+                        query=query,
+                        bot=bot,
+                        database=database,
+                        current_route=current_route,
+                        is_admin=is_admin,
+                        logger=logger
+                    )
