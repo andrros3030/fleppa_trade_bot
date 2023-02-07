@@ -94,33 +94,21 @@ def make_request(cc: CallContext):
 
 
 def stats(cc: CallContext):
-    users_query = 'select count(*) as total, ' \
-                  'sum(case when current_date - cast(ts_reg as date) <= 1 then 1 else 0 end) as Daily, ' \
-                  'sum(case when current_date - cast(ts_reg as date) <= 7 then 1 else 0 end) as Weekly, ' \
-                  'sum(case when current_date - cast(ts_reg as date) <= 30 then 1 else 0 end) as Monthly ' \
-                  'from t_users;'
-    messages_query = 'select count(*) as total, ' \
-                     'sum(case when current_date - cast(ts_saved as date) <= 1 then 1 else 0 end) as Daily, ' \
-                     'sum(case when current_date - cast(ts_saved as date) <= 7 then 1 else 0 end) as Weekly, ' \
-                     'sum(case when current_date - cast(ts_saved as date) <= 30 then 1 else 0 end) as Monthly ' \
-                     'from t_messages;'
-    fb_query = 'select count(*) as total, ' \
-               'sum(case when current_date - cast(ts_requested as date) <= 1 then 1 else 0 end) as Daily, ' \
-               'sum(case when current_date - cast(ts_requested as date) <= 7 then 1 else 0 end) as Weekly, ' \
-               'sum(case when current_date - cast(ts_requested as date) <= 30 then 1 else 0 end) as Monthly ' \
-               'from t_feedback;'
-    users_query = cc.database.unsafe_exec(users_query)
-    messages_query = cc.database.unsafe_exec(messages_query)
-    fb_query = cc.database.unsafe_exec(fb_query)
-    return cc.bot.send_message(cc.chat_id, f'Пользователей: {users_query[0][0]} '
-                                           f'(+{users_query[0][1]} за день/ '
-                                           f'+{users_query[0][2]} за неделю/'
-                                           f'+{users_query[0][3]} за месяц).\n'
-                                           f'Сообщений: {messages_query[0][0]} '
-                                           f'(+{messages_query[0][1]} за день/ '
-                                           f'+{messages_query[0][2]} за неделю/ '
-                                           f'+{messages_query[0][3]} за месяц).\n'
-                                           f'Фидбэка: {fb_query[0][0]} '
-                                           f'(+{fb_query[0][1]} за день/ '
-                                           f'+{fb_query[0][2]} за неделю/ '
-                                           f'+{fb_query[0][3]} за месяц).')
+    dct = {
+           't_users': ['ts_reg'],
+           't_messages': ['ts_saved'],
+           't_feedback': ['ts_requested']
+          }
+    for key in dct:
+        query = (f'select count(*) as total, '
+                 f'sum(case when current_date - cast({dct[key][0]} as date) <= 1 then 1 else 0 end) as Daily, '
+                 f'sum(case when current_date - cast({dct[key][0]} as date) <= 7 then 1 else 0 end) as Weekly, '
+                 f'sum(case when current_date - cast({dct[key][0]} as date) <= 30 then 1 else 0 end) as Monthly '
+                 f'from {key};')
+        dct[key].append(cc.database.unsafe_exec(query)[0])
+    res = []
+    for key in dct:
+        res.append(f'{key} {dct[key][-1][0]}(+{dct[key][-1][1]} за день, +{dct[key][-1][2]} за неделю, '
+                   f'+ {dct[key][-1][3]} за месяц).')
+
+    return cc.bot.send_message(cc.chat_id, '\n'.join(res))
