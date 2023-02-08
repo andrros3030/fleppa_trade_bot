@@ -108,5 +108,5 @@ def stats(cc: CallContext):
                  f'from {key};')
         query_result = cc.database.unsafe_exec(query)[0]
         res.append(f'{key} {query_result[0]}(+{query_result[1]} за день, +{query_result[2]} за неделю, '
-                   f'+ {dct[key][-1][3]} за месяц).')
+                   f'+ {query_result[3]} за месяц).')
     return cc.bot.send_message(cc.chat_id, '\n'.join(res))
