@@ -95,20 +95,18 @@ def make_request(cc: CallContext):
 
 def stats(cc: CallContext):
     dct = {
-           't_users': ['ts_reg'],
-           't_messages': ['ts_saved'],
-           't_feedback': ['ts_requested']
+           't_users': 'ts_reg',
+           't_messages': 'ts_saved',
+           't_feedback': 'ts_requested'
           }
-    for key in dct:
-        query = (f'select count(*) as total, '
-                 f'sum(case when current_date - cast({dct[key][0]} as date) <= 1 then 1 else 0 end) as Daily, '
-                 f'sum(case when current_date - cast({dct[key][0]} as date) <= 7 then 1 else 0 end) as Weekly, '
-                 f'sum(case when current_date - cast({dct[key][0]} as date) <= 30 then 1 else 0 end) as Monthly '
-                 f'from {key};')
-        dct[key].append(cc.database.unsafe_exec(query)[0])
     res = []
     for key in dct:
-        res.append(f'{key} {dct[key][-1][0]}(+{dct[key][-1][1]} за день, +{dct[key][-1][2]} за неделю, '
-                   f'+ {dct[key][-1][3]} за месяц).')
-
+        query = (f'select count(*) as total, '
+                 f'sum(case when current_date - cast({dct[key]} as date) <= 1 then 1 else 0 end) as Daily, '
+                 f'sum(case when current_date - cast({dct[key]} as date) <= 7 then 1 else 0 end) as Weekly, '
+                 f'sum(case when current_date - cast({dct[key]} as date) <= 30 then 1 else 0 end) as Monthly '
+                 f'from {key};')
+        query_result = cc.database.unsafe_exec(query)[0]
+        res.append(f'{key} {query_result[0]}(+{query_result[1]} за день, +{query_result[2]} за неделю, '
+                   f'+ {query_result[3]} за месяц).')
     return cc.bot.send_message(cc.chat_id, '\n'.join(res))
