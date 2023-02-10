@@ -72,8 +72,6 @@ def absolutely_all_handler(message: telebot.types.Message):
         if first_word[0] == '/':
             first_word = first_word[1:]
         has_text = True
-    # database.save_message(user_id=message_author, message_id=message.id, message_text=message.text,
-    #                       message_content_type=message.content_type)
     logger.i(f"message_author: {message_author} current route: {current_route}; "
              f"first_word: {first_word}; lower_message: {lower_message}")
     matched_by_name = None
