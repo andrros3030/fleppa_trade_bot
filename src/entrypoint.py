@@ -13,7 +13,7 @@ def run_bot(message):
 
 def handler(event, context):
     message = telebot.types.Update.de_json(event['body'])
-    global_context.set_context(context.context.token)
+    global_context.set_context(context.token)
     run_bot(message)
     return {
         'statusCode': 200,
@@ -28,4 +28,3 @@ if __name__ == "__main__":
     global_context.set_context_from_env()
     from src.main import bot
     bot.infinity_polling()
-
