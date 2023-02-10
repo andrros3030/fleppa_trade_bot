@@ -1,0 +1,90 @@
+on:
+  push:
+#      paths:
+#       - 'src/**'
+#       - 'requirements.txt'
+      branches:
+       - develop
+env:
+  REPO: cr.yandex/${{ secrets.YC_CONTAINER_REGISTRY_ID }}/fleppa-trade-bot
+jobs:
+  build-docker:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: Login to Yandex Cloud Container Registry
+      uses: yc-actions/yc-cr-login@v1
+      with:
+        yc-sa-json-credentials: ${{ secrets.YC_SA_JSON_CREDENTIALS }}
+    - name: Extract branch name
+      shell: bash
+      run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+      id: extract_branch
+
+    - name: Build, tag, and push image to Yandex Cloud Container Registry
+      env:
+        REPO: ${{ env.REPO }}
+        IMAGE_TAG: ${{steps.extract_branch.outputs.branch}}-${{ github.sha }}
+      run: |
+        docker build -t $REPO:$IMAGE_TAG .
+        docker push $REPO:$IMAGE_TAG
+# TODO: find alternative way to create VM
+#    - name: Deploy COI VM
+#      id: deploy-coi
+#      uses: yc-actions/yc-coi-deploy@v1.2.0
+#      env:
+#        YC_VM_SSH: ${{ secrets.YC_VM_SSH }}
+#        YC_VM_USERNAME: ${{ secrets.YC_VM_USERNAME }}
+#      with:
+#         yc-sa-json-credentials: ${{ secrets.YC_SA_JSON_CREDENTIALS }}
+#         folder-id: ${{ secrets.FOLDER_ID }}
+#         VM-name: ${{ secrets.YC_VM_NAME }}
+#         vm-service-account-id: ${{ secrets.SERVICE_ACCOUNT }}
+#         vm-subnet-id: ${{ secrets.YC_SUBNET_ID }}
+#         vm-cores: 2
+#         vm-memory: 4Gb
+#         vm-core-fraction: 100
+#         vm-public-ip: ${{ secrets.YC_OUTER_IP }}
+#         docker-compose-path: './docker-compose.yaml'
+#         user-data-path: './user-data.yaml'
+    - name: Connect to VM, clean docker, pull new image, deploy
+      shell: bash
+      env:
+        SSH_PRIVATE_KEY: ${{secrets.SSH_PRIVATE_KEY}}
+        SSH_KNOWN_HOSTS: ${{secrets.SSH_KNOWN_HOSTS}}
+        SSH_KEY_PATH: ${{ github.workspace }}/../private.key
+        USER: ${{ secrets.YC_VM_USERNAME }}
+        HOST: ${{ secrets.YC_OUTER_IP }}
+      run: |
+        mkdir -p ~/.ssh/
+        echo "$SSH_PRIVATE_KEY" > ../private.key
+        sudo chmod 600 ../private.key
+        echo "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
+        cat >>~/.ssh/config <<END
+        Host fserver
+            HostName $HOST
+            User $USER
+            IdentityFile ../private.key
+            StrictHostKeyChecking no
+        END
+    - name: Clean-up all docker containers
+      shell: bash
+      run: |
+        ssh fserver 'sudo docker stop $(sudo docker ps -a --format "{{.ID}} {{.Image}}" | grep main | cut -d" " -f1) || true'
+        ssh fserver 'sudo docker rm $(sudo docker ps -a --format "{{.ID}} {{.Image}}" | grep main | cut -d" " -f1) || true'
+    - name: Pull new image
+      shell: bash
+      env:
+        REPO: ${{ env.REPO }}
+        IMAGE_TAG: ${{steps.extract_branch.outputs.branch}}-${{ github.sha }}
+        BOT_TOKEN: ${{ secrets.BOT_TEST_TOKEN }}
+        DB_HOST: ${{ secrets.INNER_DB_HOST }}
+        DB_PORT: ${{ secrets.DB_PORT }}
+        DB_NAME: ${{ secrets.DB_NAME }}
+        DB_USER: ${{ secrets.DB_USER }}
+        DB_USER_PASSWORD: ${{ secrets.DB_USER_PASSWORD }}
+      run: |
+        ssh fserver "sudo docker pull $REPO:$IMAGE_TAG"
+        ssh fserver "sudo docker run -d -e BOT_TOKEN='$BOT_TOKEN' -e DB_HOST='$DB_HOST' -e DB_PORT='$DB_PORT' -e DB_NAME='$DB_NAME' -e DB_USER='$DB_USER' -e DB_USER_PASSWORD='$DB_USER_PASSWORD' --restart=always -p 80:5000 $REPO:$IMAGE_TAG"

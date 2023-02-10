@@ -4,6 +4,8 @@
 ONLY BASE AND COMMON MODULES ALLOWED TO BE IMPORTED
 """
 import os
+import subprocess
+import json
 import telebot.types
 from src.base_modules.db_auth_context import DBAuthContext
 from src.base_modules.routes import ParsedRoute, DATA_ARG
@@ -27,6 +29,7 @@ class Context:
     """
     Контекст вызова функции веб-хука или локального запуска бота
     """
+
     def __init__(self):
         """
         Получение из переменных среды необходимых секретов для подключения ко всем службам
@@ -46,6 +49,7 @@ class Context:
             -898292404,  # Фидбэчница
         ]
         self.context = None
+        self.db_auth_context = DBAuthContext()
 
     def set_testing_mode(self):
         """
@@ -54,26 +58,35 @@ class Context:
         """
         # TODO: replace environment variables values here
         self.IS_PRODUCTION = False
+        self._update_db_context()
+
+    def set_context_from_env(self):
+        """
+        Установка контекста запуска из ВМ, работает в продакшен окружении Compute Cloud.
+        Получает контекст из внутренней ручки YC с помощью запроса через bash.
+        """
+        bash_command = "curl -H Metadata-Flavor:Google 169.254.169.254/computeMetadata/v1/instance/service-accounts/" \
+                       "default/token"
+        process = subprocess.Popen(bash_command.split(), stdout=subprocess.PIPE)
+        output, error = process.communicate()
+        if output is not None:
+            # TODO: обработать ошибки и шедулить обновление контекста, когда токен сыреет
+            self.context = json.loads(output)
+        self._update_db_context()
 
     def set_context(self, new_context):
         """
-        Установка контекста запуска функции, работает только в продакшен окружении
+        Установка контекста запуска функции, работает только в продакшен окружении Cloud Functions
 
         :param new_context: контекст запуска Yandex Cloud Functions
         """
         self.context = new_context
+        self._update_db_context()
 
-    @property
-    def auth_context(self) -> DBAuthContext:
-        """
-        Сформированные данные для авторизации в yc mdb pg
-        Это свойство может быть запрошено до смены контекста на ненулевое значение, keep in mind
-
-        :return: контекст для авторизации в DataSource
-        """
-        return DBAuthContext(
+    def _update_db_context(self):
+        self.db_auth_context.fill(
             user=self.DB_USER,
-            password=self.context.token["access_token"] if self.IS_PRODUCTION else self.DB_USER_PASSWORD,
+            password=self.context["access_token"] if self.IS_PRODUCTION else self.DB_USER_PASSWORD,
             host=self.DB_HOST,
             port=self.DB_PORT,
             is_prod=self.IS_PRODUCTION,
@@ -87,7 +100,7 @@ class Context:
         :return: строка, разделенная \n
         """
         # TODO: сделать для self.context подробный вывод
-        token = self.context.token["access_token"] if self.IS_PRODUCTION else self.DB_USER_PASSWORD
+        token = self.context["access_token"] if self.IS_PRODUCTION else self.DB_USER_PASSWORD
         return f"PROD: {self.IS_PRODUCTION}\n" \
                f"CNXT: {self.context}\n" \
                f"DB_TOKEN: {_mask_token(token)}"
@@ -108,13 +121,14 @@ class CallContext:
     database: DataSource
     logger: Logger
 
-    def __init__(self, bot: telebot.TeleBot, database: DataSource,
+    def __init__(self, bot: telebot.TeleBot, database: DataSource, env_context: Context,
                  is_admin, current_route: ParsedRoute, base_route, logger: Logger,
                  message: telebot.types.Message = None, query: telebot.types.CallbackQuery = None
                  ):
         self.logger = logger
         self.bot = bot
         self.database = database
+        self.env_context = env_context
         self.is_admin = is_admin
         self.__message = message
         self.__query = query

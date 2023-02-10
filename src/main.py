@@ -15,7 +15,7 @@ from src.common_modules.custom_sender import send_long_message
 
 bot = telebot.TeleBot(global_context.BOT_TOKEN)
 logger = Logger(is_poduction=global_context.IS_PRODUCTION)
-database = DataSource(auth_context=global_context.auth_context, logger=logger)
+database = DataSource(auth_context=global_context.db_auth_context, logger=logger)
 
 
 def error_handler(message, error):
@@ -59,6 +59,7 @@ def absolutely_all_handler(message: telebot.types.Message):
     :return: результат выполнения команды
     """
     chat_id = message.chat.id
+    nothin_called = True
     message_author = message.from_user.id
     current_route = database.get_current_route(message_author)
     is_admin = database.is_admin(message_author) or message_author in global_context.SUDO_USERS
@@ -71,20 +72,20 @@ def absolutely_all_handler(message: telebot.types.Message):
         if first_word[0] == '/':
             first_word = first_word[1:]
         has_text = True
-    database.save_message(user_id=message_author, message_id=message.id, message_text=message.text,
-                          message_content_type=message.content_type)
     logger.i(f"message_author: {message_author} current route: {current_route}; "
              f"first_word: {first_word}; lower_message: {lower_message}")
     matched_by_name = None
     for cmd in commands:
         if cmd.public or is_admin:
             if current_route.route == cmd.route and cmd.route != DEFAULT_ROUTE:
-                return cmd.run(
+                nothin_called = False
+                cmd.run(
                     message=message,
                     bot=bot,
                     database=database,
                     current_route=current_route,
                     is_admin=is_admin,
+                    env_context=global_context,
                     logger=logger
                 )
             if has_text and (first_word in cmd.commands or lower_message in cmd.commands):
@@ -92,15 +93,20 @@ def absolutely_all_handler(message: telebot.types.Message):
     if matched_by_name is not None:
         # Эта точка возникает в случае, если не удалось подобрать пользователю команду по заданному роуту.
         # Кажется, это может быть только в админских командах без роута?
-        return matched_by_name.run(
+        nothin_called = False
+        matched_by_name.run(
             message=message,
             bot=bot,
             database=database,
             current_route=current_route,
             is_admin=is_admin,
+            env_context=global_context,
             logger=logger
         )
-    return bot.send_message(chat_id, 'Кажется я не знаю такой команды. Попробуй /help')
+    database.save_message(user_id=message_author, message_id=message.id, message_text=message.text,
+                          message_content_type=message.content_type)
+    if nothin_called:
+        return bot.send_message(chat_id, 'Кажется я не знаю такой команды. Попробуй /help')
 
 
 @bot.callback_query_handler(func=lambda query: True)
@@ -111,6 +117,18 @@ def callback_handler(query: telebot.types.CallbackQuery):
         query_author = query.from_user.id
         is_admin = database.is_admin(query_author) or query_author in global_context.SUDO_USERS
         current_route = database.get_current_route(query_author)
+        try:
+            # очистка кнопок под сообщением, на которое нажали
+            bot.edit_message_reply_markup(chat_id=query.message.chat.id, message_id=query.message.id)
+            # удаление сообщения, если его не нужно сохранять
+            should_drop = base_func_route.get_arg(DROP_PREV_ARG)
+            if (should_drop is not None) and str(should_drop[0]).lower() == 'true':
+                logger.i('Deleting callback message')
+                bot.delete_message(chat_id=query.message.chat.id, message_id=query.message.id)
+        except Exception as e:
+            logger.w(str(e))
+            return
+
         database.save_callback(user_id=query_author, message_id=query.message.id, callback_data=query.data,
                                buttons=query.message.reply_markup.to_json())
         logger.i(f'query_author: {query_author} called_route: {base_func_route} current_route: {current_route}')
@@ -124,12 +142,6 @@ def callback_handler(query: telebot.types.CallbackQuery):
                         database=database,
                         current_route=current_route,
                         is_admin=is_admin,
-                        logger=logger
+                        env_context=global_context,
+                        logger=logger,
                     )
-        # очистка кнопок под сообщением, на которое нажали
-        bot.edit_message_reply_markup(chat_id=query.message.chat.id, message_id=query.message.id)
-        # удаление сообщения, если его не нужно сохранять
-        should_drop = base_func_route.get_arg(DROP_PREV_ARG)
-        if (should_drop is not None) and str(should_drop[0]).lower() == 'true':
-            logger.i('Deleting callback message')
-            bot.delete_message(chat_id=query.message.chat.id, message_id=query.message.id)

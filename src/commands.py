@@ -92,7 +92,7 @@ class Command:
             return self._desc
         return f'[ADMIN] {self._desc}'
 
-    def run(self, bot, database, current_route, is_admin, logger, message=None, query=None):
+    def run(self, bot, database, current_route, env_context, is_admin, logger, message=None, query=None):
         """
         Функция для запуска реальной функции команды (должна иметь cc: CallContext в сигнатуре)
 
@@ -106,6 +106,8 @@ class Command:
 
         :param current_route: распарсеный путь пользователя
 
+        :env_context: Context с которым запущен бот
+
         :param is_admin: является ли пользователь админом
         (нужно только в help, остальные функции должны работать одинаково, как для админа, так и для не админа)
 
@@ -117,6 +119,7 @@ class Command:
                 message=message,
                 bot=bot,
                 database=database,
+                env_context=env_context,
                 current_route=current_route,
                 base_route=self._route,
                 is_admin=is_admin,

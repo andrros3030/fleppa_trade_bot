@@ -1,4 +1,4 @@
-from src.context import CallContext, global_context
+from src.context import CallContext
 from telebot.apihelper import ApiTelegramException
 from src.common_modules.markups import back_transition, markup_transitions
 from src.common_modules.custom_sender import try_to_send
@@ -135,7 +135,7 @@ def feedback(cc: CallContext):
                                 [back_transition]
                             ))
     else:
-        for feedback_chat in global_context.FEEDBACK_CHAT_ID:
+        for feedback_chat in cc.env_context.FEEDBACK_CHAT_ID:
             res = cc.bot.forward_message(feedback_chat, cc.chat_id, cc.message_id)
             cc.database.save_feedback_origin(
                 user_id=cc.message_author,
