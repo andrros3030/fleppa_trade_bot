@@ -109,7 +109,6 @@ def absolutely_all_handler(message: telebot.types.Message):
         return bot.send_message(chat_id, 'Кажется я не знаю такой команды. Попробуй /help')
 
 
-
 @bot.callback_query_handler(func=lambda query: True)
 @msg_executor
 def callback_handler(query: telebot.types.CallbackQuery):
