@@ -2,7 +2,7 @@
 DO NOT IMPORT BASE_MODULES, OTHER FEATURES OR ROOT MODULES EXCEPT CONTEXT
 """
 from src.common_modules.custom_sender import send_long_message
-from src.context import global_context, CallContext
+from src.context import CallContext
 import requests
 
 
@@ -42,7 +42,7 @@ def exec_sql(cc: CallContext):
 
 
 def get_environment(cc: CallContext):
-    return cc.bot.send_message(cc.chat_id, str(global_context))
+    return cc.bot.send_message(cc.chat_id, str(cc.env_context))
 
 
 def make_link(cc: CallContext):

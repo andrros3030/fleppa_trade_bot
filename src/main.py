@@ -15,7 +15,7 @@ from src.common_modules.custom_sender import send_long_message
 
 bot = telebot.TeleBot(global_context.BOT_TOKEN)
 logger = Logger(is_poduction=global_context.IS_PRODUCTION)
-database = DataSource(auth_context=global_context.auth_context, logger=logger)
+database = DataSource(auth_context=global_context.db_auth_context, logger=logger)
 
 
 def error_handler(message, error):
@@ -85,6 +85,7 @@ def absolutely_all_handler(message: telebot.types.Message):
                     database=database,
                     current_route=current_route,
                     is_admin=is_admin,
+                    env_context=global_context,
                     logger=logger
                 )
             if has_text and (first_word in cmd.commands or lower_message in cmd.commands):
@@ -99,6 +100,7 @@ def absolutely_all_handler(message: telebot.types.Message):
             database=database,
             current_route=current_route,
             is_admin=is_admin,
+            env_context=global_context,
             logger=logger
         )
     database.save_message(user_id=message_author, message_id=message.id, message_text=message.text,
@@ -140,5 +142,6 @@ def callback_handler(query: telebot.types.CallbackQuery):
                         database=database,
                         current_route=current_route,
                         is_admin=is_admin,
-                        logger=logger
+                        env_context=global_context,
+                        logger=logger,
                     )
