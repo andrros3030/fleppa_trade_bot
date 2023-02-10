@@ -71,9 +71,11 @@ jobs:
         END
     - name: Clean-up all docker containers
       shell: bash
+      env:
+        BRANCH: {{steps.extract_branch.outputs.branch}}
       run: |
-        ssh fserver 'sudo docker stop $(sudo docker ps -a --format "{{.ID}} {{.Image}}" | grep main | cut -d" " -f1) || true'
-        ssh fserver 'sudo docker rm $(sudo docker ps -a --format "{{.ID}} {{.Image}}" | grep main | cut -d" " -f1) || true'
+        ssh fserver 'sudo docker stop $(sudo docker ps -a --format "{{.ID}} {{.Image}}" | grep '$BRANCH' | cut -d" " -f1) || true'
+        ssh fserver 'sudo docker rm $(sudo docker ps -a --format "{{.ID}} {{.Image}}" | grep '$BRANCH' | cut -d" " -f1) || true'
     - name: Pull new image
       shell: bash
       env:
