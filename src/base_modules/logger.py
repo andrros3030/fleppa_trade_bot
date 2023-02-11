@@ -52,7 +52,7 @@ class Logger:
     """
     log_levels: dict = {
         0: True,  # This is "error" logging level
-        1: False,  # This is "warning" logging level
+        1: True,  # This is "warning" logging level
         2: False,  # This is "info" logging level
         3: False  # This is "verbose" logging level
     }

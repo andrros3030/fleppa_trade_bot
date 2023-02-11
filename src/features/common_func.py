@@ -1,6 +1,6 @@
 from src.base_modules.constants import MENU_MESSAGE
 from src.common_modules.markups import menu_transitions, markup_transitions, back_transition
-from src.context import CallContext
+from src.call_context import CallContext
 
 
 def menu(cc: CallContext):

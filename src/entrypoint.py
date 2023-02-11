@@ -3,7 +3,7 @@ THIS IS ENTRY POINT FOR WEB-HOOK REQUESTS
 DO NOT MOVE FROM ROOT LOCATION
 """
 import telebot
-from src.context import global_context
+from src.common_modules.run_context import global_context
 
 
 def run_bot(message):

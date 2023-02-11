@@ -14,9 +14,9 @@ def test_prod():
     tmp = log_tester.i('Info message,     INVISIBLE')
     print(tmp)
     assert tmp is None
-    tmp = log_tester.w('Warning message,  INVISIBLE')
+    tmp = log_tester.w('Warning message,  VISIBLE')
     print(tmp)
-    assert tmp is None
+    assert tmp is not None
     tmp = log_tester.e('Error message,    VISIBLE')
     print(tmp)
     assert tmp is not None

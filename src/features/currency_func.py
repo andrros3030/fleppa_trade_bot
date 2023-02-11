@@ -1,7 +1,7 @@
 """
 DO NOT IMPORT BASE_MODULES, OTHER FEATURES OR ROOT MODULES EXCEPT CONTEXT
 """
-from src.context import CallContext
+from src.call_context import CallContext
 from src.base_modules.constants import AVAILABLE_CURRENCY
 from src.common_modules.request_currency import currency_info
 from src.common_modules.drawer import currency_plot, currency_data

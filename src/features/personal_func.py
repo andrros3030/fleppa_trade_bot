@@ -1,4 +1,4 @@
-from src.context import CallContext
+from src.call_context import CallContext
 from src.common_modules.homiak_diploma import diploma
 from src.common_modules.markups import back_transition, markup_transitions, diploma_transition
 from src.common_modules.photoshop import add_fleppa_wm
