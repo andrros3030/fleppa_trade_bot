@@ -5,7 +5,7 @@ DO NOT IMPORT FEATURES HERE
 import telebot
 
 from src.common_modules.markups import back_transition_markup
-from src.context import global_context
+from src.common_modules.run_context import global_context
 from src.commands import commands
 from src.base_modules.logger import Logger
 from src.base_modules.routes import DEFAULT_ROUTE, ParsedRoute, DROP_PREV_ARG

@@ -2,7 +2,7 @@
 DO NOT IMPORT BASE_MODULES, OTHER FEATURES OR ROOT MODULES EXCEPT CONTEXT
 """
 from src.common_modules.custom_sender import send_long_message
-from src.context import CallContext
+from src.call_context import CallContext
 import requests
 
 

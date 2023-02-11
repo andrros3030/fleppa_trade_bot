@@ -89,4 +89,4 @@ jobs:
         DB_USER_PASSWORD: ${{ secrets.DB_USER_PASSWORD }}
       run: |
         ssh fserver "sudo docker pull $REPO:$IMAGE_TAG"
-        ssh fserver "sudo docker run -d -e BOT_TOKEN='$BOT_TOKEN' -e DB_HOST='$DB_HOST' -e DB_PORT='$DB_PORT' -e DB_NAME='$DB_NAME' -e DB_USER='$DB_USER' -e DB_USER_PASSWORD='$DB_USER_PASSWORD' --restart=always -p 80:5000 $REPO:$IMAGE_TAG"
+        ssh fserver "sudo docker run -d -e BOT_TOKEN='$BOT_TOKEN' -e DB_HOST='$DB_HOST' -e DB_PORT='$DB_PORT' -e DB_NAME='$DB_NAME' -e DB_USER='$DB_USER' -e DB_USER_PASSWORD='$DB_USER_PASSWORD' -e BUILD_DATE='$(date)' -e IMAGE='$REPO:$IMAGE_TAG' --restart=always -p 80:5000 $REPO:$IMAGE_TAG"

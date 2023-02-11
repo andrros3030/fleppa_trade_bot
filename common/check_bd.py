@@ -1,4 +1,4 @@
-from src.context import global_context
+from src.common_modules.run_context import global_context
 from src.common_modules.data_source import DataSource
 from src.base_modules.logger import Logger
 
