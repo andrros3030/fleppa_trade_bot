@@ -105,8 +105,8 @@ def stats(cc: CallContext):
                  f'sum(case when current_date - cast(a.{dct[key][0]} as date) <= 1 then 1 else 0 end) as Daily, '
                  f'sum(case when current_date - cast(a.{dct[key][0]} as date) <= 7 then 1 else 0 end) as Weekly, '
                  f'sum(case when current_date - cast(a.{dct[key][0]} as date) <= 30 then 1 else 0 end) as Monthly '
-                 f'from {key} a join t_users b on a.{dct[key][1]}=b.pk_id ' 
-                 f'where b.l_admin is False;')
+                 f'from {key} a join t_users b on a.{dct[key][1]}=b.pk_id' 
+                 f' where b.l_admin is False;')
         query_result = cc.database.unsafe_exec(query)[0]
         res.append(f'{key} {query_result[0]}(+{query_result[1]} за день, +{query_result[2]} за неделю, '
                    f'+ {query_result[3]} за месяц).')
