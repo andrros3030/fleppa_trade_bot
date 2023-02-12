@@ -22,6 +22,8 @@ def _mask_token(token: str):
     """
     if token is None:
         return 'None'
+    if type(token) is not str:
+        token = str(token)
     if len(token) < 10:
         return '*'.join(token[::2])
     return token[0:4] + '*' * (len(token) - 5)
@@ -62,7 +64,9 @@ class Context:
             -898292404,  # Фидбэчница
         ]
         self.context = None
-        self.db_auth_context = DBAuthContext()
+        self.db_auth_context = DBAuthContext(
+            on_error=self.set_context_from_env
+        )
 
     def set_testing_mode(self):
         """
@@ -78,6 +82,9 @@ class Context:
         Установка контекста запуска из ВМ, работает в продакшен окружении Compute Cloud.
         Получает контекст из внутренней ручки YC с помощью запроса через bash.
         """
+        if not self.IS_PRODUCTION:
+            # Если окружение не продакшен - выполнение команды не доступно
+            return
         bash_command = f'curl -H Metadata-Flavor:Google {context_url}'
         process = subprocess.Popen(bash_command.split(), stdout=subprocess.PIPE)
         output, error = process.communicate()
