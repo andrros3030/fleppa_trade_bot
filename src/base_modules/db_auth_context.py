@@ -8,7 +8,7 @@ class DBAuthContext:
     """
     Контекст для авторизации в базе данных
     """
-    def __init__(self):
+    def __init__(self, on_error):
         self.user = None
         self.password = None
         self.host = None
@@ -16,6 +16,7 @@ class DBAuthContext:
         self.is_prod = None
         self.database = None
         self.dbname = None
+        self.on_error = on_error
 
     def fill(self, user: str = None, password: str = None,
              host: str = None, port: str = None, is_prod: bool = None, dbname: str = None):

@@ -31,12 +31,22 @@ class DataSource:
 
     Функции, делающие выборку или обновляющие данные должны принимать параметры в тех типах, которые исходят от БД.
     """
-    def __init_connection(self):
+    def __init_connection(self, repeats_left=3):
         """
         Перезапускает подключение к базе данных используя контекст авторизации
+        В случае, если подключиться не удалось - пробует запросить новый контекст авторизации
+        Если при заданной политике ретраев (по умолчанию - 3) подключиться к БД не удалось - завершает с ошибкой
         """
-        self.conn = psycopg2.connect(self.auth_context.get_config)
-        self.logger.v('Connection to DB set up')
+        try:
+            self.conn = psycopg2.connect(self.auth_context.get_config)
+            self.logger.v('Connection to DB set up')
+        except Exception as e:
+            if repeats_left <= 0:
+                self.logger.e('Could not connect to DB, try limit exceed. ' + str(e))
+                return
+            self.logger.w('Bad try connecting DB, trying on_error. ' + str(e))
+            self.auth_context.on_error()
+            self.__init_connection(repeats_left=repeats_left-1)
 
     def __init__(self, logger: Logger, auth_context: DBAuthContext):
         """
