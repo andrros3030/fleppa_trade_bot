@@ -25,8 +25,8 @@ def _mask_token(token: str):
     if type(token) is not str:
         token = str(token)
     if len(token) < 10:
-        return '*'.join(token[::2])
-    return token[0:4] + '*' * (len(token) - 5)
+        return '*'.join(token[::2]+(' ' if len(token) % 2 == 0 else ''))
+    return token[0:4] + '*'.join(token[4::2])
 
 
 def _mask_tokens(tokens: dict or None) -> str:
@@ -123,7 +123,9 @@ class Context:
         return f"PROD: {self.IS_PRODUCTION}\n" \
                f"BUILD_DATE: {self.BUILD_DATE}\n" \
                f"IMAGE: {self.IMAGE}\n" \
-               f"{_mask_tokens(self.context)}\n" \
+               f"context: {_mask_tokens(self.context)}\n" \
+               f"DB_USER: {_mask_token(self.DB_USER)}\n" \
+               f"DB_NAME: {_mask_token(self.DB_NAME)}\n" \
                f"DB_TOKEN: {_mask_token(token)}"
 
 
