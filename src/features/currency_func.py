@@ -7,6 +7,7 @@ from src.common_modules.request_currency import currency_info
 from src.common_modules.drawer import currency_plot, currency_data
 from src.common_modules.photoshop import add_fleppa_wm
 from src.common_modules.markups import back_transition, markup_transitions, currency_graph_transition, currency_options
+from src.common_modules.request_stock import stock_price
 
 
 # TODO: получается, что любая функция имеет свой route, а большинство бизнесовых не выполняются за одной действие
